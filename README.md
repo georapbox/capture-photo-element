@@ -1,1 +1,1 @@
-# capture-photo-element
+# <capture-photo> element
