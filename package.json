@@ -1,0 +1,37 @@
+{
+  "name": "capture-photo-element",
+  "version": "1.0.0",
+  "description": "A custom element that enables to capture a photo in the browser.",
+  "main": "capture-photo.js",
+  "type": "module",
+  "module": "capture-photo.js",
+  "scripts": {
+    "lint": "eslint capture-photo.js",
+    "demo": "npx http-server ."
+  },
+  "keywords": [
+    "custom element",
+    "web component",
+    "capture photo"
+  ],
+  "author": {
+    "name": "George Raptis",
+    "email": "georapbox@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/georapbox/capture-photo-element.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/georapbox/capture-photo-element/issues"
+  },
+  "homepage": "https://github.com/georapbox/capture-photo-element#readme",
+  "devDependencies": {
+    "eslint": "~8.8.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}

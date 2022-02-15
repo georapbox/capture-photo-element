@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>&lt;capture-photo&gt; element</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADR0lEQVRYR9WXO0hjQRSG/0Tjs1GjWR+pbEVEAylEQYKFr85HF4MY8FWIpas20XVRgorsWvrARHxUEgI20UpQfEFUUPBdxE1jIQiJkmTnDBt3F6POdW8IO5Amd+7/f3PmzDl3FACUxcXFfUqlsjMUCn1SsMH+i9pgHiFm4Q0Gg98PDg6+KJj5ADO3RM3xDWHG0qcoKSnxMiJNjAA8Cp1OF4qFOXny7YglAEH8fwD5+fmor68HS15kZWXx3fN6vdjZ2cHKygo8Ho+kHZUUgebmZnR1dSEuLi6iid/vx/DwMJxOpzCEMIDBYMDIyAioTJycnGB+fh5nZ2dgRxhFRUVobW3lEWHnG+3t7djf3xeCEAaYm5tDQUEBjo+PYTab8fT09JeBRqOBzWZDRkYG9vb20NbWJi/A1tYW4uPjMTo6iuXl5YjiBEarDwQCKCsrewEZ6SXhCGxubiIxMRHj4+Ow2+0RAfLy8qDX6/kzyoPHx8d3oyAMMDMzg8LCQpyfn8NkMsHn870rLjJBGKCqqgpDQ0Nck5KQtsLtdot4vDlHGIBUent7eQ34VUZxdHSE1dVVrK+v4/7+/kMwkgDIoba2Fh0dHcjOzn42pBOxsbEBOimnp6eSQCQDkDoVotLSUlRWVqKiogKpqanclGrA0tISJiYm+EkQGR8C+FM4KSkJ1dXVaGlpQW5uLn9EJZmKlsj4Z4CwSXJyMjelyLAui8bGRlxdXb3LIASQlpaG9PR0Htabm5tXRTMzM/n5py2yWq1YXFyUB8BoNKK7uxvUbMrLy/levzYcDgdycnIwPT2NqakpeQAorJOTk1yMuuH29nZEYZVKBZfLhZSUFIyNjWFhYUEegISEBNDK1Go1Li4ueMI9PDy8EA/3AsqBpqYmXF5eygNAKlQJBwcHeTu+vr7G7OwsDg8PecOh7K+rq0NNTQ1/TsWJ5ooMoSQMC1Fm9/T0gCISadDK19bWYLFYhDohaUgCoBe0Wi0aGhp416OV0wfJ3d0djwatfHd3V2Thz3MkA0hSF5gcewB2MwpG+z74WiDCF5NbNuF3axMIm4xTbuly2s8SSezMyOhMUiwC/XQVp+v5Z7YNnRSJaG8HhZ35/GC/b+zT/etPNB5ZtSPry64AAAAASUVORK5CYII=">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="//unpkg.com/@highlightjs/cdn-assets@11.4.0/styles/stackoverflow-dark.min.css">
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      min-height: 3000px;
+      background-color: #ececec;
+      color: #333333;
+      padding: 1.5rem 1rem;
+    }
+
+    h1, h2, h3 {
+      font-weight: 400;
+    }
+
+    h1, h2, p {
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      margin-bottom: 0;
+    }
+
+    .arrow {
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+
+    pre:not(:last-child) {
+      text-align: left;
+      margin-bottom: 1rem;
+    }
+
+    pre {
+      overflow-x: auto;
+      background-color: #1c1b1b;
+      color: #ffffff;
+      border-radius: 0.25rem;
+    }
+
+    .container {
+      position: relative;
+      padding: 1.5rem 2rem;
+      margin: 0 auto;
+      max-width: 768px;
+      border-radius: 0.25rem;
+      background-color: #ffffff;
+      box-shadow: 3px 3px 10px 1px rgba(0 0 0 / 0.1);
+    }
+
+    a {
+      color: #0d6efd;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: #0a58ca;
+    }
+
+    /* Component custom styling */
+    capture-photo:not(:defined) {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>&lt;capture-photo&gt; element</h1>
+
+    <h2>Demo</h2>
+
+    <capture-photo></capture-photo>
+
+    <h2>Usage Example</h2>
+
+    <h3>HTML</h3>
+<pre class="language-html"><code>&lt;capture-photo&gt;&lt;/capture-photo&gt;</code></pre>
+
+    <h3>CSS</h3>
+<pre class="language-css"><code>/* Customize styling */</code></pre>
+
+    <h2>Source</h2>
+
+    <p>
+      Source code can be found in <a href="https://github.com/georapbox/capture-photo-element" target="_blank" rel="noreferrer noopener">Github repository</a>.
+    </p>
+
+    <h2>License</h2>
+
+    <p>
+      <a href="https://georapbox.mit-license.org/@2022" target="_blank" rel="noreferrer noopener">The MIT License (MIT)</a>
+    </p>
+  </div>
+
+  <script type="module">
+    import { CapturePhoto } from './capture-photo.js';
+
+    CapturePhoto.defineCustomElement();
+
+    document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());
+  </script>
+
+  <script src="//unpkg.com/@highlightjs/cdn-assets@11.4.0/highlight.min.js" defer></script>
+</body>
+</html>
