@@ -16,11 +16,11 @@
     *::after {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
 
     body {
       font-family: 'Open Sans', sans-serif;
-      min-height: 3000px;
       background-color: #ececec;
       color: #333333;
       padding: 1.5rem 1rem;
@@ -55,6 +55,15 @@
       border-radius: 0.25rem;
     }
 
+    a {
+      color: #0d6efd;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: #0a58ca;
+    }
+
     .container {
       position: relative;
       padding: 1.5rem 2rem;
@@ -65,18 +74,53 @@
       box-shadow: 3px 3px 10px 1px rgba(0 0 0 / 0.1);
     }
 
-    a {
-      color: #0d6efd;
-      text-decoration: underline;
-    }
-
-    a:hover {
-      color: #0a58ca;
-    }
-
     /* Component custom styling */
     capture-photo:not(:defined) {
       display: none;
+    }
+
+    capture-photo::part(video) {
+      width: 100%;
+      background-color: #000000;
+    }
+
+    capture-photo::part(actions) {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      background-color: #000000;
+    }
+
+    capture-photo::part(capture-photo-button),
+    capture-photo::part(facing-mode-button) {
+      width: 50px;
+      min-width: 50px;
+      height: 50px;
+      background-color: #ffffff;
+      border: 0;
+      color: #000000;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    capture-photo::part(capture-photo-button) {
+      margin-left: 50px;
+    }
+
+    capture-photo::part(capture-photo-button) {
+      min-width: 70px;
+      width: 70px;
+      height: 70px;
+    }
+
+    capture-photo::part(output) {
+      overflow-x: auto;
     }
   </style>
 </head>
@@ -86,7 +130,10 @@
 
     <h2>Demo</h2>
 
-    <capture-photo></capture-photo>
+    <capture-photo>
+      <span slot="facing-mode-button">F</span>
+      <span slot="capture-photo-button">C</span>
+    </capture-photo>
 
     <h2>Usage Example</h2>
 
@@ -113,6 +160,10 @@
     import { CapturePhoto } from './capture-photo.js';
 
     CapturePhoto.defineCustomElement();
+
+    document.addEventListener('capture-photo:facingmodechange', evt => {
+      console.log('event.detail ->', evt.detail);
+    });
 
     document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());
   </script>

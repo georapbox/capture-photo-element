@@ -7,27 +7,35 @@ template.innerHTML = /*template*/`
       display: block;
     }
 
+    :host * {
+      box-sizing: border-box;
+    }
+
     :host video {
-      width: 100%;
+      display: block;
+    }
+
+    :host #output:empty {
+      display: none;
     }
   </style>
 
-  <div>
+  <div part="container">
     <video part="video" playsinline></video>
 
     <canvas hidden></canvas>
 
-    <div class="output" id="output"></div>
-
-    <div part="actions" class="actions">
-      <button part="facing-mode-button" type="button" id="facingModeButton">
-        Toggle facing mode
+    <div part="actions">
+    <button part="capture-photo-button" type="button" id="captureUserMediaButton">
+        <slot name="capture-photo-button">Capture photo</slot>
       </button>
 
-      <button part="capture-photo-button" type="button" id="captureUserMediaButton">
-        Capture photo
+      <button part="facing-mode-button" type="button" id="facingModeButton">
+        <slot name="facing-mode-button">Toggle facing mode</slot>
       </button>
     </div>
+
+    <div part="output" id="output"></div>
   </div>
 `;
 
@@ -36,9 +44,9 @@ export class CapturePhoto extends HTMLElement {
     super();
 
     this.facingMode = 'user';
-    this.videoEl = null;
-    this.canvasEl = null;
-    this.ctx = null;
+    this.$video = null;
+    this.$canvas = null;
+    this.$output = null;
 
     const shadowRoot = this.attachShadow({ mode: 'open' });
 
@@ -46,12 +54,11 @@ export class CapturePhoto extends HTMLElement {
 
     this.onFacingModeChange = this.onFacingModeChange.bind(this);
     this.handleCaptureMedia = this.handleCaptureMedia.bind(this);
-    // this.onImageLoaded = this.onImageLoaded.bind(this);
   }
 
-  startVideoStreaming(videoEl, stream) {
-    videoEl.srcObject = stream;
-    videoEl.play().catch(err => console.error(err));
+  startVideoStreaming(video, stream) {
+    video.srcObject = stream;
+    video.play().catch(err => console.error(err));
 
     const tracks = stream != null ? stream.getVideoTracks() : [];
 
@@ -67,11 +74,12 @@ export class CapturePhoto extends HTMLElement {
     });
   }
 
-  stopVideoStreaming(videoEl) {
-    const stream = videoEl.srcObject;
+  stopVideoStreaming(video) {
+    const stream = video.srcObject;
     const tracks = stream != null ? stream.getVideoTracks() : [];
+
     tracks.forEach(track => track.stop());
-    videoEl.srcObject = null;
+    video.srcObject = null;
   }
 
   requestGetUserMedia() {
@@ -87,53 +95,47 @@ export class CapturePhoto extends HTMLElement {
       },
       audio: false
     }).then(stream => {
-      // toggleModal(videoModal, true);
-      this.startVideoStreaming(this.videoEl, stream);
+      this.startVideoStreaming(this.$video, stream);
     }).catch(err => {
       console.error(err);
     });
   }
 
   handleCaptureMedia() {
-    this.canvasEl.width = this.videoEl.videoWidth;
-    this.canvasEl.height = this.videoEl.videoHeight;
-    this.ctx.drawImage(this.videoEl, 0, 0, this.canvasEl.width, this.canvasEl.height);
+    const ctx = this.$canvas.getContext('2d');
+    const width = this.$video.videoWidth;
+    const height = this.$video.videoHeight;
+
+    this.$canvas.width = width;
+    this.$canvas.height = height;
+    ctx.drawImage(this.$video, 0, 0, width, height);
 
     const image = new Image();
-    // image.addEventListener('load', this.onImageLoaded);
-    const data = this.canvasEl.toDataURL('image/png');
-    console.log(data);
+    const data = this.$canvas.toDataURL('image/png');
+
     image.src = data;
 
-    this.ctx.clearRect(0, 0, this.canvasEl.width, this.canvasEl.height);
-    this.ctx.drawImage(image, 0, 0, this.canvasEl.width, this.canvasEl.height);
-
-    // this.stopVideoStreaming(this.videoEl);
-
-    // this.videoEl.remove();
-    const outputEl = this.shadowRoot.getElementById('output');
-    outputEl.innerHTML = '';
-    outputEl.appendChild(image);
+    this.$output.innerHTML = '';
+    this.$output.appendChild(image);
   }
-
-  // onImageLoaded(evt) {
-  //   const img = evt.target;
-  //   this.canvasEl.width = img.width;
-  //   this.canvasEl.height = img.height;
-  //   this.ctx.clearRect(0, 0, this.canvasEl.width, this.canvasEl.height);
-  //   this.ctx.drawImage(img, 0, 0, this.canvasEl.width, this.canvasEl.height);
-  // }
 
   onFacingModeChange() {
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
-    this.stopVideoStreaming(this.videoEl);
+    this.stopVideoStreaming(this.$video);
     this.requestGetUserMedia();
+
+    this.dispatchEvent(new CustomEvent('capture-photo:facingmodechange', {
+      bubbles: true,
+      detail: {
+        facingMode: this.facingMode
+      }
+    }));
   }
 
   connectedCallback() {
-    this.canvasEl = this.shadowRoot.querySelector('canvas');
-    this.ctx = this.canvasEl.getContext('2d');
-    this.videoEl = this.shadowRoot.querySelector('video');
+    this.$canvas = this.shadowRoot.querySelector('canvas');
+    this.$video = this.shadowRoot.querySelector('video');
+    this.$output = this.shadowRoot.getElementById('output');
     this.facingModeButton = this.shadowRoot.getElementById('facingModeButton');
     this.captureUserMediaButton = this.shadowRoot.getElementById('captureUserMediaButton');
 
@@ -144,21 +146,16 @@ export class CapturePhoto extends HTMLElement {
   }
 
   disconnectedCallback() {
-    // TODO Clean up
-    this.canvasEl.hidden = true;
-    this.stopVideoStreaming();
+    this.stopVideoStreaming(this.$video);
     this.facingModeButton.removeEventListener('click', this.onFacingModeChange);
     this.captureUserMediaButton.removeEventListener('click', this.handleCaptureMedia);
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    // TODO
-  }
+  // attributeChangedCallback(name, oldValue, newValue) {}
 
-  static get observedAttributes() {
-    // TODO
-    return [];
-  }
+  // static get observedAttributes() {
+  //   return [];
+  // }
 
   static defineCustomElement(elementName = 'capture-photo') {
     try {
