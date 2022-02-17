@@ -44,9 +44,9 @@ export class CapturePhoto extends HTMLElement {
     super();
 
     this.facingMode = 'user';
-    this.$video = null;
-    this.$canvas = null;
-    this.$output = null;
+    this.videoElement = null;
+    this.canvasElement = null;
+    this.outputElement = null;
 
     const shadowRoot = this.attachShadow({ mode: 'open' });
 
@@ -95,33 +95,33 @@ export class CapturePhoto extends HTMLElement {
       },
       audio: false
     }).then(stream => {
-      this.startVideoStreaming(this.$video, stream);
+      this.startVideoStreaming(this.videoElement, stream);
     }).catch(err => {
       console.error(err);
     });
   }
 
   handleCaptureMedia() {
-    const ctx = this.$canvas.getContext('2d');
-    const width = this.$video.videoWidth;
-    const height = this.$video.videoHeight;
+    const ctx = this.canvasElement.getContext('2d');
+    const width = this.videoElement.videoWidth;
+    const height = this.videoElement.videoHeight;
 
-    this.$canvas.width = width;
-    this.$canvas.height = height;
-    ctx.drawImage(this.$video, 0, 0, width, height);
+    this.canvasElement.width = width;
+    this.canvasElement.height = height;
+    ctx.drawImage(this.videoElement, 0, 0, width, height);
 
     const image = new Image();
-    const data = this.$canvas.toDataURL('image/png');
+    const data = this.canvasElement.toDataURL('image/png');
 
     image.src = data;
 
-    this.$output.innerHTML = '';
-    this.$output.appendChild(image);
+    this.outputElement.innerHTML = '';
+    this.outputElement.appendChild(image);
   }
 
   onFacingModeChange() {
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
-    this.stopVideoStreaming(this.$video);
+    this.stopVideoStreaming(this.videoElement);
     this.requestGetUserMedia();
 
     this.dispatchEvent(new CustomEvent('capture-photo:facingmodechange', {
@@ -133,9 +133,9 @@ export class CapturePhoto extends HTMLElement {
   }
 
   connectedCallback() {
-    this.$canvas = this.shadowRoot.querySelector('canvas');
-    this.$video = this.shadowRoot.querySelector('video');
-    this.$output = this.shadowRoot.getElementById('output');
+    this.canvasElement = this.shadowRoot.querySelector('canvas');
+    this.videoElement = this.shadowRoot.querySelector('video');
+    this.outputElement = this.shadowRoot.getElementById('output');
     this.facingModeButton = this.shadowRoot.getElementById('facingModeButton');
     this.captureUserMediaButton = this.shadowRoot.getElementById('captureUserMediaButton');
 
@@ -146,7 +146,7 @@ export class CapturePhoto extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.stopVideoStreaming(this.$video);
+    this.stopVideoStreaming(this.videoElement);
     this.facingModeButton.removeEventListener('click', this.onFacingModeChange);
     this.captureUserMediaButton.removeEventListener('click', this.handleCaptureMedia);
   }
