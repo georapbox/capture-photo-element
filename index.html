@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="//unpkg.com/@highlightjs/cdn-assets@11.4.0/styles/stackoverflow-dark.min.css">
+
   <style>
     *,
     *::before,
@@ -81,6 +82,7 @@
 
     capture-photo::part(video) {
       width: 100%;
+      padding: 1rem;
       background-color: #000000;
     }
 
@@ -88,35 +90,45 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 0.5rem;
-      padding: 1rem 0;
+      gap: 2rem;
+      padding-bottom: 1rem;
       margin-bottom: 1rem;
       background-color: #000000;
     }
 
-    capture-photo::part(capture-photo-button),
-    capture-photo::part(facing-mode-button) {
-      width: 50px;
-      min-width: 50px;
-      height: 50px;
-      background-color: #ffffff;
-      border: 0;
+    capture-photo::part(capture-photo-button) {
+      margin-left: 50px;
+      min-width: 60px;
+      width: 60px;
+      height: 60px;
+      background-color: #cccccc;
+      border: 5px solid #383838;
       color: #000000;
       border-radius: 50%;
       font-size: 1rem;
+      cursor: pointer;
+      text-indent: -9999px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    capture-photo::part(facing-mode-button) {
+      min-width: 40px;
+      width: 40px;
+      height: 40px;
+      background-color: #ffffff;
+      border: 0;
+      line-height: 1;
+      border-radius: 50%;
       cursor: pointer;
       -webkit-appearance: none;
       -moz-appearance: none;
     }
 
-    capture-photo::part(capture-photo-button) {
-      margin-left: 50px;
-    }
-
-    capture-photo::part(capture-photo-button) {
-      min-width: 70px;
-      width: 70px;
-      height: 70px;
+    capture-photo::part(capture-photo-button):disabled,
+    capture-photo::part(facing-mode-button):disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     capture-photo::part(output) {
@@ -131,8 +143,15 @@
     <h2>Demo</h2>
 
     <capture-photo>
-      <span slot="facing-mode-button">F</span>
-      <span slot="capture-photo-button">C</span>
+      <span slot="capture-photo-button">
+        Take picture
+      </span>
+
+      <span slot="facing-mode-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
+          <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+          <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+        </svg>
     </capture-photo>
 
     <h2>Usage Example</h2>
