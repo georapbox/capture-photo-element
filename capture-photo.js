@@ -26,7 +26,7 @@ template.innerHTML = /*template*/`
     <canvas hidden></canvas>
 
     <div part="actions">
-    <button part="capture-photo-button" type="button" id="captureUserMediaButton">
+      <button part="capture-photo-button" type="button" id="captureUserMediaButton">
         <slot name="capture-photo-button">Capture photo</slot>
       </button>
 
@@ -54,6 +54,60 @@ export class CapturePhoto extends HTMLElement {
 
     this.onFacingModeChange = this.onFacingModeChange.bind(this);
     this.handleCaptureMedia = this.handleCaptureMedia.bind(this);
+    this.onVideoCanPlay = this.onVideoCanPlay.bind(this);
+  }
+
+  connectedCallback() {
+    this.canvasElement = this.shadowRoot.querySelector('canvas');
+    this.videoElement = this.shadowRoot.querySelector('video');
+    this.outputElement = this.shadowRoot.getElementById('output');
+    this.facingModeButton = this.shadowRoot.getElementById('facingModeButton');
+    this.captureUserMediaButton = this.shadowRoot.getElementById('captureUserMediaButton');
+    this.disabled = true;
+
+    this.requestGetUserMedia().then(stream => {
+      this.startVideoStreaming(this.videoElement, stream);
+    }).catch(err => {
+      console.error(err);
+    });
+
+    this.facingModeButton.addEventListener('click', this.onFacingModeChange);
+    this.captureUserMediaButton.addEventListener('click', this.handleCaptureMedia);
+    this.videoElement.addEventListener('canplay', this.onVideoCanPlay);
+  }
+
+  disconnectedCallback() {
+    this.stopVideoStreaming(this.videoElement);
+    this.facingModeButton.removeEventListener('click', this.onFacingModeChange);
+    this.captureUserMediaButton.removeEventListener('click', this.handleCaptureMedia);
+    this.videoElement.removeEventListener('canplay', this.onVideoCanPlay);
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'disabled') {
+      this.captureUserMediaButton.disabled = newValue !== null;
+      this.facingModeButton.disabled = newValue !== null;
+    }
+  }
+
+  static get observedAttributes() {
+    return ['disabled'];
+  }
+
+  get disabled() {
+    return this.getAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
+    }
+  }
+
+  onVideoCanPlay() {
+    this.disabled = false;
   }
 
   startVideoStreaming(video, stream) {
@@ -80,25 +134,22 @@ export class CapturePhoto extends HTMLElement {
 
     tracks.forEach(track => track.stop());
     video.srcObject = null;
+    this.disabled = true;
   }
 
   requestGetUserMedia() {
     if (!navigator.mediaDevices) {
-      console.error('The operation is not supported.');
+      return Promise.reject('MediaDevices.getUserMedia() is not supported.');
     }
 
-    navigator.mediaDevices.getUserMedia({
+    return navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: {
           ideal: this.facingMode
         }
       },
       audio: false
-    }).then(stream => {
-      this.startVideoStreaming(this.videoElement, stream);
-    }).catch(err => {
-      console.error(err);
-    });
+    }).catch(err => console.error(err));
   }
 
   handleCaptureMedia() {
@@ -122,7 +173,12 @@ export class CapturePhoto extends HTMLElement {
   onFacingModeChange() {
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
     this.stopVideoStreaming(this.videoElement);
-    this.requestGetUserMedia();
+
+    this.requestGetUserMedia().then(stream => {
+      this.startVideoStreaming(this.videoElement, stream);
+    }).catch(err => {
+      console.error(err);
+    });
 
     this.dispatchEvent(new CustomEvent('capture-photo:facingmodechange', {
       bubbles: true,
@@ -131,31 +187,6 @@ export class CapturePhoto extends HTMLElement {
       }
     }));
   }
-
-  connectedCallback() {
-    this.canvasElement = this.shadowRoot.querySelector('canvas');
-    this.videoElement = this.shadowRoot.querySelector('video');
-    this.outputElement = this.shadowRoot.getElementById('output');
-    this.facingModeButton = this.shadowRoot.getElementById('facingModeButton');
-    this.captureUserMediaButton = this.shadowRoot.getElementById('captureUserMediaButton');
-
-    this.requestGetUserMedia();
-
-    this.facingModeButton.addEventListener('click', this.onFacingModeChange);
-    this.captureUserMediaButton.addEventListener('click', this.handleCaptureMedia);
-  }
-
-  disconnectedCallback() {
-    this.stopVideoStreaming(this.videoElement);
-    this.facingModeButton.removeEventListener('click', this.onFacingModeChange);
-    this.captureUserMediaButton.removeEventListener('click', this.handleCaptureMedia);
-  }
-
-  // attributeChangedCallback(name, oldValue, newValue) {}
-
-  // static get observedAttributes() {
-  //   return [];
-  // }
 
   static defineCustomElement(elementName = 'capture-photo') {
     try {
