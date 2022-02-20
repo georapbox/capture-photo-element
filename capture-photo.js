@@ -63,7 +63,7 @@ export class CapturePhoto extends HTMLElement {
     this.outputElement = this.shadowRoot.getElementById('output');
     this.facingModeButton = this.shadowRoot.getElementById('facingModeButton');
     this.captureUserMediaButton = this.shadowRoot.getElementById('captureUserMediaButton');
-    this.disabled = true;
+    this.actionsDisabled = true;
 
     this.requestGetUserMedia().then(stream => {
       this.startVideoStreaming(this.videoElement, stream);
@@ -87,30 +87,30 @@ export class CapturePhoto extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'disabled') {
+    if (name === 'actions-disabled') {
       this.captureUserMediaButton.disabled = newValue !== null;
       this.facingModeButton.disabled = newValue !== null;
     }
   }
 
   static get observedAttributes() {
-    return ['disabled'];
+    return ['actions-disabled'];
   }
 
-  get disabled() {
-    return this.getAttribute('disabled');
+  get actionsDisabled() {
+    return this.getAttribute('actions-disabled');
   }
 
-  set disabled(value) {
+  set actionsDisabled(value) {
     if (value) {
-      this.setAttribute('disabled', '');
+      this.setAttribute('actions-disabled', '');
     } else {
-      this.removeAttribute('disabled');
+      this.removeAttribute('actions-disabled');
     }
   }
 
   onVideoCanPlay() {
-    this.disabled = false;
+    this.actionsDisabled = false;
   }
 
   startVideoStreaming(video, stream) {
@@ -143,7 +143,7 @@ export class CapturePhoto extends HTMLElement {
 
     tracks.forEach(track => track.stop());
     video.srcObject = null;
-    this.disabled = true;
+    this.actionsDisabled = true;
   }
 
   requestGetUserMedia() {
