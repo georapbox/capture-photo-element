@@ -67,8 +67,11 @@ export class CapturePhoto extends HTMLElement {
 
     this.requestGetUserMedia().then(stream => {
       this.startVideoStreaming(this.videoElement, stream);
-    }).catch(err => {
-      console.error(err);
+    }).catch(error => {
+      this.dispatchEvent(new CustomEvent('capture-photo:error', {
+        bubbles: true,
+        detail: { error }
+      }));
     });
 
     this.facingModeButton.addEventListener('click', this.onFacingModeChange);
@@ -112,7 +115,13 @@ export class CapturePhoto extends HTMLElement {
 
   startVideoStreaming(video, stream) {
     video.srcObject = stream;
-    video.play().catch(err => console.error(err));
+
+    video.play().catch(error => {
+      this.dispatchEvent(new CustomEvent('capture-photo:error', {
+        bubbles: true,
+        detail: { error }
+      }));
+    });
 
     const tracks = stream != null ? stream.getVideoTracks() : [];
 
@@ -149,25 +158,43 @@ export class CapturePhoto extends HTMLElement {
         }
       },
       audio: false
-    }).catch(err => console.error(err));
+    }).catch(error => {
+      this.dispatchEvent(new CustomEvent('capture-photo:error', {
+        bubbles: true,
+        detail: { error }
+      }));
+    });
   }
 
   handleCaptureMedia() {
-    const ctx = this.canvasElement.getContext('2d');
-    const width = this.videoElement.videoWidth;
-    const height = this.videoElement.videoHeight;
+    try {
+      const ctx = this.canvasElement.getContext('2d');
+      const width = this.videoElement.videoWidth;
+      const height = this.videoElement.videoHeight;
 
-    this.canvasElement.width = width;
-    this.canvasElement.height = height;
-    ctx.drawImage(this.videoElement, 0, 0, width, height);
+      this.canvasElement.width = width;
+      this.canvasElement.height = height;
+      ctx.drawImage(this.videoElement, 0, 0, width, height);
 
-    const image = new Image();
-    const data = this.canvasElement.toDataURL('image/png');
+      const dataURI = this.canvasElement.toDataURL('image/png');
 
-    image.src = data;
+      if (typeof dataURI === 'string' || dataURI.includes('data:image')) {
+        const image = new Image();
+        image.src = dataURI;
+        Array.from(this.outputElement.childNodes).forEach(node => node.remove());
+        this.outputElement.appendChild(image);
 
-    this.outputElement.innerHTML = '';
-    this.outputElement.appendChild(image);
+        this.dispatchEvent(new CustomEvent('capture-photo:success', {
+          bubbles: true,
+          detail: { dataURI }
+        }));
+      }
+    } catch (error) {
+      this.dispatchEvent(new CustomEvent('capture-photo:error', {
+        bubbles: true,
+        detail: { error }
+      }));
+    }
   }
 
   onFacingModeChange() {
@@ -176,8 +203,11 @@ export class CapturePhoto extends HTMLElement {
 
     this.requestGetUserMedia().then(stream => {
       this.startVideoStreaming(this.videoElement, stream);
-    }).catch(err => {
-      console.error(err);
+    }).catch(error => {
+      this.dispatchEvent(new CustomEvent('capture-photo:error', {
+        bubbles: true,
+        detail: { error }
+      }));
     });
 
     this.dispatchEvent(new CustomEvent('capture-photo:facingmodechange', {
@@ -189,12 +219,8 @@ export class CapturePhoto extends HTMLElement {
   }
 
   static defineCustomElement(elementName = 'capture-photo') {
-    try {
-      if (!window.customElements.get(elementName)) {
-        window.customElements.define(elementName, CapturePhoto);
-      }
-    } catch (err) {
-      console.error(err);
+    if (typeof window !== 'undefined' && !window.customElements.get(elementName)) {
+      window.customElements.define(elementName, CapturePhoto);
     }
   }
 }

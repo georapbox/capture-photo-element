@@ -181,7 +181,15 @@
     CapturePhoto.defineCustomElement();
 
     document.addEventListener('capture-photo:facingmodechange', evt => {
-      console.log('event.detail ->', evt.detail);
+      console.log('Facing mode change ->', evt.detail);
+    });
+
+    document.addEventListener('capture-photo:error', evt => {
+      console.error('Capture photo error ->', evt.detail);
+    });
+
+    document.addEventListener('capture-photo:success', evt => {
+      console.log('Capture photo success ->', evt.detail);
     });
 
     document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());
