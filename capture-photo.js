@@ -91,10 +91,14 @@ export class CapturePhoto extends HTMLElement {
       this.captureUserMediaButton.disabled = newValue !== null;
       this.facingModeButton.disabled = newValue !== null;
     }
+
+    if (name === 'output-disabled') {
+      this.emptyOutputElement();
+    }
   }
 
   static get observedAttributes() {
-    return ['actions-disabled'];
+    return ['actions-disabled', 'output-disabled'];
   }
 
   get actionsDisabled() {
@@ -109,8 +113,16 @@ export class CapturePhoto extends HTMLElement {
     }
   }
 
-  onVideoCanPlay() {
-    this.actionsDisabled = false;
+  get outputDisabled() {
+    return this.getAttribute('output-disabled');
+  }
+
+  set outputDisabled(value) {
+    if (value) {
+      this.setAttribute('output-disabled', '');
+    } else {
+      this.removeAttribute('output-disabled');
+    }
   }
 
   startVideoStreaming(video, stream) {
@@ -179,10 +191,12 @@ export class CapturePhoto extends HTMLElement {
       const dataURI = this.canvasElement.toDataURL('image/png');
 
       if (typeof dataURI === 'string' || dataURI.includes('data:image')) {
-        const image = new Image();
-        image.src = dataURI;
-        Array.from(this.outputElement.childNodes).forEach(node => node.remove());
-        this.outputElement.appendChild(image);
+        if (this.outputDisabled === null) {
+          const image = new Image();
+          image.src = dataURI;
+          this.emptyOutputElement();
+          this.outputElement.appendChild(image);
+        }
 
         this.dispatchEvent(new CustomEvent('capture-photo:success', {
           bubbles: true,
@@ -216,6 +230,14 @@ export class CapturePhoto extends HTMLElement {
         facingMode: this.facingMode
       }
     }));
+  }
+
+  onVideoCanPlay() {
+    this.actionsDisabled = false;
+  }
+
+  emptyOutputElement() {
+    Array.from(this.outputElement.childNodes).forEach(node => node.remove());
   }
 
   static defineCustomElement(elementName = 'capture-photo') {
