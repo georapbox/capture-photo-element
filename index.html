@@ -82,7 +82,7 @@
 
     capture-photo::part(video) {
       width: 100%;
-      padding: 1rem;
+      padding: 1rem 1rem 0 1rem;
       background-color: #000000;
     }
 
@@ -91,7 +91,7 @@
       justify-content: center;
       align-items: center;
       gap: 2rem;
-      padding-bottom: 1rem;
+      padding: 1rem 0;
       margin-bottom: 1rem;
       background-color: #000000;
     }
@@ -108,6 +108,7 @@
       font-size: 1rem;
       cursor: pointer;
       text-indent: -9999px;
+      overflow: hidden;
       -webkit-appearance: none;
       -moz-appearance: none;
     }
@@ -136,7 +137,9 @@
     }
 
     capture-photo::part(output-image) {
-      width: 150px;
+      max-width: 300px;
+      height: auto;
+      border: 5px solid #000;
     }
   </style>
 </head>
@@ -147,9 +150,7 @@
     <h2>Demo</h2>
 
     <capture-photo>
-      <span slot="capture-photo-button">
-        Take picture
-      </span>
+      <span slot="capture-photo-button">Take picture</span>
 
       <span slot="facing-mode-button">
         <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
