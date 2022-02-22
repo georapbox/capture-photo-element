@@ -85,8 +85,11 @@ export class CapturePhoto extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'actions-disabled') {
-      this.captureUserMediaButton.disabled = newValue !== null;
-      this.facingModeButton.disabled = newValue !== null;
+      const isDisabled = newValue !== null;
+      this.captureUserMediaButton.disabled = isDisabled;
+      this.captureUserMediaButton.part = isDisabled ? 'capture-photo-button disabled' : 'capture-photo-button';
+      this.facingModeButton.disabled = isDisabled;
+      this.facingModeButton.part = isDisabled ? 'facing-mode-button disabled' : 'facing-mode-button';
     }
 
     if (name === 'output-disabled') {

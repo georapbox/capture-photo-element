@@ -125,9 +125,9 @@
       -moz-appearance: none;
     }
 
-    capture-photo[actions-disabled]::part(capture-photo-button),
-    capture-photo[actions-disabled]::part(facing-mode-button) {
-      opacity: 0.7;
+    capture-photo::part(capture-photo-button disabled),
+    capture-photo::part(facing-mode-button disabled) {
+      opacity: 0.5;
       cursor: not-allowed;
     }
 
