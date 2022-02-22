@@ -194,6 +194,8 @@ export class CapturePhoto extends HTMLElement {
         if (!this.outputDisabled) {
           const image = new Image();
           image.src = dataURI;
+          image.width = width;
+          image.height = height;
           image.part = 'output-image';
           this.emptyOutputElement();
           this.outputElement.appendChild(image);
@@ -201,7 +203,7 @@ export class CapturePhoto extends HTMLElement {
 
         this.dispatchEvent(new CustomEvent('capture-photo:success', {
           bubbles: true,
-          detail: { dataURI }
+          detail: { dataURI, width, height }
         }));
       }
     } catch (error) {
