@@ -102,7 +102,7 @@ export class CapturePhoto extends HTMLElement {
   }
 
   get actionsDisabled() {
-    return this.getAttribute('actions-disabled');
+    return this.hasAttribute('actions-disabled');
   }
 
   set actionsDisabled(value) {
@@ -114,7 +114,7 @@ export class CapturePhoto extends HTMLElement {
   }
 
   get outputDisabled() {
-    return this.getAttribute('output-disabled');
+    return this.hasAttribute('output-disabled');
   }
 
   set outputDisabled(value) {
@@ -191,7 +191,7 @@ export class CapturePhoto extends HTMLElement {
       const dataURI = this.canvasElement.toDataURL('image/png');
 
       if (typeof dataURI === 'string' || dataURI.includes('data:image')) {
-        if (this.outputDisabled === null) {
+        if (!this.outputDisabled) {
           const image = new Image();
           image.src = dataURI;
           this.emptyOutputElement();
