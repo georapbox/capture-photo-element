@@ -127,12 +127,16 @@
 
     capture-photo[actions-disabled]::part(capture-photo-button),
     capture-photo[actions-disabled]::part(facing-mode-button) {
-      opacity: 0.5;
+      opacity: 0.7;
       cursor: not-allowed;
     }
 
-    capture-photo::part(output) {
+    capture-photo::part(output-container) {
       overflow-x: auto;
+    }
+
+    capture-photo::part(output-image) {
+      width: 150px;
     }
   </style>
 </head>

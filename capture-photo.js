@@ -35,7 +35,7 @@ template.innerHTML = /*template*/`
       </button>
     </div>
 
-    <div part="output" id="output"></div>
+    <div part="output-container" id="output"></div>
   </div>
 `;
 
@@ -44,9 +44,6 @@ export class CapturePhoto extends HTMLElement {
     super();
 
     this.facingMode = 'user';
-    this.videoElement = null;
-    this.canvasElement = null;
-    this.outputElement = null;
 
     const shadowRoot = this.attachShadow({ mode: 'open' });
 
@@ -194,6 +191,7 @@ export class CapturePhoto extends HTMLElement {
         if (!this.outputDisabled) {
           const image = new Image();
           image.src = dataURI;
+          image.part = 'output-image';
           this.emptyOutputElement();
           this.outputElement.appendChild(image);
         }
