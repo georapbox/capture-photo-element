@@ -41,13 +41,13 @@ export class CapturePhoto extends HTMLElement {
   constructor() {
     super();
 
-    this.facingMode = 'user';
-
     const shadowRoot = this.attachShadow({ mode: 'open' });
 
     shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.onFacingModeChange = this.onFacingModeChange.bind(this);
+    this.facingMode = 'user';
+
+    this.onFacingModeButtonClick = this.onFacingModeButtonClick.bind(this);
     this.handleCaptureMedia = this.handleCaptureMedia.bind(this);
     this.onVideoCanPlay = this.onVideoCanPlay.bind(this);
   }
@@ -69,14 +69,14 @@ export class CapturePhoto extends HTMLElement {
       }));
     });
 
-    this.facingModeButton.addEventListener('click', this.onFacingModeChange);
+    this.facingModeButton.addEventListener('click', this.onFacingModeButtonClick);
     this.captureUserMediaButton.addEventListener('click', this.handleCaptureMedia);
     this.videoElement.addEventListener('canplay', this.onVideoCanPlay);
   }
 
   disconnectedCallback() {
     this.stopVideoStreaming(this.videoElement);
-    this.facingModeButton.removeEventListener('click', this.onFacingModeChange);
+    this.facingModeButton.removeEventListener('click', this.onFacingModeButtonClick);
     this.captureUserMediaButton.removeEventListener('click', this.handleCaptureMedia);
     this.videoElement.removeEventListener('canplay', this.onVideoCanPlay);
   }
@@ -93,10 +93,14 @@ export class CapturePhoto extends HTMLElement {
     if (name === 'output-disabled') {
       this.emptyOutputElement();
     }
+
+    if (name === 'facing-mode') {
+      this.changeFacingModeChange(this.facingMode);
+    }
   }
 
   static get observedAttributes() {
-    return ['actions-disabled', 'output-disabled'];
+    return ['actions-disabled', 'output-disabled', 'facing-mode'];
   }
 
   get actionsDisabled() {
@@ -121,6 +125,20 @@ export class CapturePhoto extends HTMLElement {
     } else {
       this.removeAttribute('output-disabled');
     }
+  }
+
+  get facingMode() {
+    return this.getAttribute('facing-mode') || 'user';
+  }
+
+  set facingMode(value) {
+    const allowed = ['user', 'environment'];
+
+    if (typeof value !== 'string' || !allowed.includes(value)) {
+      return;
+    }
+
+    this.setAttribute('facing-mode', value);
   }
 
   startVideoStreaming(video, stream) {
@@ -212,8 +230,11 @@ export class CapturePhoto extends HTMLElement {
     }
   }
 
-  onFacingModeChange() {
+  onFacingModeButtonClick() {
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+  }
+
+  changeFacingModeChange(facingMode) {
     this.stopVideoStreaming(this.videoElement);
 
     this.requestGetUserMedia().then(stream => {
@@ -228,7 +249,7 @@ export class CapturePhoto extends HTMLElement {
     this.dispatchEvent(new CustomEvent('capture-photo:facingmodechange', {
       bubbles: true,
       detail: {
-        facingMode: this.facingMode
+        facingMode
       }
     }));
   }

@@ -127,6 +127,7 @@ capture-photo::part(output-image) {
 | ---- | ---- | ------- | ----------- |
 | `outputDisabled` (reflects to `output-disabled` attribute) | `Boolean` | `false` | Optional. It defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
 | `actionsDisabled` (reflects to `actions-disabled` attribute) | `Boolean` | `false` | Optional. It defines if the actions buttons are disabled or not. You won't probably need to use this. It's mostly used internally to temporarily disble actions buttons when video stream is not ready, to avoid unnecessary errors. |
+| `facingMode` (reflects to `facing-mode` attribute) | `String` | "user" | Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. |
 
 All properties reflect their values as HTML attributes to keep the element's DOM representation in sync with its JavaScript state.
 
@@ -142,7 +143,7 @@ Defines/registers the custom element with the name provided. If no name is provi
 
 ## Events
 
-`capture-photo:facingmodechange` - This event is triggered every time the camera's facing mode changes.
+**capture-photo:facingmodechange** - This event is triggered every time the camera's facing mode changes.
 
 ```js
 document.addEventListener('capture-photo:facingmodechange', evt => {
@@ -150,7 +151,7 @@ document.addEventListener('capture-photo:facingmodechange', evt => {
 });
 ```
 
-`capture-photo:success` - This event is triggered every time a photo is captured successfully.
+**capture-photo:success** - This event is triggered every time a photo is captured successfully.
 
 ```js
 document.addEventListener('capture-photo:success', evt => {
@@ -158,7 +159,7 @@ document.addEventListener('capture-photo:success', evt => {
 });
 ```
 
-`capture-photo:error` - This event is triggered every time an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc.
+**capture-photo:error** - This event is triggered every time an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc.
 
 ```js
 document.addEventListener('capture-photo:error', evt => {
