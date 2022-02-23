@@ -39,23 +39,6 @@
       margin-bottom: 0;
     }
 
-    .arrow {
-      margin-top: 0;
-      font-size: 1.5rem;
-    }
-
-    pre:not(:last-child) {
-      text-align: left;
-      margin-bottom: 1rem;
-    }
-
-    pre {
-      overflow-x: auto;
-      background-color: #1c1b1b;
-      color: #ffffff;
-      border-radius: 0.25rem;
-    }
-
     a {
       color: #0d6efd;
       text-decoration: underline;
@@ -80,13 +63,17 @@
       display: none;
     }
 
+    capture-photo {
+      overflow: hidden;
+    }
+
     capture-photo::part(video) {
       width: 100%;
       padding: 1rem 1rem 0 1rem;
       background-color: #000000;
     }
 
-    capture-photo::part(actions) {
+    capture-photo::part(actions-container) {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -97,7 +84,7 @@
     }
 
     capture-photo::part(capture-photo-button) {
-      margin-left: 50px;
+      margin-left: calc(40px + 2rem);
       min-width: 60px;
       width: 60px;
       height: 60px;
@@ -159,13 +146,7 @@
         </svg>
     </capture-photo>
 
-    <h2>Usage Example</h2>
-
-    <h3>HTML</h3>
-<pre class="language-html"><code>&lt;capture-photo&gt;&lt;/capture-photo&gt;</code></pre>
-
-    <h3>CSS</h3>
-<pre class="language-css"><code>/* Customize styling */</code></pre>
+    <!-- TODO: Provide example link -->
 
     <h2>Source</h2>
 
@@ -186,20 +167,16 @@
     CapturePhoto.defineCustomElement();
 
     document.addEventListener('capture-photo:facingmodechange', evt => {
-      console.log('Facing mode change ->', evt.detail);
+      console.log('capture-photo:facingmodechange ->', evt.detail);
     });
 
     document.addEventListener('capture-photo:error', evt => {
-      console.error('Capture photo error ->', evt.detail);
+      console.error('capture-photo:error ->', evt.detail);
     });
 
     document.addEventListener('capture-photo:success', evt => {
-      console.log('Capture photo success ->', evt.detail);
+      console.log('capture-photo:success ->', evt.detail);
     });
-
-    document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());
   </script>
-
-  <script src="//unpkg.com/@highlightjs/cdn-assets@11.4.0/highlight.min.js" defer></script>
 </body>
 </html>

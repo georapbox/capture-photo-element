@@ -20,23 +20,21 @@ template.innerHTML = /*template*/`
     }
   </style>
 
-  <div part="container">
-    <video part="video" playsinline></video>
+  <video part="video" playsinline></video>
 
-    <canvas hidden></canvas>
+  <canvas hidden></canvas>
 
-    <div part="actions">
-      <button part="capture-photo-button" type="button" id="captureUserMediaButton">
-        <slot name="capture-photo-button">Capture photo</slot>
-      </button>
+  <div part="actions-container">
+    <button part="capture-photo-button" type="button" id="captureUserMediaButton">
+      <slot name="capture-photo-button">Capture photo</slot>
+    </button>
 
-      <button part="facing-mode-button" type="button" id="facingModeButton">
-        <slot name="facing-mode-button">Toggle facing mode</slot>
-      </button>
-    </div>
-
-    <div part="output-container" id="output"></div>
+    <button part="facing-mode-button" type="button" id="facingModeButton">
+      <slot name="facing-mode-button">Toggle facing mode</slot>
+    </button>
   </div>
+
+  <div part="output-container" id="output"></div>
 `;
 
 export class CapturePhoto extends HTMLElement {
