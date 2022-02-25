@@ -1,20 +1,35 @@
+[![npm version](https://img.shields.io/npm/v/@georapbox/capture-photo-element.svg)](https://www.npmjs.com/package/@georapbox/capture-photo-element)
+[![npm license](https://img.shields.io/npm/l/@georapbox/capture-photo-element.svg)](https://www.npmjs.com/package/@georapbox/capture-photo-element)
+
 # &lt;capture-photo&gt; element
 
 A custom element that enables to capture a photo in the browser.
 
 Demo page: https://georapbox.github.io/capture-photo-element/
 
+## Installation
+
+```sh
+$ npm install --save @georapbox/capture-photo-element
+```
+
 ## Usage
 
 ### Script
-```js
-import { CapturePhoto } from '<YOUR_PATH>/capture-photo.js';
 
-CapturePhoto.defineCustomElement();
+Import as ES module:
 
-// Alternatively, you can use the `CustomElementRegistry.define()` method to define the element,
-// which is what the `CapturePhoto.defineCustomElement()` static method uses under the hood.
-window.customElements.define('capture-photo', CapturePhoto);
+```html
+<script type="module">
+  import { CapturePhoto } from 'https://unpkg.com/@georapbox/capture-photo-element';
+
+  // By default, the element is not automatically defined to offer more flexibility.
+  CapturePhoto.defineCustomElement();
+
+  // Alternatively, you can use the `CustomElementRegistry.define()` method to define the element,
+  // which is what the `CapturePhoto.defineCustomElement()` static method uses under the hood.
+  window.customElements.define('capture-photo', CapturePhoto);
+</script>
 ```
 
 ### Markup
