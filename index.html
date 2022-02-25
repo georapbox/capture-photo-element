@@ -22,21 +22,13 @@
 
     body {
       font-family: 'Open Sans', sans-serif;
-      background-color: #ececec;
       color: #333333;
-      padding: 1.5rem 1rem;
-    }
-
-    h1, h2, h3 {
-      font-weight: 400;
+      padding: 1rem;
     }
 
     h1, h2, p {
+      font-weight: 400;
       margin-bottom: 1rem;
-    }
-
-    h3 {
-      margin-bottom: 0;
     }
 
     a {
@@ -49,13 +41,13 @@
     }
 
     .container {
-      position: relative;
-      padding: 1.5rem 2rem;
       margin: 0 auto;
-      max-width: 768px;
-      border-radius: 0.25rem;
-      background-color: #ffffff;
-      box-shadow: 3px 3px 10px 1px rgba(0 0 0 / 0.1);
+      max-width: 640px;
+    }
+
+    @media screen and (max-width: 414px) {
+      h1 { font-size: 1.5rem; }
+      h2 { font-size: 1.3rem; }
     }
 
     /* Component custom styling */
@@ -69,6 +61,7 @@
 
     capture-photo::part(video) {
       width: 100%;
+      height: auto;
       padding: 1rem 1rem 0 1rem;
       background-color: #000000;
     }
@@ -124,7 +117,7 @@
     }
 
     capture-photo::part(output-image) {
-      max-width: 300px;
+      max-width: 100%;
       height: auto;
       border: 5px solid #000;
     }
@@ -133,6 +126,8 @@
 <body>
   <div class="container">
     <h1>&lt;capture-photo&gt; element</h1>
+
+    <p>A custom element that enables to capture a photo in the browser.</p>
 
     <h2>Demo</h2>
 
@@ -146,12 +141,10 @@
         </svg>
     </capture-photo>
 
-    <!-- TODO: Provide example link -->
-
     <h2>Source</h2>
 
     <p>
-      Source code can be found in <a href="https://github.com/georapbox/capture-photo-element" target="_blank" rel="noreferrer noopener">Github repository</a>.
+      Source code and documentation can be found in <a href="https://github.com/georapbox/capture-photo-element" target="_blank" rel="noreferrer noopener">Github repository</a>.
     </p>
 
     <h2>License</h2>
@@ -176,6 +169,10 @@
 
     document.addEventListener('capture-photo:success', evt => {
       console.log('capture-photo:success ->', evt.detail);
+    });
+
+    document.addEventListener('capture-photo:dimensionschange', evt => {
+      console.log('capture-photo:dimensionschange ->', evt.detail);
     });
   </script>
 </body>

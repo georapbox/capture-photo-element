@@ -45,8 +45,6 @@ export class CapturePhoto extends HTMLElement {
 
     shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.facingMode = 'user';
-
     this.onFacingModeButtonClick = this.onFacingModeButtonClick.bind(this);
     this.handleCaptureMedia = this.handleCaptureMedia.bind(this);
     this.onVideoCanPlay = this.onVideoCanPlay.bind(this);
@@ -59,16 +57,7 @@ export class CapturePhoto extends HTMLElement {
     this.facingModeButton = this.shadowRoot.getElementById('facingModeButton');
     this.captureUserMediaButton = this.shadowRoot.getElementById('captureUserMediaButton');
     this.actionsDisabled = true;
-
-    this.requestGetUserMedia().then(stream => {
-      this.startVideoStreaming(this.videoElement, stream);
-    }).catch(error => {
-      this.dispatchEvent(new CustomEvent('capture-photo:error', {
-        bubbles: true,
-        detail: { error }
-      }));
-    });
-
+    this.init();
     this.facingModeButton.addEventListener('click', this.onFacingModeButtonClick);
     this.captureUserMediaButton.addEventListener('click', this.handleCaptureMedia);
     this.videoElement.addEventListener('canplay', this.onVideoCanPlay);
@@ -84,10 +73,13 @@ export class CapturePhoto extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'actions-disabled') {
       const isDisabled = newValue !== null;
-      this.captureUserMediaButton.disabled = isDisabled;
-      this.captureUserMediaButton.part = isDisabled ? 'capture-photo-button disabled' : 'capture-photo-button';
-      this.facingModeButton.disabled = isDisabled;
-      this.facingModeButton.part = isDisabled ? 'facing-mode-button disabled' : 'facing-mode-button';
+
+      if (this.captureUserMediaButton || this.facingModeButton) {
+        this.captureUserMediaButton.disabled = isDisabled;
+        this.captureUserMediaButton.part = isDisabled ? 'capture-photo-button disabled' : 'capture-photo-button';
+        this.facingModeButton.disabled = isDisabled;
+        this.facingModeButton.part = isDisabled ? 'facing-mode-button disabled' : 'facing-mode-button';
+      }
     }
 
     if (name === 'output-disabled') {
@@ -95,12 +87,30 @@ export class CapturePhoto extends HTMLElement {
     }
 
     if (name === 'facing-mode') {
-      this.changeFacingModeChange(this.facingMode);
+      this.stopVideoStreaming(this.videoElement);
+      this.init();
+      this.dispatchEvent(new CustomEvent('capture-photo:facingmodechange', {
+        bubbles: true,
+        detail: {
+          facingMode: newValue
+        }
+      }));
+    }
+
+    if (name === 'dimensions-constraints') {
+      if (this.dimensionsConstraints.width || this.dimensionsConstraints.height) {
+        this.stopVideoStreaming(this.videoElement);
+        this.init();
+        this.dispatchEvent(new CustomEvent('capture-photo:dimensionschange', {
+          bubbles: true,
+          detail: this.dimensionsConstraints
+        }));
+      }
     }
   }
 
   static get observedAttributes() {
-    return ['actions-disabled', 'output-disabled', 'facing-mode'];
+    return ['actions-disabled', 'output-disabled', 'facing-mode', 'dimensions-constraints'];
   }
 
   get actionsDisabled() {
@@ -141,34 +151,54 @@ export class CapturePhoto extends HTMLElement {
     this.setAttribute('facing-mode', value);
   }
 
+  get dimensionsConstraints() {
+    return JSON.parse(this.getAttribute('dimensions-constraints'));
+  }
+
+  set dimensionsConstraints(value) {
+    this.setAttribute('dimensions-constraints', JSON.stringify(value));
+  }
+
+  makeConstraints() {
+    const constraints = {
+      video: {
+        facingMode: {
+          ideal: this.facingMode
+        }
+      },
+      audio: false
+    };
+
+    const dimensionsConstraints = this.dimensionsConstraints || {};
+
+    if (dimensionsConstraints.width) {
+      constraints.video.width = dimensionsConstraints.width;
+    }
+
+    if (dimensionsConstraints.height) {
+      constraints.video.height = dimensionsConstraints.height;
+    }
+
+    return constraints;
+  }
+
   startVideoStreaming(video, stream) {
     video.srcObject = stream;
-
-    video.play().catch(error => {
-      this.dispatchEvent(new CustomEvent('capture-photo:error', {
-        bubbles: true,
-        detail: { error }
-      }));
-    });
 
     const tracks = stream != null ? stream.getVideoTracks() : [];
 
     tracks.forEach(track => {
-      track.applyConstraints({
-        video: {
-          facingMode: {
-            ideal: this.facingMode
-          }
-        },
-        audio: false
-      });
+      track.applyConstraints(this.makeConstraints());
     });
   }
 
   stopVideoStreaming(video) {
+    if (!video) {
+      return;
+    }
+
     const stream = video.srcObject;
     const tracks = stream != null ? stream.getVideoTracks() : [];
-
     tracks.forEach(track => track.stop());
     video.srcObject = null;
     this.actionsDisabled = true;
@@ -179,14 +209,7 @@ export class CapturePhoto extends HTMLElement {
       return Promise.reject('MediaDevices.getUserMedia() is not supported.');
     }
 
-    return navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: {
-          ideal: this.facingMode
-        }
-      },
-      audio: false
-    }).catch(error => {
+    return navigator.mediaDevices.getUserMedia(this.makeConstraints()).catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
         detail: { error }
@@ -199,14 +222,12 @@ export class CapturePhoto extends HTMLElement {
       const ctx = this.canvasElement.getContext('2d');
       const width = this.videoElement.videoWidth;
       const height = this.videoElement.videoHeight;
-
       this.canvasElement.width = width;
       this.canvasElement.height = height;
       ctx.drawImage(this.videoElement, 0, 0, width, height);
-
       const dataURI = this.canvasElement.toDataURL('image/png');
 
-      if (typeof dataURI === 'string' || dataURI.includes('data:image')) {
+      if (typeof dataURI === 'string' && dataURI.includes('data:image')) {
         if (!this.outputDisabled) {
           const image = new Image();
           image.src = dataURI;
@@ -234,9 +255,26 @@ export class CapturePhoto extends HTMLElement {
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
   }
 
-  changeFacingModeChange(facingMode) {
-    this.stopVideoStreaming(this.videoElement);
+  onVideoCanPlay(evt) {
+    this.actionsDisabled = false;
 
+    evt.target.play().catch(error => {
+      this.dispatchEvent(new CustomEvent('capture-photo:error', {
+        bubbles: true,
+        detail: { error }
+      }));
+    });
+  }
+
+  emptyOutputElement() {
+    if (!this.outputElement) {
+      return;
+    }
+
+    Array.from(this.outputElement.childNodes).forEach(node => node.remove());
+  }
+
+  init() {
     this.requestGetUserMedia().then(stream => {
       this.startVideoStreaming(this.videoElement, stream);
     }).catch(error => {
@@ -245,21 +283,6 @@ export class CapturePhoto extends HTMLElement {
         detail: { error }
       }));
     });
-
-    this.dispatchEvent(new CustomEvent('capture-photo:facingmodechange', {
-      bubbles: true,
-      detail: {
-        facingMode
-      }
-    }));
-  }
-
-  onVideoCanPlay() {
-    this.actionsDisabled = false;
-  }
-
-  emptyOutputElement() {
-    Array.from(this.outputElement.childNodes).forEach(node => node.remove());
   }
 
   static defineCustomElement(elementName = 'capture-photo') {
