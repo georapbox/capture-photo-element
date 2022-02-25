@@ -143,7 +143,7 @@ capture-photo::part(output-image) {
 | `outputDisabled` | `output-disabled` | Optional. Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
 | `actionsDisabled` | `actions-disabled` | Optional. Defines if the actions buttons are disabled or not. You won't probably need to use this. It's mostly used internally to temporarily disble actions buttons when video stream is not ready, to avoid unnecessary errors. |
 | `facingMode` | `facing-mode` | Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. Defaults to "user". |
-| `dimensionsConstraints` | `dimensions-constraints` | Optional. Plain object that represents the video width and height constraints, eg `{ width: 640, height: 480 }`. For available values, please refer to [constraints documentation](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#parameters). |
+| `dimensionsConstraints` | `dimensions-constraints` | Optional. Plain object that represents the video width and height constraints, eg `{ width: 640, height: 480 }`. Please refer to [constraints documentation](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#parameters) for more details of how constraints work. |
 
 All properties reflect their values as HTML attributes to keep the element's DOM representation in sync with its JavaScript state.
 
