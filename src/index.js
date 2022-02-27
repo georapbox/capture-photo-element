@@ -57,7 +57,7 @@ export class CapturePhoto extends HTMLElement {
     this.facingModeButton = this.shadowRoot.getElementById('facingModeButton');
     this.captureUserMediaButton = this.shadowRoot.getElementById('captureUserMediaButton');
     this.actionsDisabled = true;
-    this.init();
+    this.requestGetUserMedia();
     this.facingModeButton.addEventListener('click', this.onFacingModeButtonClick);
     this.captureUserMediaButton.addEventListener('click', this.handleCaptureMedia);
     this.videoElement.addEventListener('canplay', this.onVideoCanPlay);
@@ -88,29 +88,25 @@ export class CapturePhoto extends HTMLElement {
 
     if (name === 'facing-mode') {
       this.stopVideoStreaming(this.videoElement);
-      this.init();
-      this.dispatchEvent(new CustomEvent('capture-photo:facingmodechange', {
+      this.requestGetUserMedia();
+      this.dispatchEvent(new CustomEvent('capture-photo:facing-mode-change', {
         bubbles: true,
-        detail: {
-          facingMode: newValue
-        }
+        detail: { facingMode: newValue }
       }));
     }
 
-    if (name === 'dimensions-constraints') {
-      if (this.dimensionsConstraints.width || this.dimensionsConstraints.height) {
-        this.stopVideoStreaming(this.videoElement);
-        this.init();
-        this.dispatchEvent(new CustomEvent('capture-photo:dimensionschange', {
-          bubbles: true,
-          detail: this.dimensionsConstraints
-        }));
-      }
+    if (name === 'camera-resolution') {
+      this.stopVideoStreaming(this.videoElement);
+      this.requestGetUserMedia();
+      this.dispatchEvent(new CustomEvent('capture-photo:camera-resolution-change', {
+        bubbles: true,
+        detail: { cameraResolution: newValue }
+      }));
     }
   }
 
   static get observedAttributes() {
-    return ['actions-disabled', 'output-disabled', 'facing-mode', 'dimensions-constraints'];
+    return ['actions-disabled', 'output-disabled', 'facing-mode', 'camera-resolution'];
   }
 
   get actionsDisabled() {
@@ -151,12 +147,12 @@ export class CapturePhoto extends HTMLElement {
     this.setAttribute('facing-mode', value);
   }
 
-  get dimensionsConstraints() {
-    return JSON.parse(this.getAttribute('dimensions-constraints'));
+  get cameraResolution() {
+    return this.getAttribute('camera-resolution');
   }
 
-  set dimensionsConstraints(value) {
-    this.setAttribute('dimensions-constraints', JSON.stringify(value));
+  set cameraResolution(value) {
+    this.setAttribute('camera-resolution', value);
   }
 
   makeConstraints() {
@@ -169,27 +165,13 @@ export class CapturePhoto extends HTMLElement {
       audio: false
     };
 
-    const dimensionsConstraints = this.dimensionsConstraints || {};
-
-    if (dimensionsConstraints.width) {
-      constraints.video.width = dimensionsConstraints.width;
-    }
-
-    if (dimensionsConstraints.height) {
-      constraints.video.height = dimensionsConstraints.height;
+    if (typeof this.cameraResolution === 'string') {
+      const [width, height] = this.cameraResolution.split('x');
+      constraints.video.width = width;
+      constraints.video.height = height;
     }
 
     return constraints;
-  }
-
-  startVideoStreaming(video, stream) {
-    video.srcObject = stream;
-
-    const tracks = stream != null ? stream.getVideoTracks() : [];
-
-    tracks.forEach(track => {
-      track.applyConstraints(this.makeConstraints());
-    });
   }
 
   stopVideoStreaming(video) {
@@ -205,11 +187,9 @@ export class CapturePhoto extends HTMLElement {
   }
 
   requestGetUserMedia() {
-    if (!navigator.mediaDevices) {
-      return Promise.reject('MediaDevices.getUserMedia() is not supported.');
-    }
-
-    return navigator.mediaDevices.getUserMedia(this.makeConstraints()).catch(error => {
+    navigator.mediaDevices.getUserMedia(this.makeConstraints()).then(stream => {
+      this.videoElement.srcObject = stream;
+    }).catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
         detail: { error }
@@ -257,7 +237,6 @@ export class CapturePhoto extends HTMLElement {
 
   onVideoCanPlay(evt) {
     this.actionsDisabled = false;
-
     evt.target.play().catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
@@ -272,17 +251,6 @@ export class CapturePhoto extends HTMLElement {
     }
 
     Array.from(this.outputElement.childNodes).forEach(node => node.remove());
-  }
-
-  init() {
-    this.requestGetUserMedia().then(stream => {
-      this.startVideoStreaming(this.videoElement, stream);
-    }).catch(error => {
-      this.dispatchEvent(new CustomEvent('capture-photo:error', {
-        bubbles: true,
-        detail: { error }
-      }));
-    });
   }
 
   static defineCustomElement(elementName = 'capture-photo') {
