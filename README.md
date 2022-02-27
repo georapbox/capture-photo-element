@@ -15,126 +15,117 @@ $ npm install --save @georapbox/capture-photo-element
 
 ## Usage
 
-### Script
-
-Import as ES module:
+By default, the component is style-free to remain as less opinionated as possible. However, you can style the various elements of the component using the `::part()` CSS pseudo-elements provided for this purpose. The example below demonstrates all available parts for styling.
 
 ```html
-<script type="module">
-  import { CapturePhoto } from 'https://unpkg.com/@georapbox/capture-photo-element';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>capture-photo-element demo</title>
+  <style>
+    capture-photo:not(:defined) {
+      display: none;
+    }
 
-  // By default, the element is not automatically defined to offer more flexibility.
-  CapturePhoto.defineCustomElement();
+    capture-photo {
+      overflow: hidden;
+    }
 
-  // Alternatively, you can use the `CustomElementRegistry.define()` method to define the element,
-  // which is what the `CapturePhoto.defineCustomElement()` static method uses under the hood.
-  window.customElements.define('capture-photo', CapturePhoto);
-</script>
-```
+    /* The video element */
+    capture-photo::part(video) {
+      width: 100%;
+      padding: 1rem 1rem 0 1rem;
+      background-color: #000000;
+    }
 
-### Markup
+    /* Actions container element - where actions buttons are placed */
+    capture-photo::part(actions-container) {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      background-color: #000000;
+    }
 
-#### Using with defaults
+    /* The button responsible to take picture */
+    capture-photo::part(capture-photo-button) {
+      margin-left: calc(40px + 2rem); /* facing mode button width + actions buttons gap */
+      min-width: 60px;
+      width: 60px;
+      height: 60px;
+      background-color: #cccccc;
+      border: 5px solid #383838;
+      color: #000000;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      text-indent: -9999px;
+      overflow: hidden;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
 
-```html
-<capture-photo></capture-photo>
-```
+    /* The button responsible to change camera's facing mode */
+    capture-photo::part(facing-mode-button) {
+      min-width: 40px;
+      width: 40px;
+      height: 40px;
+      background-color: #ffffff;
+      border: 0;
+      line-height: 1;
+      border-radius: 50%;
+      cursor: pointer;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
 
-#### Customizing the actions buttons
+    /* Disabled state for actions buttons */
+    capture-photo::part(capture-photo-button disabled),
+    capture-photo::part(facing-mode-button disabled) {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-```html
-<capture-photo>
-  <span slot="capture-photo-button">Take picture</span>
+    /* Output container - where the final output photo is placed */
+    capture-photo::part(output-container) {
+      overflow-x: auto;
+    }
 
-  <span slot="facing-mode-button">
-    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
-      <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
-      <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
-    </svg>
-</capture-photo>
-```
+    /* The generated photo */
+    capture-photo::part(output-image) {
+      max-width: 300px;
+      height: auto;
+      border: 5px solid #000;
+    }
+  </style>
+</head>
+<body>
+  <capture-photo facing-mode="environment" camera-resolution="320x240">
+    <!-- Customise the content of the button that takes the picture -->
+    <span slot="capture-photo-button">Take picture</span>
 
-### Style
+    <!-- Customise the content of the button that changes the facing mode -->
+    <span slot="facing-mode-button">
+      <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
+        <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+        <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+      </svg>
+    </span>
+  </capture-photo>
 
-By default, the component is style-free to remain as less opinionated as possible. However, you can style the various elements of the component using the `::part()` CSS pseudo-elements provided for this purpose. Below is a complete example that demonstrates all available parts for styling.
+  <script type="module">
+    import { CapturePhoto } from './node_modules/@georapbox/capture-photo-element/dist/index.js';
 
-```css
-capture-photo:not(:defined) {
-  display: none;
-}
-
-capture-photo {
-  overflow: hidden;
-}
-
-/* The video element */
-capture-photo::part(video) {
-  width: 100%;
-  padding: 1rem 1rem 0 1rem;
-  background-color: #000000;
-}
-
-/* Actions container element - where actions buttons are placed */
-capture-photo::part(actions-container) {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-  padding: 1rem 0;
-  margin-bottom: 1rem;
-  background-color: #000000;
-}
-
-/* The button responsible to take picture */
-capture-photo::part(capture-photo-button) {
-  margin-left: calc(40px + 2rem); /* facing mode button width + actions buttons gap */
-  min-width: 60px;
-  width: 60px;
-  height: 60px;
-  background-color: #cccccc;
-  border: 5px solid #383838;
-  color: #000000;
-  border-radius: 50%;
-  font-size: 1rem;
-  cursor: pointer;
-  text-indent: -9999px;
-  overflow: hidden;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-}
-
-/* The button responsible to change camera's facing mode */
-capture-photo::part(facing-mode-button) {
-  min-width: 40px;
-  width: 40px;
-  height: 40px;
-  background-color: #ffffff;
-  border: 0;
-  line-height: 1;
-  border-radius: 50%;
-  cursor: pointer;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-}
-
-/* Disabled state for actions buttons */
-capture-photo::part(capture-photo-button disabled),
-capture-photo::part(facing-mode-button disabled) {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Output container - where the final output photo is placed */
-capture-photo::part(output-container) {
-  overflow-x: auto;
-}
-
-/* The generated photo */
-capture-photo::part(output-image) {
-  max-width: 300px;
-  height: auto;
-  border: 5px solid #000;
-}
+    // By default, the element is not automatically defined to offer more flexibility.
+    CapturePhoto.defineCustomElement();
+  </script>
+</body>
+</html>
 ```
 
 ## Properties/Attributes
@@ -143,7 +134,7 @@ capture-photo::part(output-image) {
 | `outputDisabled` | `output-disabled` | Optional. Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
 | `actionsDisabled` | `actions-disabled` | Optional. Defines if the actions buttons are disabled or not. You won't probably need to use this. It's mostly used internally to temporarily disble actions buttons when video stream is not ready, to avoid unnecessary errors. |
 | `facingMode` | `facing-mode` | Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. Defaults to "user". |
-| `dimensionsConstraints` | `dimensions-constraints` | Optional. Plain object that represents the video width and height constraints, eg `{ width: 640, height: 480 }`. Please refer to [constraints documentation](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#parameters) for more details of how constraints work. |
+| `cameraResolution` | `camera-resolution` | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. Please refer to [constraints documentation](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#parameters) for more details of how constraints work. |
 
 All properties reflect their values as HTML attributes to keep the element's DOM representation in sync with its JavaScript state.
 
@@ -159,11 +150,19 @@ Defines/registers the custom element with the name provided. If no name is provi
 
 ## Events
 
-**capture-photo:facingmodechange** - This event is triggered every time the camera's facing mode changes.
+**capture-photo:facing-mode-change** - This event is triggered every time the camera's facing mode changes.
 
 ```js
-document.addEventListener('capture-photo:facingmodechange', evt => {
+document.addEventListener('capture-photo:facing-mode-change', evt => {
   console.log(evt.detail); // => { facingMode: 'environment' }
+});
+```
+
+**capture-photo:camera-resolution-change** - This event is triggered every time the camera's resolution changes.
+
+```js
+document.addEventListener('capture-photo:camera-resolution-change', evt => {
+  console.log(evt.detail); // => { cameraResolution: '640x480' }
 });
 ```
 

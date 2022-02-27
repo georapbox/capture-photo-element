@@ -161,8 +161,8 @@
 
     CapturePhoto.defineCustomElement();
 
-    document.addEventListener('capture-photo:facingmodechange', evt => {
-      console.log('capture-photo:facingmodechange ->', evt.detail);
+    document.addEventListener('capture-photo:facing-mode-change', evt => {
+      console.log('capture-photo:facing-mode-change ->', evt.detail);
     });
 
     document.addEventListener('capture-photo:error', evt => {
@@ -173,8 +173,8 @@
       console.log('capture-photo:success ->', evt.detail);
     });
 
-    document.addEventListener('capture-photo:dimensionschange', evt => {
-      console.log('capture-photo:dimensionschange ->', evt.detail);
+    document.addEventListener('capture-photo:camera-resolution-change', evt => {
+      console.log('capture-photo:camera-resolution-change ->', evt.detail);
     });
   </script>
 </body>
