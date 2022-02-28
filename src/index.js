@@ -155,7 +155,19 @@ export class CapturePhoto extends HTMLElement {
     this.setAttribute('camera-resolution', value);
   }
 
-  makeConstraints() {
+  stopVideoStreaming(video) {
+    if (!video) {
+      return;
+    }
+
+    const stream = video.srcObject;
+    const tracks = stream != null ? stream.getVideoTracks() : [];
+    tracks.forEach(track => track.stop());
+    video.srcObject = null;
+    this.actionsDisabled = true;
+  }
+
+  requestGetUserMedia() {
     const constraints = {
       video: {
         facingMode: {
@@ -171,23 +183,7 @@ export class CapturePhoto extends HTMLElement {
       constraints.video.height = height;
     }
 
-    return constraints;
-  }
-
-  stopVideoStreaming(video) {
-    if (!video) {
-      return;
-    }
-
-    const stream = video.srcObject;
-    const tracks = stream != null ? stream.getVideoTracks() : [];
-    tracks.forEach(track => track.stop());
-    video.srcObject = null;
-    this.actionsDisabled = true;
-  }
-
-  requestGetUserMedia() {
-    navigator.mediaDevices.getUserMedia(this.makeConstraints()).then(stream => {
+    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
       this.videoElement.srcObject = stream;
     }).catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
