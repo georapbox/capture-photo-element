@@ -1,7 +1,7 @@
 {
   "name": "@georapbox/capture-photo-element",
   "version": "1.0.0",
-  "description": "A custom element that enables to capture a photo in the browser.",
+  "description": "A custom element to capture a photo in the browser.",
   "main": "dist/index.js",
   "type": "module",
   "module": "dist/index.js",
