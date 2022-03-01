@@ -280,20 +280,27 @@ export class CapturePhoto extends HTMLElement {
   }
 
   _applyZoom(zoom) {
-    if (!this._stream || !zoom) {
-      return;
-    }
+    try {
+      if (!this._stream || !zoom) {
+        return;
+      }
 
-    const [track] = this._stream.getVideoTracks();
-    const capabilities = track.getCapabilities();
-    const settings = track.getSettings();
+      const [track] = this._stream.getVideoTracks();
+      const capabilities = track.getCapabilities();
+      const settings = track.getSettings();
 
-    if ('zoom' in settings) {
-      track.applyConstraints({
-        advanced: [{
-          zoom: clamp(Number(zoom), capabilities.zoom.min, capabilities.zoom.max)
-        }]
-      });
+      if ('zoom' in settings) {
+        track.applyConstraints({
+          advanced: [{
+            zoom: clamp(Number(zoom), capabilities.zoom.min, capabilities.zoom.max)
+          }]
+        });
+      }
+    } catch (error) {
+      this.dispatchEvent(new CustomEvent('capture-photo:error', {
+        bubbles: true,
+        detail: { error }
+      }));
     }
   }
 
