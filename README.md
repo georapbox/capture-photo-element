@@ -1,6 +1,3 @@
-[![npm version](https://img.shields.io/npm/v/@georapbox/capture-photo-element.svg)](https://www.npmjs.com/package/@georapbox/capture-photo-element)
-[![npm license](https://img.shields.io/npm/l/@georapbox/capture-photo-element.svg)](https://www.npmjs.com/package/@georapbox/capture-photo-element)
-
 [demo]: https://georapbox.github.io/capture-photo-element/
 [getUserMedia]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 [MediaDevices]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices
@@ -17,18 +14,12 @@ The [MediaDevices.getUserMedia()][getUserMedia] method of the [MediaDevices][Med
 
 [API documentation](#api) &bull; [Demo][demo]
 
-## Installation
-
-```sh
-$ npm install --save @georapbox/capture-photo-element
-```
-
 ## Usage
 
 ### Script
 
 ```js
-import { CapturePhoto } from './node_modules/@georapbox/capture-photo-element/dist/index.js';
+import { CapturePhoto } from '<YOUR_PATH>/capture-photo.js';
 
 // By default, the element is not automatically defined to offer more flexibility.
 CapturePhoto.defineCustomElement();
@@ -102,6 +93,7 @@ capture-photo::part(output-image) {
 | `actionsDisabled` | `actions-disabled` | Optional. Defines if the actions buttons are disabled or not. You won't probably need to use this. It's mostly used internally to temporarily disble actions buttons when video stream is not ready, to avoid unnecessary errors. |
 | `facingMode` | `facing-mode` | Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. Defaults to "user". |
 | `cameraResolution` | `camera-resolution` | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. Please refer to [constraints documentation][constraints] for more details of how constraints work. |
+| `zoom` | `zoom` | Optional. Defines the camera's zoom level if supported by the device. |
 
 All properties reflect their values as HTML attributes to keep the element's DOM representation in sync with its JavaScript state.
 
@@ -130,6 +122,14 @@ document.addEventListener('capture-photo:facing-mode-change', evt => {
 ```js
 document.addEventListener('capture-photo:camera-resolution-change', evt => {
   console.log(evt.detail); // => { cameraResolution: '640x480' }
+});
+```
+
+**capture-photo:zoom-change** - This event is triggered every time the camera's zoom level changes.
+
+```js
+document.addEventListener('capture-photo:zoom-change', evt => {
+  console.log(evt.detail); // => { zoom: '2' }
 });
 ```
 
@@ -248,7 +248,7 @@ Below is a full usage example, with custom configuration and styling. Check the 
   </capture-photo>
 
   <script type="module">
-    import { CapturePhoto } from './node_modules/@georapbox/capture-photo-element/dist/index.js';
+    import { CapturePhoto } from './capture-photo.js';
 
     CapturePhoto.defineCustomElement();
   </script>

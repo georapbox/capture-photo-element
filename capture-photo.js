@@ -1,3 +1,15 @@
+function clamp(value, lower, upper) {
+  if (Number.isNaN(lower)) {
+    lower = 0;
+  }
+
+  if (Number.isNaN(upper)) {
+    upper = 0;
+  }
+
+  return Math.min(Math.max(value, Math.min(lower, upper)), Math.max(lower, upper));
+}
+
 const template = document.createElement('template');
 
 template.innerHTML = /*template*/`
@@ -45,9 +57,9 @@ export class CapturePhoto extends HTMLElement {
 
     shadowRoot.appendChild(template.content.cloneNode(true));
 
-    this.onFacingModeButtonClick = this.onFacingModeButtonClick.bind(this);
-    this.handleCaptureMedia = this.handleCaptureMedia.bind(this);
-    this.onVideoCanPlay = this.onVideoCanPlay.bind(this);
+    this._onFacingModeButtonClick = this._onFacingModeButtonClick.bind(this);
+    this.takePicture = this.takePicture.bind(this);
+    this._onVideoCanPlay = this._onVideoCanPlay.bind(this);
   }
 
   connectedCallback() {
@@ -57,17 +69,17 @@ export class CapturePhoto extends HTMLElement {
     this.facingModeButton = this.shadowRoot.getElementById('facingModeButton');
     this.captureUserMediaButton = this.shadowRoot.getElementById('captureUserMediaButton');
     this.actionsDisabled = true;
-    this.requestGetUserMedia();
-    this.facingModeButton.addEventListener('click', this.onFacingModeButtonClick);
-    this.captureUserMediaButton.addEventListener('click', this.handleCaptureMedia);
-    this.videoElement.addEventListener('canplay', this.onVideoCanPlay);
+    this._requestGetUserMedia();
+    this.facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+    this.captureUserMediaButton.addEventListener('click', this.takePicture);
+    this.videoElement.addEventListener('canplay', this._onVideoCanPlay);
   }
 
   disconnectedCallback() {
-    this.stopVideoStreaming(this.videoElement);
-    this.facingModeButton.removeEventListener('click', this.onFacingModeButtonClick);
-    this.captureUserMediaButton.removeEventListener('click', this.handleCaptureMedia);
-    this.videoElement.removeEventListener('canplay', this.onVideoCanPlay);
+    this._stopVideoStreaming();
+    this.facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
+    this.captureUserMediaButton.removeEventListener('click', this.takePicture);
+    this.videoElement.removeEventListener('canplay', this._onVideoCanPlay);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -83,12 +95,12 @@ export class CapturePhoto extends HTMLElement {
     }
 
     if (name === 'output-disabled') {
-      this.emptyOutputElement();
+      this._emptyOutputElement();
     }
 
     if (name === 'facing-mode') {
-      this.stopVideoStreaming(this.videoElement);
-      this.requestGetUserMedia();
+      this._stopVideoStreaming();
+      this._requestGetUserMedia();
       this.dispatchEvent(new CustomEvent('capture-photo:facing-mode-change', {
         bubbles: true,
         detail: { facingMode: newValue }
@@ -96,17 +108,25 @@ export class CapturePhoto extends HTMLElement {
     }
 
     if (name === 'camera-resolution') {
-      this.stopVideoStreaming(this.videoElement);
-      this.requestGetUserMedia();
+      this._stopVideoStreaming();
+      this._requestGetUserMedia();
       this.dispatchEvent(new CustomEvent('capture-photo:camera-resolution-change', {
         bubbles: true,
         detail: { cameraResolution: newValue }
       }));
     }
+
+    if (name === 'zoom') {
+      this._applyZoom(this.zoom);
+      this.dispatchEvent(new CustomEvent('capture-photo:zoom-change', {
+        bubbles: true,
+        detail: { zoom: newValue }
+      }));
+    }
   }
 
   static get observedAttributes() {
-    return ['actions-disabled', 'output-disabled', 'facing-mode', 'camera-resolution'];
+    return ['actions-disabled', 'output-disabled', 'facing-mode', 'camera-resolution', 'zoom'];
   }
 
   get actionsDisabled() {
@@ -155,19 +175,27 @@ export class CapturePhoto extends HTMLElement {
     this.setAttribute('camera-resolution', value);
   }
 
-  stopVideoStreaming(video) {
-    if (!video) {
+  get zoom() {
+    return this.getAttribute('zoom');
+  }
+
+  set zoom(value) {
+    this.setAttribute('zoom', value);
+  }
+
+  _stopVideoStreaming() {
+    if (!this.videoElement || !this._stream) {
       return;
     }
 
-    const stream = video.srcObject;
-    const tracks = stream != null ? stream.getVideoTracks() : [];
-    tracks.forEach(track => track.stop());
-    video.srcObject = null;
+    const [track] = this._stream.getVideoTracks();
+    track && track.stop();
+    this.videoElement.srcObject = null;
+    this._stream = null;
     this.actionsDisabled = true;
   }
 
-  requestGetUserMedia() {
+  _requestGetUserMedia() {
     const constraints = {
       video: {
         facingMode: {
@@ -185,6 +213,8 @@ export class CapturePhoto extends HTMLElement {
 
     navigator.mediaDevices.getUserMedia(constraints).then(stream => {
       this.videoElement.srcObject = stream;
+      this._stream = stream;
+      this._applyZoom(this.zoom);
     }).catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
@@ -193,7 +223,7 @@ export class CapturePhoto extends HTMLElement {
     });
   }
 
-  handleCaptureMedia() {
+  takePicture() {
     try {
       const ctx = this.canvasElement.getContext('2d');
       const width = this.videoElement.videoWidth;
@@ -210,7 +240,7 @@ export class CapturePhoto extends HTMLElement {
           image.width = width;
           image.height = height;
           image.part = 'output-image';
-          this.emptyOutputElement();
+          this._emptyOutputElement();
           this.outputElement.appendChild(image);
         }
 
@@ -227,11 +257,11 @@ export class CapturePhoto extends HTMLElement {
     }
   }
 
-  onFacingModeButtonClick() {
+  _onFacingModeButtonClick() {
     this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
   }
 
-  onVideoCanPlay(evt) {
+  _onVideoCanPlay(evt) {
     this.actionsDisabled = false;
     evt.target.play().catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
@@ -241,12 +271,30 @@ export class CapturePhoto extends HTMLElement {
     });
   }
 
-  emptyOutputElement() {
+  _emptyOutputElement() {
     if (!this.outputElement) {
       return;
     }
 
     Array.from(this.outputElement.childNodes).forEach(node => node.remove());
+  }
+
+  _applyZoom(zoom) {
+    if (!this._stream || !zoom) {
+      return;
+    }
+
+    const [track] = this._stream.getVideoTracks();
+    const capabilities = track.getCapabilities();
+    const settings = track.getSettings();
+
+    if ('zoom' in settings) {
+      track.applyConstraints({
+        advanced: [{
+          zoom: clamp(Number(zoom), capabilities.zoom.min, capabilities.zoom.max)
+        }]
+      });
+    }
   }
 
   static defineCustomElement(elementName = 'capture-photo') {
