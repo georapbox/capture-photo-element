@@ -37,13 +37,8 @@ template.innerHTML = /*template*/`
   <canvas hidden></canvas>
 
   <div part="actions-container">
-    <button part="capture-photo-button" type="button" id="captureUserMediaButton">
-      <slot name="capture-photo-button">Capture photo</slot>
-    </button>
-
-    <button part="facing-mode-button" type="button" id="facingModeButton">
-      <slot name="facing-mode-button">Toggle facing mode</slot>
-    </button>
+    <slot name="capture-button"><button part="capture-button" type="button"><slot name="capture-button-content">Capture photo</slot></button></slot>
+    <slot name="facing-mode-button"><button part="facing-mode-button" type="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
   </div>
 
   <div part="output-container" id="output"></div>
@@ -64,21 +59,23 @@ export class CapturePhoto extends HTMLElement {
 
   connectedCallback() {
     this.canvasElement = this.shadowRoot.querySelector('canvas');
-    this.videoElement = this.shadowRoot.querySelector('video');
     this.outputElement = this.shadowRoot.getElementById('output');
-    this.facingModeButton = this.shadowRoot.getElementById('facingModeButton');
-    this.captureUserMediaButton = this.shadowRoot.getElementById('captureUserMediaButton');
+    this.videoElement = this.shadowRoot.querySelector('video');
+    this.videoElement.addEventListener('canplay', this._onVideoCanPlay);
+    const captureButtonSlot = this.shadowRoot.querySelector('slot[name="capture-button"]');
+    this.captureButton = captureButtonSlot.assignedNodes({ flatten: true }).find(el => el.nodeName === 'BUTTON');
+    this.captureButton && this.captureButton.addEventListener('click', this.takePicture);
+    const facingModeButtonSlot = this.shadowRoot.querySelector('slot[name="facing-mode-button"]');
+    this.facingModeButton = facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => el.nodeName === 'BUTTON');
+    this.facingModeButton && this.facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
     this.actionsDisabled = true;
     this._requestGetUserMedia();
-    this.facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
-    this.captureUserMediaButton.addEventListener('click', this.takePicture);
-    this.videoElement.addEventListener('canplay', this._onVideoCanPlay);
   }
 
   disconnectedCallback() {
     this._stopVideoStreaming();
     this.facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
-    this.captureUserMediaButton.removeEventListener('click', this.takePicture);
+    this.captureButton.removeEventListener('click', this.takePicture);
     this.videoElement.removeEventListener('canplay', this._onVideoCanPlay);
   }
 
@@ -86,9 +83,12 @@ export class CapturePhoto extends HTMLElement {
     if (name === 'actions-disabled') {
       const isDisabled = newValue !== null;
 
-      if (this.captureUserMediaButton || this.facingModeButton) {
-        this.captureUserMediaButton.disabled = isDisabled;
-        this.captureUserMediaButton.part = isDisabled ? 'capture-photo-button disabled' : 'capture-photo-button';
+      if (this.captureButton) {
+        this.captureButton.disabled = isDisabled;
+        this.captureButton.part = isDisabled ? 'capture-button disabled' : 'capture-button';
+      }
+
+      if (this.facingModeButton) {
         this.facingModeButton.disabled = isDisabled;
         this.facingModeButton.part = isDisabled ? 'facing-mode-button disabled' : 'facing-mode-button';
       }

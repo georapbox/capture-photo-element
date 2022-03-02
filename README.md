@@ -28,17 +28,7 @@ CapturePhoto.defineCustomElement();
 ### Markup
 
 ```html
-<capture-photo facing-mode="environment" camera-resolution="320x240">
-  <!-- Customise the content of the button that takes the picture -->
-  <span slot="capture-photo-button">
-    Take picture
-  </span>
-
-  <!-- Customise the content of the button that changes the facing mode -->
-  <span slot="facing-mode-button">
-    Change camera  
-  </span>
-</capture-photo>
+<capture-photo facing-mode="environment" camera-resolution="320x240"></capture-photo>
 ```
 
 ### Style
@@ -62,7 +52,7 @@ capture-photo::part(actions-container) {
   /* Actions container element - where actions buttons are placed */
 }
 
-capture-photo::part(capture-photo-button) {
+capture-photo::part(capture-button) {
   /* The button responsible to take picture */
 }
 
@@ -70,7 +60,7 @@ capture-photo::part(facing-mode-button) {
   /* The button responsible to change camera's facing mode */
 }
 
-capture-photo::part(capture-photo-button disabled),
+capture-photo::part(capture-button disabled),
 capture-photo::part(facing-mode-button disabled) {
   /* Disabled state for actions buttons */
 }
@@ -96,6 +86,29 @@ capture-photo::part(output-image) {
 | `zoom` | `zoom` | Optional. Defines the camera's zoom level if supported by the device. |
 
 All properties reflect their values as HTML attributes to keep the element's DOM representation in sync with its JavaScript state.
+
+### Slots
+
+Below is a list with all available slots provided by the component so that you can fill with your own markup and override some of the default elements.
+
+| Slot attribure name | Description |
+| ------------------- | ----------- |
+| `capture-button` | Override the default capture photo button with your own. |
+| `capture-button-content` | Override the default content of the capture photo button with your own content. |
+| `facing-mode-button` | Override the default facing mode button with your own. |
+| `facing-mode-button-content` | Override the default content of the facing mode button with your own content. |
+
+#### Slots usage examples
+
+```html
+<capture-photo>
+  <!-- Override the default button that takes the picture with your own -->
+  <button slot="capture-button-content">Take picture</button>
+
+  <!-- Override just the content of the button that changes the facing mode -->
+  <span slot="facing-mode-button-content">Change camera</span>
+</capture-photo>
+```
 
 ### Static methods
 
@@ -186,7 +199,7 @@ Below is a full usage example, with custom configuration and styling. Check the 
       background-color: #000000;
     }
 
-    capture-photo::part(capture-photo-button) {
+    capture-photo::part(capture-button) {
       margin-left: calc(40px + 2rem); /* facing mode button width + actions buttons gap */
       min-width: 60px;
       width: 60px;
@@ -216,7 +229,7 @@ Below is a full usage example, with custom configuration and styling. Check the 
       -moz-appearance: none;
     }
 
-    capture-photo::part(capture-photo-button disabled),
+    capture-photo::part(capture-button disabled),
     capture-photo::part(facing-mode-button disabled) {
       opacity: 0.5;
       cursor: not-allowed;
@@ -234,12 +247,8 @@ Below is a full usage example, with custom configuration and styling. Check the 
   </style>
 </head>
 <body>
-  <capture-photo facing-mode="environment" camera-resolution="320x240">
-    <span slot="capture-photo-button">
-      Take picture
-    </span>
-
-    <span slot="facing-mode-button">
+  <capture-photo>
+    <span slot="facing-mode-button-content">
       <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
         <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
         <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
