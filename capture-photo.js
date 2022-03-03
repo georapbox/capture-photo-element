@@ -48,6 +48,8 @@ export class CapturePhoto extends HTMLElement {
   constructor() {
     super();
 
+    this._supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
+
     const shadowRoot = this.attachShadow({ mode: 'open' });
 
     shadowRoot.appendChild(template.content.cloneNode(true));
@@ -61,22 +63,30 @@ export class CapturePhoto extends HTMLElement {
     this.canvasElement = this.shadowRoot.querySelector('canvas');
     this.outputElement = this.shadowRoot.getElementById('output');
     this.videoElement = this.shadowRoot.querySelector('video');
-    this.videoElement.addEventListener('canplay', this._onVideoCanPlay);
+    this.videoElement && this.videoElement.addEventListener('canplay', this._onVideoCanPlay);
     const captureButtonSlot = this.shadowRoot.querySelector('slot[name="capture-button"]');
     this.captureButton = captureButtonSlot.assignedNodes({ flatten: true }).find(el => el.nodeName === 'BUTTON');
     this.captureButton && this.captureButton.addEventListener('click', this.takePicture);
     const facingModeButtonSlot = this.shadowRoot.querySelector('slot[name="facing-mode-button"]');
     this.facingModeButton = facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => el.nodeName === 'BUTTON');
-    this.facingModeButton && this.facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+
+    if (this.facingModeButton) {
+      if (this._supportedConstraints.facingMode) {
+        this.facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+      } else {
+        this.facingModeButton.hidden = true;
+      }
+    }
+
     this.actionsDisabled = true;
     this._requestGetUserMedia();
   }
 
   disconnectedCallback() {
     this._stopVideoStreaming();
-    this.facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
-    this.captureButton.removeEventListener('click', this.takePicture);
-    this.videoElement.removeEventListener('canplay', this._onVideoCanPlay);
+    this.facingModeButton && this.facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
+    this.captureButton && this.captureButton.removeEventListener('click', this.takePicture);
+    this.videoElement && this.videoElement.removeEventListener('canplay', this._onVideoCanPlay);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -98,7 +108,7 @@ export class CapturePhoto extends HTMLElement {
       this._emptyOutputElement();
     }
 
-    if (name === 'facing-mode') {
+    if (name === 'facing-mode' && this._supportedConstraints.facingMode) {
       this._stopVideoStreaming();
       this._requestGetUserMedia();
       this.dispatchEvent(new CustomEvent('capture-photo:facing-mode-change', {
