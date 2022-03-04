@@ -186,11 +186,15 @@ export class CapturePhoto extends HTMLElement {
   }
 
   get zoom() {
-    return this.getAttribute('zoom');
+    return Number(this.getAttribute('zoom'));
   }
 
   set zoom(value) {
-    this.setAttribute('zoom', value);
+    value = Number(value);
+
+    if (!Number.isNaN(value) && value > 0) {
+      this.setAttribute('zoom', value);
+    }
   }
 
   _stopVideoStreaming() {
@@ -290,27 +294,25 @@ export class CapturePhoto extends HTMLElement {
   }
 
   _applyZoom(zoom) {
-    try {
-      if (!this._stream || !zoom) {
-        return;
-      }
+    if (!this._stream || !zoom) {
+      return;
+    }
 
-      const [track] = this._stream.getVideoTracks();
-      const capabilities = track.getCapabilities();
-      const settings = track.getSettings();
+    const [track] = this._stream.getVideoTracks();
 
-      if ('zoom' in settings) {
-        track.applyConstraints({
-          advanced: [{
-            zoom: clamp(Number(zoom), capabilities.zoom.min, capabilities.zoom.max)
-          }]
-        });
-      }
-    } catch (error) {
-      this.dispatchEvent(new CustomEvent('capture-photo:error', {
-        bubbles: true,
-        detail: { error }
-      }));
+    if (typeof track.getCapabilities !== 'function' || typeof track.getSettings !== 'function') {
+      return;
+    }
+
+    const capabilities = track.getCapabilities();
+    const settings = track.getSettings();
+
+    if ('zoom' in settings) {
+      track.applyConstraints({
+        advanced: [{
+          zoom: clamp(Number(zoom), capabilities.zoom.min, capabilities.zoom.max)
+        }]
+      });
     }
   }
 

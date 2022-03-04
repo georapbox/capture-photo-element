@@ -77,13 +77,13 @@ capture-photo::part(output-image) {
 ## API
 
 ### Properties/Attributes
-| Property name | Attribute name | Description |
-| ------------- | -------------- | ----------- |
-| `outputDisabled` | `output-disabled` | Optional. Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
-| `actionsDisabled` | `actions-disabled` | Optional. Defines if the actions buttons are disabled or not. You won't probably need to use this. It's mostly used internally to temporarily disble actions buttons when video stream is not ready, to avoid unnecessary errors. |
-| `facingMode` | `facing-mode` | Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. Defaults to "user". |
-| `cameraResolution` | `camera-resolution` | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. Please refer to [constraints documentation][constraints] for more details of how constraints work. |
-| `zoom` | `zoom` | Optional. Defines the camera's zoom level if supported by the device. |
+| Property name | Attribute name | Type | Default | Description |
+| ------------- | -------------- | ---- | ------- | ----------- |
+| `outputDisabled` | `output-disabled` | Boolean | false | Optional. Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
+| `actionsDisabled` | `actions-disabled` | Boolean | false | Optional. Defines if the actions buttons are disabled or not. You won't probably need to use this. It's mostly used internally to temporarily disble actions buttons when video stream is not ready, to avoid unnecessary errors. |
+| `facingMode` | `facing-mode` | String | 'user'| Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. |
+| `cameraResolution` | `camera-resolution` | String | null | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. Please refer to [constraints documentation][constraints] for more details of how constraints work. |
+| `zoom` | `zoom` | Number | 0 | Optional. Defines the camera's zoom level if supported by the device. |
 
 All properties reflect their values as HTML attributes to keep the element's DOM representation in sync with its JavaScript state.
 
