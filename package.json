@@ -6,7 +6,7 @@
   "type": "module",
   "module": "capture-photo.js",
   "scripts": {
-    "lint": "eslint src/**/*.js",
+    "lint": "eslint *.js",
     "demo": "npx http-server ."
   },
   "keywords": [
