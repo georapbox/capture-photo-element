@@ -134,6 +134,12 @@ Defines/registers the custom element with the name provided. If no name is provi
 | ----- | ---- | ------- | ----------- |
 | elementName | `string` | `capture-photo` | Name for the new custom element |
 
+### Public methods
+
+#### takePicture()
+
+When called upon the element, it will capture a photo using its properties.
+
 ### Events
 
 **capture-photo:facing-mode-change** - This event is triggered every time the camera's facing mode changes.
