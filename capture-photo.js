@@ -37,8 +37,8 @@ template.innerHTML = /*template*/`
   <canvas hidden></canvas>
 
   <div part="actions-container">
-    <slot name="capture-button"><button part="capture-button" type="button"><slot name="capture-button-content">Capture photo</slot></button></slot>
-    <slot name="facing-mode-button"><button part="facing-mode-button" type="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
+    <slot name="capture-button"><button part="capture-button" type="button" behavior="button"><slot name="capture-button-content">Capture photo</slot></button></slot>
+    <slot name="facing-mode-button"><button part="facing-mode-button" type="button" behavior="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
   </div>
 
   <div part="output-container" id="output"></div>
@@ -57,24 +57,28 @@ export class CapturePhoto extends HTMLElement {
     this._onFacingModeButtonClick = this._onFacingModeButtonClick.bind(this);
     this.takePicture = this.takePicture.bind(this);
     this._onVideoCanPlay = this._onVideoCanPlay.bind(this);
+    this._onCaptureButtonSlotChange = this._onCaptureButtonSlotChange.bind(this);
+    this._onFacingModeButtonSlotChange = this._onFacingModeButtonSlotChange.bind(this);
   }
 
   connectedCallback() {
-    this.canvasElement = this.shadowRoot.querySelector('canvas');
-    this.outputElement = this.shadowRoot.getElementById('output');
-    this.videoElement = this.shadowRoot.querySelector('video');
-    this.videoElement && this.videoElement.addEventListener('canplay', this._onVideoCanPlay);
-    const captureButtonSlot = this.shadowRoot.querySelector('slot[name="capture-button"]');
-    this.captureButton = captureButtonSlot.assignedNodes({ flatten: true }).find(el => el.nodeName === 'BUTTON');
-    this.captureButton && this.captureButton.addEventListener('click', this.takePicture);
-    const facingModeButtonSlot = this.shadowRoot.querySelector('slot[name="facing-mode-button"]');
-    this.facingModeButton = facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => el.nodeName === 'BUTTON');
+    this.$canvasElement = this.shadowRoot.querySelector('canvas');
+    this.$outputElement = this.shadowRoot.getElementById('output');
+    this.$videoElement = this.shadowRoot.querySelector('video');
+    this.$videoElement && this.$videoElement.addEventListener('canplay', this._onVideoCanPlay);
+    this._captureButtonSlot = this.shadowRoot.querySelector('slot[name="capture-button"]');
+    this._captureButtonSlot.addEventListener('slotchange', this._onCaptureButtonSlotChange);
+    this.$captureButton = this._captureButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
+    this.$captureButton && this.$captureButton.addEventListener('click', this.takePicture);
+    this._facingModeButtonSlot = this.shadowRoot.querySelector('slot[name="facing-mode-button"]');
+    this._facingModeButtonSlot.addEventListener('slotchange', this._onFacingModeButtonSlotChange);
+    this.$facingModeButton = this._facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
 
-    if (this.facingModeButton) {
+    if (this.$facingModeButton) {
       if (this._supportedConstraints.facingMode) {
-        this.facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+        this.$facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
       } else {
-        this.facingModeButton.hidden = true;
+        this.$facingModeButton.hidden = true;
       }
     }
 
@@ -84,23 +88,23 @@ export class CapturePhoto extends HTMLElement {
 
   disconnectedCallback() {
     this._stopVideoStreaming();
-    this.facingModeButton && this.facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
-    this.captureButton && this.captureButton.removeEventListener('click', this.takePicture);
-    this.videoElement && this.videoElement.removeEventListener('canplay', this._onVideoCanPlay);
+    this.$facingModeButton && this.$facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
+    this.$captureButton && this.$captureButton.removeEventListener('click', this.takePicture);
+    this.$videoElement && this.$videoElement.removeEventListener('canplay', this._onVideoCanPlay);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'actions-disabled') {
       const isDisabled = newValue !== null;
 
-      if (this.captureButton) {
-        this.captureButton.disabled = isDisabled;
-        this.captureButton.part = isDisabled ? 'capture-button disabled' : 'capture-button';
+      if (this.$captureButton) {
+        this.$captureButton.disabled = isDisabled;
+        this.$captureButton.part = isDisabled ? 'capture-button disabled' : 'capture-button';
       }
 
-      if (this.facingModeButton) {
-        this.facingModeButton.disabled = isDisabled;
-        this.facingModeButton.part = isDisabled ? 'facing-mode-button disabled' : 'facing-mode-button';
+      if (this.$facingModeButton) {
+        this.$facingModeButton.disabled = isDisabled;
+        this.$facingModeButton.part = isDisabled ? 'facing-mode-button disabled' : 'facing-mode-button';
       }
     }
 
@@ -198,13 +202,13 @@ export class CapturePhoto extends HTMLElement {
   }
 
   _stopVideoStreaming() {
-    if (!this.videoElement || !this._stream) {
+    if (!this.$videoElement || !this._stream) {
       return;
     }
 
     const [track] = this._stream.getVideoTracks();
     track && track.stop();
-    this.videoElement.srcObject = null;
+    this.$videoElement.srcObject = null;
     this._stream = null;
     this.actionsDisabled = true;
   }
@@ -226,7 +230,7 @@ export class CapturePhoto extends HTMLElement {
     }
 
     navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-      this.videoElement.srcObject = stream;
+      this.$videoElement.srcObject = stream;
       this._stream = stream;
       this._applyZoom(this.zoom);
     }).catch(error => {
@@ -239,13 +243,13 @@ export class CapturePhoto extends HTMLElement {
 
   takePicture() {
     try {
-      const ctx = this.canvasElement.getContext('2d');
-      const width = this.videoElement.videoWidth;
-      const height = this.videoElement.videoHeight;
-      this.canvasElement.width = width;
-      this.canvasElement.height = height;
-      ctx.drawImage(this.videoElement, 0, 0, width, height);
-      const dataURI = this.canvasElement.toDataURL('image/png');
+      const ctx = this.$canvasElement.getContext('2d');
+      const width = this.$videoElement.videoWidth;
+      const height = this.$videoElement.videoHeight;
+      this.$canvasElement.width = width;
+      this.$canvasElement.height = height;
+      ctx.drawImage(this.$videoElement, 0, 0, width, height);
+      const dataURI = this.$canvasElement.toDataURL('image/png');
 
       if (typeof dataURI === 'string' && dataURI.includes('data:image')) {
         if (!this.outputDisabled) {
@@ -255,7 +259,7 @@ export class CapturePhoto extends HTMLElement {
           image.height = height;
           image.part = 'output-image';
           this._emptyOutputElement();
-          this.outputElement.appendChild(image);
+          this.$outputElement.appendChild(image);
         }
 
         this.dispatchEvent(new CustomEvent('capture-photo:success', {
@@ -286,11 +290,11 @@ export class CapturePhoto extends HTMLElement {
   }
 
   _emptyOutputElement() {
-    if (!this.outputElement) {
+    if (!this.$outputElement) {
       return;
     }
 
-    Array.from(this.outputElement.childNodes).forEach(node => node.remove());
+    Array.from(this.$outputElement.childNodes).forEach(node => node.remove());
   }
 
   _applyZoom(zoom) {
@@ -314,6 +318,18 @@ export class CapturePhoto extends HTMLElement {
         }]
       });
     }
+  }
+
+  _onCaptureButtonSlotChange() {
+    this.$captureButton && this.$captureButton.removeEventListener('click', this.takePicture);
+    this.$captureButton = this._captureButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
+    this.$captureButton && this.$captureButton.addEventListener('click', this.takePicture);
+  }
+
+  _onFacingModeButtonSlotChange() {
+    this.$facingModeButton && this.$facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
+    this.$facingModeButton = this._facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
+    this.$facingModeButton && this.$facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
   }
 
   static defineCustomElement(elementName = 'capture-photo') {

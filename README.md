@@ -93,19 +93,33 @@ Below is a list with all available slots provided by the component so that you c
 
 | Slot attribure name | Description |
 | ------------------- | ----------- |
-| `capture-button` | Override the default capture photo button with your own. |
+| `capture-button` | Override the default capture photo button with your own. It is important to note that you will need to provide the `behavior="button"` attribute to your element, to tell the browser that this is the element you want to use as the new capture button. |
 | `capture-button-content` | Override the default content of the capture photo button with your own content. |
-| `facing-mode-button` | Override the default facing mode button with your own. |
+| `facing-mode-button` | Override the default facing mode button with your own. It is important to note that you will need to provide the `behavior="button"` attribute to your element, to tell the browser that this is the element you want to use as the new facing mode button. |
 | `facing-mode-button-content` | Override the default content of the facing mode button with your own content. |
 
 #### Slots usage examples
 
+##### Override the default buttons with your own elements
+
 ```html
 <capture-photo>
-  <!-- Override the default button that takes the picture with your own -->
-  <button slot="capture-button-content">Take picture</button>
+  <button slot="capture-button" behavior="button">
+    Take picture
+  </button>
+  
+  <a slot="facing-mode-button" behavior="button" href="#">
+    Change camera
+  </a>
+</capture-photo>
+```
 
-  <!-- Override just the content of the button that changes the facing mode -->
+##### Override just the content of the default buttons
+
+```html
+<capture-photo>
+  <span slot="capture-button-content">Take picture</span>
+  
   <span slot="facing-mode-button-content">Change camera</span>
 </capture-photo>
 ```
