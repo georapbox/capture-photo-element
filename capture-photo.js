@@ -82,6 +82,12 @@ export class CapturePhoto extends HTMLElement {
       }
     }
 
+    this._upgradeProperty('outputDisabled');
+    this._upgradeProperty('actionsDisabled');
+    this._upgradeProperty('facingMode');
+    this._upgradeProperty('cameraResolution');
+    this._upgradeProperty('zoom');
+
     this.actionsDisabled = true;
     this._requestGetUserMedia();
   }
@@ -339,6 +345,22 @@ export class CapturePhoto extends HTMLElement {
       this.$facingModeButton && this.$facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
       this.$facingModeButton = this._facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
       this.$facingModeButton && this.$facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+    }
+  }
+
+  /**
+   * https://developers.google.com/web/fundamentals/web-components/best-practices#lazy-properties
+   * This is to safe guard against cases where, for instance, a framework
+   * may have added the element to the page and set a value on one of its
+   * properties, but lazy loaded its definition. Without this guard, the
+   * upgraded element would miss that property and the instance property
+   * would prevent the class property setter from ever being called.
+   */
+  _upgradeProperty(prop) {
+    if (Object.prototype.hasOwnProperty.call(this, prop)) {
+      const value = this[prop];
+      delete this[prop];
+      this[prop] = value;
     }
   }
 
