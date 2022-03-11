@@ -105,12 +105,12 @@ export class CapturePhoto extends HTMLElement {
 
       if (this.$captureButton) {
         this.$captureButton.disabled = isDisabled;
-        this.$captureButton.part = isDisabled ? 'capture-button disabled' : 'capture-button';
+        this.$captureButton.part = isDisabled ? 'capture-button capture-button--disabled' : 'capture-button';
       }
 
       if (this.$facingModeButton) {
         this.$facingModeButton.disabled = isDisabled;
-        this.$facingModeButton.part = isDisabled ? 'facing-mode-button disabled' : 'facing-mode-button';
+        this.$facingModeButton.part = isDisabled ? 'facing-mode-button facing-mode-button--disabled' : 'facing-mode-button';
       }
     }
 

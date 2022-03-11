@@ -60,8 +60,8 @@ capture-photo::part(facing-mode-button) {
   /* The button responsible to change camera's facing mode */
 }
 
-capture-photo::part(capture-button disabled),
-capture-photo::part(facing-mode-button disabled) {
+capture-photo::part(capture-button capture-button--disabled),
+capture-photo::part(facing-mode-button facing-mode-button--disabled) {
   /* Disabled state for actions buttons */
 }
 
@@ -249,8 +249,8 @@ Below is a full usage example, with custom configuration and styling. Check the 
       -moz-appearance: none;
     }
 
-    capture-photo::part(capture-button disabled),
-    capture-photo::part(facing-mode-button disabled) {
+    capture-photo::part(capture-button capture-button--disabled),
+    capture-photo::part(facing-mode-button facing-mode-button--disabled) {
       opacity: 0.5;
       cursor: not-allowed;
     }
