@@ -17,10 +17,13 @@ template.innerHTML = /*template*/`
     :host {
       all: initial;
       display: block;
+      box-sizing: border-box;
     }
 
-    :host * {
-      box-sizing: border-box;
+    :host *,
+    :host *::before,
+    :host *::after {
+      box-sizing: inherit;
     }
 
     :host video {
@@ -29,6 +32,10 @@ template.innerHTML = /*template*/`
 
     :host #output:empty {
       display: none;
+    }
+
+    [hidden] {
+      display: none !important;
     }
   </style>
 
