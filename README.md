@@ -77,8 +77,8 @@ capture-photo::part(output-image) {
 ## API
 
 ### Properties/Attributes
-| Property name | Attribute name | Type | Default | Description |
-| ------------- | -------------- | ---- | ------- | ----------- |
+| Property | Attribute | Type | Default | Description |
+| -------- | --------- | ---- | ------- | ----------- |
 | `outputDisabled` | `output-disabled` | Boolean | false | Optional. Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
 | `actionsDisabled` | `actions-disabled` | Boolean | false | Optional. Defines if the actions buttons are disabled or not. You won't probably need to use this. It's mostly used internally to temporarily disble actions buttons when video stream is not ready, to avoid unnecessary errors. |
 | `facingMode` | `facing-mode` | String | 'user'| Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. |
@@ -89,10 +89,8 @@ All properties reflect their values as HTML attributes to keep the element's DOM
 
 ### Slots
 
-Below is a list with all available slots provided by the component so that you can fill with your own markup and override some of the default elements.
-
-| Slot attribure name | Description |
-| ------------------- | ----------- |
+| Name | Description |
+| ---- | ----------- |
 | `capture-button` | Override the default capture photo button with your own. It is important to note that you will need to provide the `behavior="button"` attribute to your element, to tell the browser that this is the element you want to use as the new capture button. |
 | `capture-button-content` | Override the default content of the capture photo button with your own content. |
 | `facing-mode-button` | Override the default facing mode button with your own. It is important to note that you will need to provide the `behavior="button"` attribute to your element, to tell the browser that this is the element you want to use as the new facing mode button. |
@@ -104,11 +102,11 @@ Below is a list with all available slots provided by the component so that you c
 
 ```html
 <capture-photo>
-  <button slot="capture-button" behavior="button">
+  <button slot="capture-button" behavior="button" type="button">
     Take picture
   </button>
   
-  <a slot="facing-mode-button" behavior="button" href="#">
+  <a slot="facing-mode-button" behavior="button" href="#" role="button">
     Change camera
   </a>
 </capture-photo>
@@ -124,9 +122,24 @@ Below is a list with all available slots provided by the component so that you c
 </capture-photo>
 ```
 
+### CSS Parts
+
+| Name | Description |
+| ---- | ----------- |
+| `video` | The video element. |
+| `actions-container` | The action buttons container element. |
+| `capture-button` | The capture photo button. |
+| `capture-button--disabled` | The capture photo button when is disabled. |
+| `facing-mode-button` | The facing mode button. |
+| `facing-mode-button--disabled` | The facing mode button when is disabled. |
+| `output-container` | The output container element. |
+| `output-image` | The output image element. |
+
 ### Static methods
 
-#### CapturePhoto.defineCustomElement(elementName='capture-photo')
+```js
+CapturePhoto.defineCustomElement(elementName='capture-photo')
+```
 
 Defines/registers the custom element with the name provided. If no name is provided, the default name is used. The method checks if the element is already defined, hence will skip trying to redefine it.
 
@@ -136,13 +149,15 @@ Defines/registers the custom element with the name provided. If no name is provi
 
 ### Public methods
 
-#### takePicture()
+```js
+takePicture()
+```
 
 When called upon the element, it will capture a photo using its properties.
 
 ### Events
 
-**capture-photo:facing-mode-change** - This event is triggered every time the camera's facing mode changes.
+`capture-photo:facing-mode-change` - Emitted when the camera's facing mode changes.
 
 ```js
 document.addEventListener('capture-photo:facing-mode-change', evt => {
@@ -150,7 +165,7 @@ document.addEventListener('capture-photo:facing-mode-change', evt => {
 });
 ```
 
-**capture-photo:camera-resolution-change** - This event is triggered every time the camera's resolution changes.
+`capture-photo:camera-resolution-change` - Emitted when the camera's resolution changes.
 
 ```js
 document.addEventListener('capture-photo:camera-resolution-change', evt => {
@@ -158,7 +173,7 @@ document.addEventListener('capture-photo:camera-resolution-change', evt => {
 });
 ```
 
-**capture-photo:zoom-change** - This event is triggered every time the camera's zoom level changes.
+`capture-photo:zoom-change` - Emitted when the camera's zoom level changes.
 
 ```js
 document.addEventListener('capture-photo:zoom-change', evt => {
@@ -166,7 +181,7 @@ document.addEventListener('capture-photo:zoom-change', evt => {
 });
 ```
 
-**capture-photo:success** - This event is triggered every time a photo is captured successfully.
+`capture-photo:success` - Emitted when a photo is captured successfully.
 
 ```js
 document.addEventListener('capture-photo:success', evt => {
@@ -174,7 +189,7 @@ document.addEventListener('capture-photo:success', evt => {
 });
 ```
 
-**capture-photo:error** - This event is triggered every time an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc.
+`capture-photo:error` - Emitted when an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc.
 
 ```js
 document.addEventListener('capture-photo:error', evt => {

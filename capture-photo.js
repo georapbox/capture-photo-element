@@ -1,3 +1,34 @@
+/**
+ * A custom element to capture a photo in the browser.
+ *
+ * @slot capture-button - The capture photo button.
+ * @slot capture-button-content - The capture photo button's content.
+ * @slot facing-mode-button - The facing mode button.
+ * @slot facing-mode-button-content - The facing mode button's content.
+ *
+ * @csspart video - The video element.
+ * @csspart actions-container - The action buttons container element.
+ * @csspart capture-button - The capture photo button.
+ * @csspart capture-button--disabled - The capture photo button when is disabled.
+ * @csspart facing-mode-button - The facing mode button.
+ * @csspart facing-mode-button--disabled - The facing mode button when is disabled.
+ * @csspart output-container - The output container element.
+ * @csspart output-image - The output image element.
+ *
+ * @event capture-photo:facing-mode-change - Emitted when the camera's facing mode changes.
+ * @event capture-photo:camera-resolution-change - Emitted when the camera's resolution changes.
+ * @event capture-photo:zoom-change - Emitted when the camera's zoom level changes.
+ * @event capture-photo:success - Emitted when a photo is captured successfully.
+ * @event capture-photo:error - Emitted when an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc.
+ *
+ * @example
+ *
+ * <capture-photo facing-mode="environment" camera-resolution="320x240">
+ *   <button slot="capture-button" behavior="button" type="button">Take picture</button>
+ *   <a slot="facing-mode-button" behavior="button" href="#" role="button">Change camera</a>
+ * </capture-photo>
+ */
+
 function clamp(value, lower, upper) {
   if (Number.isNaN(lower)) {
     lower = 0;
