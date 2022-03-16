@@ -135,25 +135,12 @@ All properties reflect their values as HTML attributes to keep the element's DOM
 | `output-container` | The output container element. |
 | `output-image` | The output image element. |
 
-### Static methods
+### Methods
 
-```js
-CapturePhoto.defineCustomElement(elementName='capture-photo')
-```
-
-Defines/registers the custom element with the name provided. If no name is provided, the default name is used. The method checks if the element is already defined, hence will skip trying to redefine it.
-
-| Param | Type | Default | Description |
-| ----- | ---- | ------- | ----------- |
-| elementName | `string` | `capture-photo` | Name for the new custom element |
-
-### Public methods
-
-```js
-takePicture()
-```
-
-When called upon the element, it will capture a photo using its properties.
+| Name | Type | Description | Arguments |
+| ---- | ---- | ----------- | --------- |
+| `defineCustomElement` | Static | Defines/registers the custom element with the name provided. If no name is provided, the default name is used. The method checks if the element is already defined, hence will skip trying to redefine it. | `elementName='capture-photo'` |
+| `takePicture` | Prototype | Captures a photo using the element's properties. | - |
 
 ### Events
 
