@@ -6,6 +6,7 @@
   },
   "extends": [
     "eslint:recommended",
+    "plugin:wc/recommended",
     "plugin:wc/best-practice"
   ],
   "parserOptions": {
