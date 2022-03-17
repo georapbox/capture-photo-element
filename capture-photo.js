@@ -100,6 +100,10 @@ export class CapturePhoto extends HTMLElement {
   }
 
   connectedCallback() {
+    if (!this.facingMode) {
+      this.facingMode = 'user';
+    }
+
     this.$canvasElement = this.shadowRoot.querySelector('canvas');
     this.$outputElement = this.shadowRoot.getElementById('output');
     this.$videoElement = this.shadowRoot.querySelector('video');
@@ -178,7 +182,7 @@ export class CapturePhoto extends HTMLElement {
       this._applyZoom(this.zoom);
       this.dispatchEvent(new CustomEvent('capture-photo:zoom-change', {
         bubbles: true,
-        detail: { zoom: newValue }
+        detail: { zoom: this.zoom }
       }));
     }
   }
@@ -212,7 +216,7 @@ export class CapturePhoto extends HTMLElement {
   }
 
   get facingMode() {
-    return this.getAttribute('facing-mode') || 'user';
+    return this.getAttribute('facing-mode');
   }
 
   set facingMode(value) {
@@ -234,15 +238,12 @@ export class CapturePhoto extends HTMLElement {
   }
 
   get zoom() {
-    return Number(this.getAttribute('zoom'));
+    return Number(this.getAttribute('zoom')) || null;
   }
 
   set zoom(value) {
-    value = Number(value);
-
-    if (!Number.isNaN(value) && value > 0) {
-      this.setAttribute('zoom', value);
-    }
+    const numValue = Number(value) || 0;
+    this.setAttribute('zoom', numValue > 0 ? Math.floor(numValue) : 0);
   }
 
   _stopVideoStreaming() {
