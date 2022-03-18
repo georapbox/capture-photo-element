@@ -1,5 +1,5 @@
 /**
- * A custom element to capture a photo in the browser.
+ * A custom element that implements the `MediaDevices.getUserMedia()` method of the `MediaDevices` interface to capture a photo in the browser.
  *
  * @slot capture-button - The capture photo button.
  * @slot capture-button-content - The capture photo button's content.

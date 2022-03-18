@@ -8,9 +8,7 @@
 
 # &lt;capture-photo&gt; element
 
-A custom element to capture a photo in the browser.
-
-The [MediaDevices.getUserMedia()][getUserMedia] method of the [MediaDevices][MediaDevices] interface is used under the hood, therefore it will prompt the user for permission to use the device's camera.
+A custom element that implements the [MediaDevices.getUserMedia()][getUserMedia] method of the [MediaDevices][MediaDevices] interface to capture a photo in the browser.
 
 [API documentation](#api) &bull; [Demo][demo]
 
