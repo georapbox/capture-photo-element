@@ -95,7 +95,6 @@
     }
 
     capture-photo::part(capture-button) {
-      margin-left: calc(40px + 2rem);
       min-width: 60px;
       width: 60px;
       height: 60px;
@@ -112,6 +111,7 @@
     }
 
     capture-photo::part(facing-mode-button) {
+      margin-right: calc(-40px - 2rem);
       min-width: 40px;
       width: 40px;
       height: 40px;
@@ -122,12 +122,6 @@
       cursor: pointer;
       -webkit-appearance: none;
       -moz-appearance: none;
-    }
-
-    capture-photo::part(capture-button capture-button--disabled),
-    capture-photo::part(facing-mode-button facing-mode-button--disabled) {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
 
     capture-photo::part(output-container) {
@@ -174,14 +168,14 @@
   </div>
 
   <script type="module">
-    import { CapturePhoto } from './capture-photo.js';
+    import { CapturePhoto } from 'https://unpkg.com/@georapbox/capture-photo-element/dist/capture-photo.min.js';
 
     document.addEventListener('capture-photo:facing-mode-change', evt => {
       console.log('capture-photo:facing-mode-change ->', evt.detail);
     });
 
     document.addEventListener('capture-photo:error', evt => {
-      console.error('capture-photo:error ->', evt.detail);
+      console.log('capture-photo:error ->', evt.detail);
     });
 
     document.addEventListener('capture-photo:success', evt => {

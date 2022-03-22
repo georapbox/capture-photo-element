@@ -1,46 +1,3 @@
-/**
- * A custom element that implements the `MediaDevices.getUserMedia()` method of the `MediaDevices` interface to capture a photo in the browser.
- *
- * @slot capture-button - The capture photo button.
- * @slot capture-button-content - The capture photo button's content.
- * @slot facing-mode-button - The facing mode button.
- * @slot facing-mode-button-content - The facing mode button's content.
- *
- * @csspart video - The video element.
- * @csspart actions-container - The action buttons container element.
- * @csspart capture-button - The capture photo button.
- * @csspart capture-button--disabled - The capture photo button when is disabled.
- * @csspart facing-mode-button - The facing mode button.
- * @csspart facing-mode-button--disabled - The facing mode button when is disabled.
- * @csspart output-container - The output container element.
- * @csspart output-image - The output image element.
- *
- * @event capture-photo:facing-mode-change - Emitted when the camera's facing mode changes.
- * @event capture-photo:camera-resolution-change - Emitted when the camera's resolution changes.
- * @event capture-photo:zoom-change - Emitted when the camera's zoom level changes.
- * @event capture-photo:success - Emitted when a photo is captured successfully.
- * @event capture-photo:error - Emitted when an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc.
- *
- * @example
- *
- * <capture-photo facing-mode="environment" camera-resolution="320x240">
- *   <button slot="capture-button" behavior="button" type="button">Take picture</button>
- *   <a slot="facing-mode-button" behavior="button" href="#" role="button">Change camera</a>
- * </capture-photo>
- */
-
-function clamp(value, lower, upper) {
-  if (Number.isNaN(lower)) {
-    lower = 0;
-  }
-
-  if (Number.isNaN(upper)) {
-    upper = 0;
-  }
-
-  return Math.min(Math.max(value, Math.min(lower, upper)), Math.max(lower, upper));
-}
-
 const template = document.createElement('template');
 
 template.innerHTML = /*template*/`
@@ -82,11 +39,49 @@ template.innerHTML = /*template*/`
   <div part="output-container" id="output"></div>
 `;
 
-export class CapturePhoto extends HTMLElement {
+const clamp = (value, lower, upper) => {
+  if (Number.isNaN(lower)) {
+    lower = 0;
+  }
+
+  if (Number.isNaN(upper)) {
+    upper = 0;
+  }
+
+  return Math.min(Math.max(value, Math.min(lower, upper)), Math.max(lower, upper));
+};
+
+/**
+ * @slot capture-button - The capture photo button.
+ * @slot capture-button-content - The capture photo button's content.
+ * @slot facing-mode-button - The facing mode button.
+ * @slot facing-mode-button-content - The facing mode button's content.
+ *
+ * @csspart video - The video element.
+ * @csspart actions-container - The action buttons container element.
+ * @csspart capture-button - The capture photo button.
+ * @csspart facing-mode-button - The facing mode button.
+ * @csspart output-container - The output container element.
+ * @csspart output-image - The output image element.
+ *
+ * @event capture-photo:facing-mode-change - Emitted when the camera's facing mode changes.
+ * @event capture-photo:camera-resolution-change - Emitted when the camera's resolution changes.
+ * @event capture-photo:zoom-change - Emitted when the camera's zoom level changes.
+ * @event capture-photo:success - Emitted when a photo is captured successfully.
+ * @event capture-photo:error - Emitted when an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc.
+ *
+ * @example
+ *
+ * <capture-photo facing-mode="environment" camera-resolution="320x240">
+ *   <button slot="capture-button" behavior="button" type="button">Take picture</button>
+ *   <a slot="facing-mode-button" behavior="button" href="#" role="button">Change camera</a>
+ * </capture-photo>
+ */
+class CapturePhoto extends HTMLElement {
   constructor() {
     super();
 
-    this._supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
+    this._supportedConstraints = CapturePhoto.isSupported() ? navigator.mediaDevices.getSupportedConstraints() : {};
 
     const shadowRoot = this.attachShadow({ mode: 'open' });
 
@@ -100,10 +95,6 @@ export class CapturePhoto extends HTMLElement {
   }
 
   connectedCallback() {
-    if (!this.facingMode) {
-      this.facingMode = 'user';
-    }
-
     this.$canvasElement = this.shadowRoot.querySelector('canvas');
     this.$outputElement = this.shadowRoot.getElementById('output');
     this.$videoElement = this.shadowRoot.querySelector('video');
@@ -125,12 +116,24 @@ export class CapturePhoto extends HTMLElement {
     }
 
     this._upgradeProperty('outputDisabled');
-    this._upgradeProperty('actionsDisabled');
     this._upgradeProperty('facingMode');
     this._upgradeProperty('cameraResolution');
     this._upgradeProperty('zoom');
 
-    this.actionsDisabled = true;
+    this._loading = true;
+
+    if (!CapturePhoto.isSupported()) {
+      return this.dispatchEvent(new CustomEvent('capture-photo:error', {
+        bubbles: true,
+        detail: {
+          error: {
+            name: 'NotSupportedError',
+            message: 'Not supported'
+          }
+        }
+      }));
+    }
+
     this._requestGetUserMedia();
   }
 
@@ -142,20 +145,6 @@ export class CapturePhoto extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'actions-disabled') {
-      const isDisabled = newValue !== null;
-
-      if (this.$captureButton) {
-        this.$captureButton.disabled = isDisabled;
-        this.$captureButton.part.toggle('capture-button--disabled', isDisabled);
-      }
-
-      if (this.$facingModeButton) {
-        this.$facingModeButton.disabled = isDisabled;
-        this.$facingModeButton.part.toggle('facing-mode-button--disabled', isDisabled);
-      }
-    }
-
     if (name === 'output-disabled') {
       this._emptyOutputElement();
     }
@@ -188,19 +177,7 @@ export class CapturePhoto extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['actions-disabled', 'output-disabled', 'facing-mode', 'camera-resolution', 'zoom'];
-  }
-
-  get actionsDisabled() {
-    return this.hasAttribute('actions-disabled');
-  }
-
-  set actionsDisabled(value) {
-    if (value) {
-      this.setAttribute('actions-disabled', '');
-    } else {
-      this.removeAttribute('actions-disabled');
-    }
+    return ['output-disabled', 'facing-mode', 'camera-resolution', 'zoom'];
   }
 
   get outputDisabled() {
@@ -220,12 +197,6 @@ export class CapturePhoto extends HTMLElement {
   }
 
   set facingMode(value) {
-    const allowed = ['user', 'environment'];
-
-    if (typeof value !== 'string' || !allowed.includes(value)) {
-      return;
-    }
-
     this.setAttribute('facing-mode', value);
   }
 
@@ -255,14 +226,18 @@ export class CapturePhoto extends HTMLElement {
     track && track.stop();
     this.$videoElement.srcObject = null;
     this._stream = null;
-    this.actionsDisabled = true;
+    this._loading = true;
   }
 
   _requestGetUserMedia() {
+    if (!CapturePhoto.isSupported()) {
+      return;
+    }
+
     const constraints = {
       video: {
         facingMode: {
-          ideal: this.facingMode
+          ideal: this.facingMode || 'user'
         }
       },
       audio: false
@@ -286,7 +261,11 @@ export class CapturePhoto extends HTMLElement {
     });
   }
 
-  takePicture() {
+  capture() {
+    if (this._loading) {
+      return;
+    }
+
     try {
       const ctx = this.$canvasElement.getContext('2d');
       const width = this.$videoElement.videoWidth;
@@ -322,16 +301,21 @@ export class CapturePhoto extends HTMLElement {
 
   _onFacingModeButtonClick(evt) {
     evt.preventDefault();
-    this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+
+    if (this._loading) {
+      return;
+    }
+
+    this.facingMode = this.facingMode === 'user' || !this.facingMode ? 'environment' : 'user';
   }
 
   _onCapturePhotoButtonClick(evt) {
     evt.preventDefault();
-    this.takePicture();
+    this.capture();
   }
 
   _onVideoCanPlay(evt) {
-    this.actionsDisabled = false;
+    this._loading = false;
     evt.target.play().catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
@@ -375,7 +359,14 @@ export class CapturePhoto extends HTMLElement {
     if (evt.target && evt.target.name === 'capture-button') {
       this.$captureButton && this.$captureButton.removeEventListener('click', this._onCapturePhotoButtonClick);
       this.$captureButton = this._captureButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
-      this.$captureButton && this.$captureButton.addEventListener('click', this._onCapturePhotoButtonClick);
+
+      if (this.$captureButton) {
+        this.$captureButton.addEventListener('click', this._onCapturePhotoButtonClick);
+
+        if (this.$captureButton.nodeName !== 'BUTTON') {
+          this.$captureButton.setAttribute('role', 'button');
+        }
+      }
     }
   }
 
@@ -383,7 +374,14 @@ export class CapturePhoto extends HTMLElement {
     if (evt.target && evt.target.name === 'facing-mode-button') {
       this.$facingModeButton && this.$facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
       this.$facingModeButton = this._facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
-      this.$facingModeButton && this.$facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+
+      if (this.$facingModeButton) {
+        this.$facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+
+        if (this.$facingModeButton.nodeName !== 'BUTTON') {
+          this.$facingModeButton.setAttribute('role', 'button');
+        }
+      }
     }
   }
 
@@ -403,9 +401,15 @@ export class CapturePhoto extends HTMLElement {
     }
   }
 
+  static isSupported() {
+    return Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  }
+
   static defineCustomElement(elementName = 'capture-photo') {
     if (typeof window !== 'undefined' && !window.customElements.get(elementName)) {
       window.customElements.define(elementName, CapturePhoto);
     }
   }
 }
+
+export { CapturePhoto };

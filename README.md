@@ -1,3 +1,6 @@
+[![npm version](https://img.shields.io/npm/v/@georapbox/capture-photo-element.svg)](https://www.npmjs.com/package/@georapbox/capture-photo-element)
+[![npm license](https://img.shields.io/npm/l/@georapbox/capture-photo-element.svg)](https://www.npmjs.com/package/@georapbox/capture-photo-element)
+
 [demo]: https://georapbox.github.io/capture-photo-element/
 [getUserMedia]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 [MediaDevices]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices
@@ -12,14 +15,20 @@ A custom element that implements the [MediaDevices.getUserMedia()][getUserMedia]
 
 [API documentation](#api) &bull; [Demo][demo]
 
+## Install
+
+```sh
+$ npm install --save @georapbox/capture-photo-element
+```
+
 ## Usage
 
 ### Script
 
 ```js
-import { CapturePhoto } from '<YOUR_PATH>/capture-photo.js';
+import { CapturePhoto } from './node_modules/@georapbox/capture-photo-element/dist/capture-photo.min.js';
 
-// By default, the element is not automatically defined to offer more flexibility.
+// Manually define the element.
 CapturePhoto.defineCustomElement();
 ```
 
@@ -34,14 +43,6 @@ CapturePhoto.defineCustomElement();
 By default, the component is style-free to remain as less opinionated as possible. However, you can style the various elements of the component using the `::part()` CSS pseudo-elements provided for this purpose. Below are demonstrated all available parts for styling.
 
 ```css
-capture-photo:not(:defined) {
-  /* Host element - not defined state */
-}
-
-capture-photo {
-  /* Host element */
-}
-
 capture-photo::part(video) {
   /* The video element */
 }
@@ -56,11 +57,6 @@ capture-photo::part(capture-button) {
 
 capture-photo::part(facing-mode-button) {
   /* The button responsible to change camera's facing mode */
-}
-
-capture-photo::part(capture-button capture-button--disabled),
-capture-photo::part(facing-mode-button facing-mode-button--disabled) {
-  /* Disabled state for actions buttons */
 }
 
 capture-photo::part(output-container) {
@@ -78,8 +74,7 @@ capture-photo::part(output-image) {
 | Property | Attribute | Type | Default | Description |
 | -------- | --------- | ---- | ------- | ----------- |
 | `outputDisabled` | `output-disabled` | Boolean | `false` | Optional. Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
-| `actionsDisabled` | `actions-disabled` | Boolean | `false` | Optional. Defines if the actions buttons are disabled or not. You won't probably need to use this. It's mostly used internally to temporarily disble actions buttons when video stream is not ready, to avoid unnecessary errors. |
-| `facingMode` | `facing-mode` | String | `'user'`| Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. |
+| `facingMode` | `facing-mode` | String | `null` | Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. |
 | `cameraResolution` | `camera-resolution` | String | `null` | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. Please refer to [constraints documentation][constraints] for more details of how constraints work. |
 | `zoom` | `zoom` | Number | `null` | Optional. Defines the camera's zoom level if supported by the device. |
 
@@ -127,9 +122,7 @@ All properties reflect their values as HTML attributes to keep the element's DOM
 | `video` | The video element. |
 | `actions-container` | The action buttons container element. |
 | `capture-button` | The capture photo button. |
-| `capture-button--disabled` | The capture photo button when is disabled. |
 | `facing-mode-button` | The facing mode button. |
-| `facing-mode-button--disabled` | The facing mode button when is disabled. |
 | `output-container` | The output container element. |
 | `output-image` | The output image element. |
 
@@ -138,7 +131,8 @@ All properties reflect their values as HTML attributes to keep the element's DOM
 | Name | Type | Description | Arguments |
 | ---- | ---- | ----------- | --------- |
 | `defineCustomElement` | Static | Defines/registers the custom element with the name provided. If no name is provided, the default name is used. The method checks if the element is already defined, hence will skip trying to redefine it. | `elementName='capture-photo'` |
-| `takePicture` | Prototype | Captures a photo using the element's properties. | - |
+| `isSupported` | Static | Returns `true` if `MediaDevices.getUserMedia()` is supported by the platform, otherwise returns `false`. | - |
+| `capture` | Prototype | Captures a photo using the element's properties. | - |
 
 ### Events
 
@@ -220,7 +214,6 @@ Below is a full usage example, with custom configuration and styling. Check the 
     }
 
     capture-photo::part(capture-button) {
-      margin-left: calc(40px + 2rem); /* facing mode button width + actions buttons gap */
       min-width: 60px;
       width: 60px;
       height: 60px;
@@ -237,6 +230,7 @@ Below is a full usage example, with custom configuration and styling. Check the 
     }
 
     capture-photo::part(facing-mode-button) {
+      margin-right: calc(-40px - 2rem); /* facing mode button width + actions buttons gap */
       min-width: 40px;
       width: 40px;
       height: 40px;
@@ -247,12 +241,6 @@ Below is a full usage example, with custom configuration and styling. Check the 
       cursor: pointer;
       -webkit-appearance: none;
       -moz-appearance: none;
-    }
-
-    capture-photo::part(capture-button capture-button--disabled),
-    capture-photo::part(facing-mode-button facing-mode-button--disabled) {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
 
     capture-photo::part(output-container) {
