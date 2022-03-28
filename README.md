@@ -8,6 +8,7 @@
 [support]: https://caniuse.com/#feat=custom-elementsv1
 [polyfill]: https://github.com/webcomponents/polyfills/tree/master/packages/custom-elements
 [license]: https://georapbox.mit-license.org/@2022
+[changelog]: https://github.com/georapbox/capture-photo-element/blob/main/CHANGELOG.md
 
 # &lt;capture-photo&gt; element
 
@@ -77,6 +78,7 @@ capture-photo::part(output-image) {
 | `facingMode` | `facing-mode` | String | `null` | Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. |
 | `cameraResolution` | `camera-resolution` | String | `null` | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. Please refer to [constraints documentation][constraints] for more details of how constraints work. |
 | `zoom` | `zoom` | Number | `null` | Optional. Defines the camera's zoom level if supported by the device. |
+| `loading` | `loading` | Boolean | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
 
 All properties reflect their values as HTML attributes to keep the element's DOM representation in sync with its JavaScript state.
 
@@ -243,6 +245,12 @@ Below is a full usage example, with custom configuration and styling. Check the 
       -moz-appearance: none;
     }
 
+    capture-photo[loading]::part(capture-button),
+    capture-photo[loading]::part(facing-mode-button) {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
     capture-photo::part(output-container) {
       overflow-x: auto;
     }
@@ -272,6 +280,10 @@ Below is a full usage example, with custom configuration and styling. Check the 
 </body>
 </html>
 ```
+
+## Changelog
+
+For API updates and breaking changes, check the [CHANGELOG][changelog].
 
 ## Browser support
 

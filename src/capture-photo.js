@@ -120,8 +120,6 @@ class CapturePhoto extends HTMLElement {
     this._upgradeProperty('cameraResolution');
     this._upgradeProperty('zoom');
 
-    this._loading = true;
-
     if (!CapturePhoto.isSupported()) {
       return this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
@@ -217,6 +215,10 @@ class CapturePhoto extends HTMLElement {
     this.setAttribute('zoom', numValue > 0 ? Math.floor(numValue) : 0);
   }
 
+  get loading() {
+    return this.hasAttribute('loading');
+  }
+
   _stopVideoStreaming() {
     if (!this.$videoElement || !this._stream) {
       return;
@@ -226,13 +228,14 @@ class CapturePhoto extends HTMLElement {
     track && track.stop();
     this.$videoElement.srcObject = null;
     this._stream = null;
-    this._loading = true;
   }
 
   _requestGetUserMedia() {
     if (!CapturePhoto.isSupported()) {
       return;
     }
+
+    this.setAttribute('loading', '');
 
     const constraints = {
       video: {
@@ -262,7 +265,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   capture() {
-    if (this._loading) {
+    if (this.hasAttribute('loading')) {
       return;
     }
 
@@ -302,7 +305,7 @@ class CapturePhoto extends HTMLElement {
   _onFacingModeButtonClick(evt) {
     evt.preventDefault();
 
-    if (this._loading) {
+    if (this.hasAttribute('loading')) {
       return;
     }
 
@@ -315,7 +318,8 @@ class CapturePhoto extends HTMLElement {
   }
 
   _onVideoCanPlay(evt) {
-    this._loading = false;
+    this.removeAttribute('loading');
+
     evt.target.play().catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,

@@ -124,6 +124,12 @@
       -moz-appearance: none;
     }
 
+    capture-photo[loading]::part(capture-button),
+    capture-photo[loading]::part(facing-mode-button) {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
     capture-photo::part(output-container) {
       overflow-x: auto;
     }
@@ -168,7 +174,8 @@
   </div>
 
   <script type="module">
-    import { CapturePhoto } from 'https://unpkg.com/@georapbox/capture-photo-element/dist/capture-photo.min.js';
+    // import { CapturePhoto } from 'https://unpkg.com/@georapbox/capture-photo-element/dist/capture-photo.min.js';
+    import { CapturePhoto } from '../src/capture-photo.js';
 
     document.addEventListener('capture-photo:facing-mode-change', evt => {
       console.log('capture-photo:facing-mode-change ->', evt.detail);
