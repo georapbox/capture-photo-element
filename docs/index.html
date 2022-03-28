@@ -9,137 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-color: #ffffff;
-      --text-color: #303942;
-      --link-color: #1a73e8;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg-color: #202125;
-        --text-color: #cccccc;
-        --link-color: #8ab4f8;
-      }
-    }
-
-    *,
-    *::before,
-    *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Open Sans', sans-serif;
-      color: var(--text-color);
-      background-color: var(--bg-color);
-      padding: 1rem;
-    }
-
-    h1, h2, p {
-      font-weight: 400;
-      margin-bottom: 1rem;
-    }
-
-    a {
-      color: var(--link-color);
-      text-decoration: underline;
-    }
-
-    .container {
-      margin: 0 auto;
-      max-width: 640px;
-    }
-
-    @media screen and (max-width: 414px) {
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      h2 {
-        font-size: 1.3rem;
-      }
-    }
-
-    /* Component custom styling */
-    capture-photo:not(:defined) {
-      display: none;
-    }
-
-    capture-photo {
-      overflow: hidden;
-    }
-
-    capture-photo::part(video) {
-      width: 100%;
-      height: auto;
-      padding: 1rem 1rem 0 1rem;
-      background-color: #000000;
-    }
-
-    capture-photo::part(actions-container) {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 2rem;
-      padding: 1rem 0;
-      margin-bottom: 1rem;
-      background-color: #000000;
-    }
-
-    capture-photo::part(zoom-input) {
-      width: 60px;
-    }
-
-    capture-photo::part(capture-button) {
-      min-width: 60px;
-      width: 60px;
-      height: 60px;
-      background-color: #cccccc;
-      border: 5px solid #383838;
-      color: #000000;
-      border-radius: 50%;
-      font-size: 1rem;
-      cursor: pointer;
-      text-indent: -9999px;
-      overflow: hidden;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-    }
-
-    capture-photo::part(facing-mode-button) {
-      margin-right: calc(-40px - 2rem);
-      min-width: 40px;
-      width: 40px;
-      height: 40px;
-      background-color: #ffffff;
-      border: 0;
-      line-height: 1;
-      border-radius: 50%;
-      cursor: pointer;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-    }
-
-    capture-photo[loading]::part(capture-button),
-    capture-photo[loading]::part(facing-mode-button) {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    capture-photo::part(output-container) {
-      overflow-x: auto;
-    }
-
-    capture-photo::part(output-image) {
-      max-width: 100%;
-      height: auto;
-      border: 5px solid #000;
-    }
-  </style>
+  <link rel="stylesheet" href="main.css">
 </head>
 <body>
   <div class="container">
@@ -158,7 +28,7 @@
       </span>
     </capture-photo>
 
-    <p>Open the console panel in developer tools to see actions events.</p>
+    <pre id="console"></pre>
 
     <h2>Source</h2>
 
@@ -173,31 +43,6 @@
     </p>
   </div>
 
-  <script type="module">
-    // import { CapturePhoto } from 'https://unpkg.com/@georapbox/capture-photo-element/dist/capture-photo.min.js';
-    import { CapturePhoto } from '../src/capture-photo.js';
-
-    document.addEventListener('capture-photo:facing-mode-change', evt => {
-      console.log('capture-photo:facing-mode-change ->', evt.detail);
-    });
-
-    document.addEventListener('capture-photo:error', evt => {
-      console.log('capture-photo:error ->', evt.detail);
-    });
-
-    document.addEventListener('capture-photo:success', evt => {
-      console.log('capture-photo:success ->', evt.detail);
-    });
-
-    document.addEventListener('capture-photo:camera-resolution-change', evt => {
-      console.log('capture-photo:camera-resolution-change ->', evt.detail);
-    });
-
-    document.addEventListener('capture-photo:zoom-change', evt => {
-      console.log('capture-photo:zoom-change ->', evt.detail);
-    });
-
-    CapturePhoto.defineCustomElement();
-  </script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
