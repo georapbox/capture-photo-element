@@ -140,6 +140,8 @@ class CapturePhoto extends HTMLElement {
     this.$facingModeButton && this.$facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
     this.$captureButton && this.$captureButton.removeEventListener('click', this._onCapturePhotoButtonClick);
     this.$videoElement && this.$videoElement.removeEventListener('canplay', this._onVideoCanPlay);
+    this._captureButtonSlot.removeEventListener('slotchange', this._onCaptureButtonSlotChange);
+    this._facingModeButtonSlot.removeEventListener('slotchange', this._onFacingModeButtonSlotChange);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {

@@ -1,4 +1,5 @@
-import { CapturePhoto } from 'https://unpkg.com/@georapbox/capture-photo-element/dist/capture-photo.min.js';
+// import { CapturePhoto } from 'https://unpkg.com/@georapbox/capture-photo-element/dist/capture-photo.min.js';
+import { CapturePhoto } from '../src/capture-photo.js';
 
 const $console = document.getElementById('console');
 
@@ -14,7 +15,7 @@ document.addEventListener('capture-photo:error', evt => {
 
 document.addEventListener('capture-photo:success', evt => {
   console.log('capture-photo:success ->', evt.detail);
-  $console.innerHTML += `<div>$ <span class="success">capture-photo:success</span> -> ${JSON.stringify(evt.detail)}</div>`;
+  $console.innerHTML += `<div>$ <span class="success">capture-photo:success</span> -> {"dataURI":"data:image/png;base64,...", "width":${evt.detail.width}, "height":${evt.detail.height}}</div>`;
 });
 
 document.addEventListener('capture-photo:camera-resolution-change', evt => {
