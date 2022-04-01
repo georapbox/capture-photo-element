@@ -1,5 +1,4 @@
-// import { CapturePhoto } from 'https://unpkg.com/@georapbox/capture-photo-element/dist/capture-photo.min.js';
-import { CapturePhoto } from '../src/capture-photo.js';
+import { CapturePhoto } from 'https://unpkg.com/@georapbox/capture-photo-element/dist/capture-photo.min.js';
 
 const $console = document.getElementById('console');
 
