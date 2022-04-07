@@ -34,8 +34,8 @@ template.innerHTML = html`
   <canvas hidden></canvas>
 
   <div part="actions-container">
-    <slot name="capture-button"><button part="capture-button" type="button" behavior="button"><slot name="capture-button-content">Capture photo</slot></button></slot>
-    <slot name="facing-mode-button"><button part="facing-mode-button" type="button" behavior="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
+    <slot name="capture-button"><button part="capture-button" type="button"><slot name="capture-button-content">Capture photo</slot></button></slot>
+    <slot name="facing-mode-button"><button part="facing-mode-button" type="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
   </div>
 
   <div part="output-container" id="output"></div>
@@ -75,8 +75,8 @@ const clamp = (value, lower, upper) => {
  * @example
  *
  * <capture-photo facing-mode="environment" camera-resolution="320x240">
- *   <button slot="capture-button" behavior="button" type="button">Take picture</button>
- *   <a slot="facing-mode-button" behavior="button" href="#" role="button">Change camera</a>
+ *   <button slot="capture-button" type="button">Take picture</button>
+ *   <a slot="facing-mode-button" href="#" role="button">Change camera</a>
  * </capture-photo>
  */
 class CapturePhoto extends HTMLElement {
@@ -103,11 +103,15 @@ class CapturePhoto extends HTMLElement {
     this.$videoElement && this.$videoElement.addEventListener('canplay', this._onVideoCanPlay);
     this._captureButtonSlot = this.shadowRoot.querySelector('slot[name="capture-button"]');
     this._captureButtonSlot.addEventListener('slotchange', this._onCaptureButtonSlotChange);
-    this.$captureButton = this._captureButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
+    this.$captureButton = this._captureButtonSlot.assignedNodes({ flatten: true }).find(el => {
+      return el.nodeType === 1 && (el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'capture-button');
+    });
     this.$captureButton && this.$captureButton.addEventListener('click', this._onCapturePhotoButtonClick);
     this._facingModeButtonSlot = this.shadowRoot.querySelector('slot[name="facing-mode-button"]');
     this._facingModeButtonSlot.addEventListener('slotchange', this._onFacingModeButtonSlotChange);
-    this.$facingModeButton = this._facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
+    this.$facingModeButton = this._facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => {
+      return el.nodeType === 1 && (el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'facing-mode-button');
+    });
 
     if (this.$facingModeButton) {
       if (this._supportedConstraints.facingMode) {
@@ -366,12 +370,14 @@ class CapturePhoto extends HTMLElement {
   _onCaptureButtonSlotChange(evt) {
     if (evt.target && evt.target.name === 'capture-button') {
       this.$captureButton && this.$captureButton.removeEventListener('click', this._onCapturePhotoButtonClick);
-      this.$captureButton = this._captureButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
+      this.$captureButton = this._captureButtonSlot.assignedNodes({ flatten: true }).find(el => {
+        return el.nodeType === 1 && (el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'capture-button');
+      });
 
       if (this.$captureButton) {
         this.$captureButton.addEventListener('click', this._onCapturePhotoButtonClick);
 
-        if (this.$captureButton.nodeName !== 'BUTTON') {
+        if (this.$captureButton.nodeName !== 'BUTTON' && !this.$captureButton.hasAttribute('role')) {
           this.$captureButton.setAttribute('role', 'button');
         }
       }
@@ -381,12 +387,14 @@ class CapturePhoto extends HTMLElement {
   _onFacingModeButtonSlotChange(evt) {
     if (evt.target && evt.target.name === 'facing-mode-button') {
       this.$facingModeButton && this.$facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
-      this.$facingModeButton = this._facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
+      this.$facingModeButton = this._facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => {
+        return el.nodeType === 1 && (el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'facing-mode-button');
+      });
 
       if (this.$facingModeButton) {
         this.$facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
 
-        if (this.$facingModeButton.nodeName !== 'BUTTON') {
+        if (this.$facingModeButton.nodeName !== 'BUTTON' && !this.$facingModeButton.hasAttribute('role')) {
           this.$facingModeButton.setAttribute('role', 'button');
         }
       }

@@ -86,9 +86,9 @@ All properties reflect their values as HTML attributes to keep the element's DOM
 
 | Name | Description |
 | ---- | ----------- |
-| `capture-button` | Override the default capture photo button with your own. It is important to note that you will need to provide the `behavior="button"` attribute to your element, to tell the browser that this is the element you want to use as the new capture button. |
+| `capture-button` | Override the default capture photo button with your own. |
 | `capture-button-content` | Override the default content of the capture photo button with your own content. |
-| `facing-mode-button` | Override the default facing mode button with your own. It is important to note that you will need to provide the `behavior="button"` attribute to your element, to tell the browser that this is the element you want to use as the new facing mode button. |
+| `facing-mode-button` | Override the default facing mode button with your own. |
 | `facing-mode-button-content` | Override the default content of the facing mode button with your own content. |
 
 #### Slots usage examples
@@ -97,11 +97,11 @@ All properties reflect their values as HTML attributes to keep the element's DOM
 
 ```html
 <capture-photo>
-  <button slot="capture-button" behavior="button" type="button">
+  <button slot="capture-button" type="button">
     Take picture
   </button>
   
-  <a slot="facing-mode-button" behavior="button" href="#" role="button">
+  <a slot="facing-mode-button" href="#" role="button">
     Change camera
   </a>
 </capture-photo>

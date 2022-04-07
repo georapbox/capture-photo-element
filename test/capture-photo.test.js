@@ -76,14 +76,14 @@ describe('<capture-photo>', () => {
   it('change button slots', async () => {
     const el = await fixture(html`
       <capture-photo>
-        <button type="button" slot="capture-button" behavior="button">Take picture</button>
-        <button type="button" slot="facing-mode-button" behavior="button">Change camera</button>
+        <button type="button" slot="capture-button">Take picture</button>
+        <button type="button" slot="facing-mode-button">Change camera</button>
       </capture-photo>
     `);
 
     expect(el).lightDom.to.equal(`
-      <button type="button" slot="capture-button" behavior="button">Take picture</button>
-      <button type="button" slot="facing-mode-button" behavior="button">Change camera</button>
+      <button type="button" slot="capture-button">Take picture</button>
+      <button type="button" slot="facing-mode-button">Change camera</button>
     `);
   });
 
@@ -104,14 +104,14 @@ describe('<capture-photo>', () => {
   it('role="button" is added on button slots if node is not button', async () => {
     const el = await fixture(html`
       <capture-photo>
-        <a href="#" slot="capture-button" behavior="button">Take picture</a>
-        <a href="#" slot="facing-mode-button" behavior="button">Change camera</a>
+        <a href="#" slot="capture-button">Take picture</a>
+        <a href="#" slot="facing-mode-button">Change camera</a>
       </capture-photo>
     `);
 
     expect(el).lightDom.to.equal(`
-      <a href="#" slot="capture-button" behavior="button" role="button">Take picture</a>
-      <a href="#" slot="facing-mode-button" behavior="button" role="button">Change camera</a>
+      <a href="#" slot="capture-button" role="button">Take picture</a>
+      <a href="#" slot="facing-mode-button" role="button">Change camera</a>
     `);
   });
 
@@ -163,7 +163,7 @@ describe('<capture-photo>', () => {
   it('capture method is called', async () => {
     const el = await fixture(html`<capture-photo></capture-photo>`);
     const captureSlot = el.shadowRoot.querySelector('slot[name="capture-button"]');
-    const captureButton = captureSlot.assignedNodes({ flatten: true }).find(el => el.getAttribute('behavior') === 'button');
+    const captureButton = captureSlot.assignedNodes({ flatten: true }).find(el => el.nodeName === 'BUTTON');
     const fn = sinon.spy(el, 'capture');
 
     captureButton.click();
