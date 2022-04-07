@@ -33,6 +33,12 @@ import { CapturePhoto } from './node_modules/@georapbox/capture-photo-element/di
 CapturePhoto.defineCustomElement();
 ```
 
+Alternatively, you can import the automatically defined custom element.
+
+```js
+import './node_modules/@georapbox/capture-photo-element/dist/capture-photo-defined.min.js';
+```
+
 ### Markup
 
 ```html

@@ -9,35 +9,27 @@ template.innerHTML = html`
       display: block;
       box-sizing: border-box;
     }
-
     :host *,
     :host *::before,
     :host *::after {
       box-sizing: inherit;
     }
-
     :host video {
       display: block;
     }
-
     :host #output:empty {
       display: none;
     }
-
     [hidden] {
       display: none !important;
     }
   </style>
-
   <video part="video" playsinline></video>
-
   <canvas hidden></canvas>
-
   <div part="actions-container">
     <slot name="capture-button"><button part="capture-button" type="button"><slot name="capture-button-content">Capture photo</slot></button></slot>
     <slot name="facing-mode-button"><button part="facing-mode-button" type="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
   </div>
-
   <div part="output-container" id="output"></div>
 `;
 
