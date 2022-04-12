@@ -90,6 +90,8 @@ capture-photo:not(:defined) {
 }
 
 capture-photo {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -98,6 +100,7 @@ capture-photo::part(video) {
   height: auto;
   padding: 1rem 1rem 0 1rem;
   background-color: #000000;
+  box-sizing: border-box;
 }
 
 capture-photo::part(actions-container) {
@@ -108,10 +111,6 @@ capture-photo::part(actions-container) {
   padding: 1rem 0;
   margin-bottom: 1rem;
   background-color: #000000;
-}
-
-capture-photo::part(zoom-input) {
-  width: 60px;
 }
 
 capture-photo::part(capture-button) {
