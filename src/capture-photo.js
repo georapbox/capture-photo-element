@@ -77,9 +77,10 @@ class CapturePhoto extends HTMLElement {
 
     this._supportedConstraints = CapturePhoto.isSupported() ? navigator.mediaDevices.getSupportedConstraints() : {};
 
-    const shadowRoot = this.attachShadow({ mode: 'open' });
-
-    shadowRoot.appendChild(template.content.cloneNode(true));
+    if (!this.shadowRoot) {
+      this.attachShadow({ mode: 'open' });
+      this.shadowRoot.appendChild(template.content.cloneNode(true));
+    }
 
     this._onFacingModeButtonClick = this._onFacingModeButtonClick.bind(this);
     this._onCapturePhotoButtonClick = this._onCapturePhotoButtonClick.bind(this);
