@@ -27,7 +27,9 @@ template.innerHTML = html`
   <video part="video" playsinline></video>
   <canvas hidden></canvas>
   <div part="actions-container">
-    <slot name="capture-button"><button part="capture-button" type="button"><slot name="capture-button-content">Capture photo</slot></button></slot>
+    <slot name="capture-button">
+      <button part="capture-button" type="button"><slot name="capture-button-content">Capture photo</slot></button>
+    </slot>
     <slot name="facing-mode-button"><button part="facing-mode-button" type="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
   </div>
   <div part="output-container" id="output"></div>
@@ -391,8 +393,8 @@ class CapturePhoto extends HTMLElement {
       return null;
     }
 
-    return this._facingModeButtonSlot.assignedNodes({ flatten: true }).find(el => {
-      return el.nodeType === 1 && (el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'facing-mode-button');
+    return this._facingModeButtonSlot.assignedElements({ flatten: true }).find(el => {
+      return el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'facing-mode-button';
     });
   }
 
@@ -401,8 +403,8 @@ class CapturePhoto extends HTMLElement {
       return null;
     }
 
-    return this._captureButtonSlot.assignedNodes({ flatten: true }).find(el => {
-      return el.nodeType === 1 && (el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'capture-button');
+    return this._captureButtonSlot.assignedElements({ flatten: true }).find(el => {
+      return el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'capture-button';
     });
   }
 
