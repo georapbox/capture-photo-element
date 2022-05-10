@@ -10,7 +10,7 @@
 [license]: https://georapbox.mit-license.org/@2022
 [changelog]: https://github.com/georapbox/capture-photo-element/blob/main/CHANGELOG.md
 
-# &lt;capture-photo&gt; element
+# &lt;capture-photo&gt;
 
 A custom element that implements the [MediaDevices.getUserMedia()][getUserMedia] method of the [MediaDevices][MediaDevices] interface to capture a photo in the browser.
 
