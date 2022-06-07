@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v1.2.2 (2022-06-07)
+
+- Use `HTMLSlotElement.assignedElements()` method instead of `HTMLSlotElement.assignedNodes()` to get the elements assigned to slots.
+- Minor updates to documentation.
+- Update dev dependencies.
+
+
 ## v1.2.1 (2022-04-12)
 
 - Check if Declarative Shadow DOM is present before imperatively attaching to host element.

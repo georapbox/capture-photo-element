@@ -77,16 +77,14 @@ capture-photo::part(output-image) {
 
 ## API
 
-### Properties/Attributes
-| Property | Attribute | Type | Default | Description |
-| -------- | --------- | ---- | ------- | ----------- |
-| `outputDisabled` | `output-disabled` | Boolean | `false` | Optional. Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
-| `facingMode` | `facing-mode` | String | `null` | Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. |
-| `cameraResolution` | `camera-resolution` | String | `null` | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. Please refer to [constraints documentation][constraints] for more details of how constraints work. |
-| `zoom` | `zoom` | Number | `null` | Optional. Defines the camera's zoom level if supported by the device. |
-| `loading` | `loading` | Boolean | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
-
-All properties reflect their values as HTML attributes to keep the element's DOM representation in sync with its JavaScript state.
+### Properties
+| Name | Reflects | Type | Default | Description |
+| ---- | -------- | ---- | ------- | ----------- |
+| `outputDisabled`<br><small>`output-disabled`</small> | ✓ | Boolean | `false` | Optional. Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
+| `facingMode`<br><small>`facing-mode`</small> | ✓ | String | `null` | Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. |
+| `cameraResolution`<br><small>`camera-resolution`</small> | ✓ | String | `null` | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. Please refer to [constraints documentation][constraints] for more details of how constraints work. |
+| `zoom` | ✓ | Number | `null` | Optional. Defines the camera's zoom level if supported by the device. |
+| `loading` | ✓ | Boolean | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
 
 ### Slots
 
