@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.2.3 (2022-06-27)
+
+- Use `composed: true` for all dispatched events, to make them propagate across the shadow DOM boundary into the standard DOM.
+
 ## v1.2.2 (2022-06-07)
 
 - Use `HTMLSlotElement.assignedElements()` method instead of `HTMLSlotElement.assignedNodes()` to get the elements assigned to slots.

@@ -94,6 +94,7 @@ class CapturePhoto extends HTMLElement {
     if (!CapturePhoto.isSupported()) {
       return this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
+        composed: true,
         detail: {
           error: {
             name: 'NotSupportedError',
@@ -125,6 +126,7 @@ class CapturePhoto extends HTMLElement {
       this._requestGetUserMedia();
       this.dispatchEvent(new CustomEvent('capture-photo:facing-mode-change', {
         bubbles: true,
+        composed: true,
         detail: { facingMode: newValue }
       }));
     }
@@ -134,6 +136,7 @@ class CapturePhoto extends HTMLElement {
       this._requestGetUserMedia();
       this.dispatchEvent(new CustomEvent('capture-photo:camera-resolution-change', {
         bubbles: true,
+        composed: true,
         detail: { cameraResolution: newValue }
       }));
     }
@@ -142,6 +145,7 @@ class CapturePhoto extends HTMLElement {
       this._applyZoom(this.zoom);
       this.dispatchEvent(new CustomEvent('capture-photo:zoom-change', {
         bubbles: true,
+        composed: true,
         detail: { zoom: this.zoom }
       }));
     }
@@ -232,6 +236,7 @@ class CapturePhoto extends HTMLElement {
     }).catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
+        composed: true,
         detail: { error }
       }));
     });
@@ -264,12 +269,14 @@ class CapturePhoto extends HTMLElement {
 
         this.dispatchEvent(new CustomEvent('capture-photo:success', {
           bubbles: true,
+          composed: true,
           detail: { dataURI, width, height }
         }));
       }
     } catch (error) {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
+        composed: true,
         detail: { error }
       }));
     }
@@ -296,6 +303,7 @@ class CapturePhoto extends HTMLElement {
     evt.target.play().catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
+        composed: true,
         detail: { error }
       }));
     });
