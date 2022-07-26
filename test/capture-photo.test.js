@@ -1,4 +1,4 @@
-import { elementUpdated, waitUntil, expect, fixture, fixtureCleanup, html } from '@open-wc/testing';
+import { elementUpdated, expect, fixture, fixtureCleanup, html, oneEvent } from '@open-wc/testing';
 import sinon from 'sinon';
 import { CapturePhoto } from '../src/capture-photo.js';
 
@@ -117,47 +117,47 @@ describe('<capture-photo>', () => {
 
   it('capture-photo:facing-mode-change event is emitted', async () => {
     const el = await fixture(html`<capture-photo></capture-photo>`);
-    const handler = sinon.spy();
-
-    el.addEventListener('capture-photo:facing-mode-change', handler);
+    const listener = oneEvent(el, 'capture-photo:facing-mode-change');
 
     el.facingMode = 'environment';
 
     await elementUpdated(el);
 
-    await waitUntil(() => handler.calledOnce);
+    const { detail } = await listener;
 
-    expect(handler).to.have.been.calledOnce;
+    expect(detail).to.deep.equal({
+      facingMode: 'environment'
+    });
   });
 
   it('capture-photo:camera-resolution-change event is emitted', async () => {
     const el = await fixture(html`<capture-photo></capture-photo>`);
-    const handler = sinon.spy();
-
-    el.addEventListener('capture-photo:camera-resolution-change', handler);
+    const listener = oneEvent(el, 'capture-photo:camera-resolution-change');
 
     el.cameraResolution = '320x240';
 
     await elementUpdated(el);
 
-    await waitUntil(() => handler.calledOnce);
+    const { detail } = await listener;
 
-    expect(handler).to.have.been.calledOnce;
+    expect(detail).to.deep.equal({
+      cameraResolution: '320x240'
+    });
   });
 
   it('capture-photo:zoom-change event is emitted', async () => {
     const el = await fixture(html`<capture-photo></capture-photo>`);
-    const handler = sinon.spy();
-
-    el.addEventListener('capture-photo:zoom-change', handler);
+    const listener = oneEvent(el, 'capture-photo:zoom-change');
 
     el.zoom = 2;
 
     await elementUpdated(el);
 
-    await waitUntil(() => handler.calledOnce);
+    const { detail } = await listener;
 
-    expect(handler).to.have.been.calledOnce;
+    expect(detail).to.deep.equal({
+      zoom: 2
+    });
   });
 
   it('capture method is called', async () => {

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.2.4 (2022-07-26)
+
+- Update Events section in documentation.
+- Update tests for dispatched events in order to also test `event.detail` values.
+- Update dev dependencies.
+
 ## v1.2.3 (2022-06-27)
 
 - Use `composed: true` for all dispatched events, to make them propagate across the shadow DOM boundary into the standard DOM.

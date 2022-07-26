@@ -142,45 +142,13 @@ capture-photo::part(output-image) {
 
 ### Events
 
-`capture-photo:facing-mode-change` - Emitted when the camera's facing mode changes.
-
-```js
-document.addEventListener('capture-photo:facing-mode-change', evt => {
-  console.log(evt.detail); // => { facingMode: 'environment' }
-});
-```
-
-`capture-photo:camera-resolution-change` - Emitted when the camera's resolution changes.
-
-```js
-document.addEventListener('capture-photo:camera-resolution-change', evt => {
-  console.log(evt.detail); // => { cameraResolution: '640x480' }
-});
-```
-
-`capture-photo:zoom-change` - Emitted when the camera's zoom level changes.
-
-```js
-document.addEventListener('capture-photo:zoom-change', evt => {
-  console.log(evt.detail); // => { zoom: 2 }
-});
-```
-
-`capture-photo:success` - Emitted when a photo is captured successfully.
-
-```js
-document.addEventListener('capture-photo:success', evt => {
-  console.log(evt.detail); // => { dataURI: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAA...', width: 640, height: 480 }
-});
-```
-
-`capture-photo:error` - Emitted when an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc.
-
-```js
-document.addEventListener('capture-photo:error', evt => {
-  console.log(evt.detail); // => { error: DOMException: Permission denied }
-});
-```
+| Name | Description | Event Detail |
+| ---- | ----------- | ------------ |
+| `capture-photo:facing-mode-change` | Emitted when the camera's facing mode changes. | `{ facingMode: 'user' \| 'environment' }` |
+| `capture-photo:camera-resolution-change` | Emitted when the camera's resolution changes. | `{ cameraResolution: String }`|
+| `capture-photo:zoom-change` | Emitted when the camera's zoom level changes. | `{ zoom: Number }` |
+| `capture-photo:success` | Emitted when a photo is captured successfully. | `{ dataURI: String, width: Number, height: Number }` |
+| `capture-photo:error` | Emitted when an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc. | `{ error: DOMException }` |
 
 ## Example
 
