@@ -1,3 +1,7 @@
+:root {
+  --body-max-width: 700px;
+}
+
 #console:empty {
   display: none;
 }
