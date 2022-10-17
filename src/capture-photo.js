@@ -1,8 +1,6 @@
 const template = document.createElement('template');
 
-const html = String.raw;
-
-template.innerHTML = html`
+template.innerHTML = /* html */`
   <style>
     :host {
       all: initial;
@@ -60,29 +58,29 @@ class CapturePhoto extends HTMLElement {
 
     this._onFacingModeButtonClick = this._onFacingModeButtonClick.bind(this);
     this._onCapturePhotoButtonClick = this._onCapturePhotoButtonClick.bind(this);
-    this._onVideoCanPlay = this._onVideoCanPlay.bind(this);
+    this._onVideoLoadedMetaData = this._onVideoLoadedMetaData.bind(this);
     this._onCaptureButtonSlotChange = this._onCaptureButtonSlotChange.bind(this);
     this._onFacingModeButtonSlotChange = this._onFacingModeButtonSlotChange.bind(this);
   }
 
   connectedCallback() {
-    this.$canvasElement = this.shadowRoot.querySelector('canvas');
-    this.$outputElement = this.shadowRoot.getElementById('output');
-    this.$videoElement = this.shadowRoot.querySelector('video');
-    this.$videoElement && this.$videoElement.addEventListener('canplay', this._onVideoCanPlay);
+    this._canvasElement = this.shadowRoot.querySelector('canvas');
+    this._outputElement = this.shadowRoot.getElementById('output');
+    this._videoElement = this.shadowRoot.querySelector('video');
+    this._videoElement && this._videoElement.addEventListener('loadedmetadata', this._onVideoLoadedMetaData);
     this._captureButtonSlot = this.shadowRoot.querySelector('slot[name="capture-button"]');
     this._captureButtonSlot && this._captureButtonSlot.addEventListener('slotchange', this._onCaptureButtonSlotChange);
-    this.$captureButton = this._getCaptureButton();
-    this.$captureButton && this.$captureButton.addEventListener('click', this._onCapturePhotoButtonClick);
+    this._captureButton = this._getCaptureButton();
+    this._captureButton && this._captureButton.addEventListener('click', this._onCapturePhotoButtonClick);
     this._facingModeButtonSlot = this.shadowRoot.querySelector('slot[name="facing-mode-button"]');
     this._facingModeButtonSlot && this._facingModeButtonSlot.addEventListener('slotchange', this._onFacingModeButtonSlotChange);
-    this.$facingModeButton = this._getFacingModeButton();
+    this._facingModeButton = this._getFacingModeButton();
 
-    if (this.$facingModeButton) {
+    if (this._facingModeButton) {
       if (this._supportedConstraints.facingMode) {
-        this.$facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+        this._facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
       } else {
-        this.$facingModeButton.hidden = true;
+        this._facingModeButton.hidden = true;
       }
     }
 
@@ -109,9 +107,9 @@ class CapturePhoto extends HTMLElement {
 
   disconnectedCallback() {
     this._stopVideoStreaming();
-    this.$facingModeButton && this.$facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
-    this.$captureButton && this.$captureButton.removeEventListener('click', this._onCapturePhotoButtonClick);
-    this.$videoElement && this.$videoElement.removeEventListener('canplay', this._onVideoCanPlay);
+    this._facingModeButton && this._facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
+    this._captureButton && this._captureButton.removeEventListener('click', this._onCapturePhotoButtonClick);
+    this._videoElement && this._videoElement.removeEventListener('canplay', this._onVideoLoadedMetaData);
     this._captureButtonSlot && this._captureButtonSlot.removeEventListener('slotchange', this._onCaptureButtonSlotChange);
     this._facingModeButtonSlot && this._facingModeButtonSlot.removeEventListener('slotchange', this._onFacingModeButtonSlotChange);
   }
@@ -197,13 +195,13 @@ class CapturePhoto extends HTMLElement {
   }
 
   _stopVideoStreaming() {
-    if (!this.$videoElement || !this._stream) {
+    if (!this._videoElement || !this._stream) {
       return;
     }
 
     const [track] = this._stream.getVideoTracks();
     track && track.stop();
-    this.$videoElement.srcObject = null;
+    this._videoElement.srcObject = null;
     this._stream = null;
   }
 
@@ -230,7 +228,7 @@ class CapturePhoto extends HTMLElement {
     }
 
     navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-      this.$videoElement.srcObject = stream;
+      this._videoElement.srcObject = stream;
       this._stream = stream;
       this._applyZoom(this.zoom);
     }).catch(error => {
@@ -239,22 +237,24 @@ class CapturePhoto extends HTMLElement {
         composed: true,
         detail: { error }
       }));
+    }).finally(() => {
+      this.removeAttribute('loading');
     });
   }
 
   capture() {
-    if (this.hasAttribute('loading')) {
+    if (this.loading) {
       return;
     }
 
     try {
-      const ctx = this.$canvasElement.getContext('2d');
-      const width = this.$videoElement.videoWidth;
-      const height = this.$videoElement.videoHeight;
-      this.$canvasElement.width = width;
-      this.$canvasElement.height = height;
-      ctx.drawImage(this.$videoElement, 0, 0, width, height);
-      const dataURI = this.$canvasElement.toDataURL('image/png');
+      const ctx = this._canvasElement.getContext('2d');
+      const width = this._videoElement.videoWidth;
+      const height = this._videoElement.videoHeight;
+      this._canvasElement.width = width;
+      this._canvasElement.height = height;
+      ctx.drawImage(this._videoElement, 0, 0, width, height);
+      const dataURI = this._canvasElement.toDataURL('image/png');
 
       if (typeof dataURI === 'string' && dataURI.includes('data:image')) {
         if (!this.outputDisabled) {
@@ -264,7 +264,7 @@ class CapturePhoto extends HTMLElement {
           image.height = height;
           image.part = 'output-image';
           this._emptyOutputElement();
-          this.$outputElement && this.$outputElement.appendChild(image);
+          this._outputElement && this._outputElement.appendChild(image);
         }
 
         this.dispatchEvent(new CustomEvent('capture-photo:success', {
@@ -285,7 +285,7 @@ class CapturePhoto extends HTMLElement {
   _onFacingModeButtonClick(evt) {
     evt.preventDefault();
 
-    if (this.hasAttribute('loading')) {
+    if (this.loading) {
       return;
     }
 
@@ -297,24 +297,32 @@ class CapturePhoto extends HTMLElement {
     this.capture();
   }
 
-  _onVideoCanPlay(evt) {
-    this.removeAttribute('loading');
+  _onVideoLoadedMetaData(evt) {
+    const video = evt.target;
 
-    evt.target.play().catch(error => {
+    video.play().then(() => {
+      this.dispatchEvent(new CustomEvent('capture-photo:video-play', {
+        bubbles: true,
+        composed: true,
+        detail: { video }
+      }));
+    }).catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
         composed: true,
         detail: { error }
       }));
+    }).finally(() => {
+      this.removeAttribute('loading');
     });
   }
 
   _emptyOutputElement() {
-    if (!this.$outputElement) {
+    if (!this._outputElement) {
       return;
     }
 
-    Array.from(this.$outputElement.childNodes).forEach(node => node.remove());
+    Array.from(this._outputElement.childNodes).forEach(node => node.remove());
   }
 
   _applyZoom(zoom) {
@@ -342,14 +350,14 @@ class CapturePhoto extends HTMLElement {
 
   _onCaptureButtonSlotChange(evt) {
     if (evt.target && evt.target.name === 'capture-button') {
-      this.$captureButton && this.$captureButton.removeEventListener('click', this._onCapturePhotoButtonClick);
-      this.$captureButton = this._getCaptureButton();
+      this._captureButton && this._captureButton.removeEventListener('click', this._onCapturePhotoButtonClick);
+      this._captureButton = this._getCaptureButton();
 
-      if (this.$captureButton) {
-        this.$captureButton.addEventListener('click', this._onCapturePhotoButtonClick);
+      if (this._captureButton) {
+        this._captureButton.addEventListener('click', this._onCapturePhotoButtonClick);
 
-        if (this.$captureButton.nodeName !== 'BUTTON' && !this.$captureButton.hasAttribute('role')) {
-          this.$captureButton.setAttribute('role', 'button');
+        if (this._captureButton.nodeName !== 'BUTTON' && !this._captureButton.hasAttribute('role')) {
+          this._captureButton.setAttribute('role', 'button');
         }
       }
     }
@@ -357,14 +365,14 @@ class CapturePhoto extends HTMLElement {
 
   _onFacingModeButtonSlotChange(evt) {
     if (evt.target && evt.target.name === 'facing-mode-button') {
-      this.$facingModeButton && this.$facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
-      this.$facingModeButton = this._getFacingModeButton();
+      this._facingModeButton && this._facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
+      this._facingModeButton = this._getFacingModeButton();
 
-      if (this.$facingModeButton) {
-        this.$facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+      if (this._facingModeButton) {
+        this._facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
 
-        if (this.$facingModeButton.nodeName !== 'BUTTON' && !this.$facingModeButton.hasAttribute('role')) {
-          this.$facingModeButton.setAttribute('role', 'button');
+        if (this._facingModeButton.nodeName !== 'BUTTON' && !this._facingModeButton.hasAttribute('role')) {
+          this._facingModeButton.setAttribute('role', 'button');
         }
       }
     }

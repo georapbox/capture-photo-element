@@ -144,6 +144,7 @@ capture-photo::part(output-image) {
 
 | Name | Description | Event Detail |
 | ---- | ----------- | ------------ |
+| `capture-photo:video-play` | Emitted when camera's video stream starts playing. It is triggered during initial load, or when facing mode or camera resolution mode change are requested. | `{ video: HTMLVideoElement }` |
 | `capture-photo:facing-mode-change` | Emitted when the camera's facing mode changes. | `{ facingMode: 'user' \| 'environment' }` |
 | `capture-photo:camera-resolution-change` | Emitted when the camera's resolution changes. | `{ cameraResolution: String }`|
 | `capture-photo:zoom-change` | Emitted when the camera's zoom level changes. | `{ zoom: Number }` |

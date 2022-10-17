@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.3.0 (2022-10-17)
+
+- Remove `loading` attribute if `mediaDevices.getUserMedia()` fails.
+- Dispatch `capture-photo:video-play` when video starts playing.
+- Update dev dependencies.
+
 ## v1.2.4 (2022-07-26)
 
 - Update Events section in documentation.
