@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v1.3.1 (2022-10-20)
+
+- Fix issue [#2](https://github.com/georapbox/capture-photo-element/issues/2)
+- Ensure that when changing `facing-mode`, `camera-resolution` and `zoom` attributes, any side effect won't be triggered if the old value is the same as the new value passed.
+
 ## v1.3.0 (2022-10-17)
 
 - Remove `loading` attribute if `mediaDevices.getUserMedia()` fails.

@@ -49,6 +49,7 @@ class CapturePhoto extends HTMLElement {
   constructor() {
     super();
 
+    this._connected = false;
     this._supportedConstraints = CapturePhoto.isSupported() ? navigator.mediaDevices.getSupportedConstraints() : {};
 
     if (!this.shadowRoot) {
@@ -64,6 +65,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   connectedCallback() {
+    this._connected = true;
     this._canvasElement = this.shadowRoot.querySelector('canvas');
     this._outputElement = this.shadowRoot.getElementById('output');
     this._videoElement = this.shadowRoot.querySelector('video');
@@ -115,11 +117,15 @@ class CapturePhoto extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+    if (!this._connected) {
+      return;
+    }
+
     if (name === 'output-disabled') {
       this._emptyOutputElement();
     }
 
-    if (name === 'facing-mode' && this._supportedConstraints.facingMode) {
+    if (name === 'facing-mode' && this._supportedConstraints.facingMode && oldValue !== newValue) {
       this._stopVideoStreaming();
       this._requestGetUserMedia();
       this.dispatchEvent(new CustomEvent('capture-photo:facing-mode-change', {
@@ -129,7 +135,7 @@ class CapturePhoto extends HTMLElement {
       }));
     }
 
-    if (name === 'camera-resolution') {
+    if (name === 'camera-resolution' && oldValue !== newValue) {
       this._stopVideoStreaming();
       this._requestGetUserMedia();
       this.dispatchEvent(new CustomEvent('capture-photo:camera-resolution-change', {
@@ -139,7 +145,7 @@ class CapturePhoto extends HTMLElement {
       }));
     }
 
-    if (name === 'zoom') {
+    if (name === 'zoom' && oldValue !== newValue) {
       this._applyZoom(this.zoom);
       this.dispatchEvent(new CustomEvent('capture-photo:zoom-change', {
         bubbles: true,
