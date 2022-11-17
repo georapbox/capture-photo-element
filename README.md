@@ -27,7 +27,7 @@ $ npm install --save @georapbox/capture-photo-element
 ### Script
 
 ```js
-import { CapturePhoto } from './node_modules/@georapbox/capture-photo-element/dist/capture-photo.min.js';
+import { CapturePhoto } from './node_modules/@georapbox/capture-photo-element/dist/capture-photo.js';
 
 // Manually define the element.
 CapturePhoto.defineCustomElement();
@@ -36,7 +36,7 @@ CapturePhoto.defineCustomElement();
 Alternatively, you can import the automatically defined custom element.
 
 ```js
-import './node_modules/@georapbox/capture-photo-element/dist/capture-photo-defined.min.js';
+import './node_modules/@georapbox/capture-photo-element/dist/capture-photo-defined.js';
 ```
 
 ### Markup

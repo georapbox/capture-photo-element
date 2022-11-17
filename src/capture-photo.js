@@ -1,6 +1,8 @@
 const template = document.createElement('template');
 
-template.innerHTML = /* html */`
+const html = String.raw;
+
+template.innerHTML = html`
   <style>
     :host {
       all: initial;
@@ -46,50 +48,55 @@ const clamp = (value, lower, upper) => {
 };
 
 class CapturePhoto extends HTMLElement {
+  #connected;
+  #supportedConstraints;
+  #stream;
+  #canvasElement;
+  #outputElement;
+  #videoElement;
+  #captureButtonSlot;
+  #captureButton;
+  #facingModeButtonSlot;
+  #facingModeButton;
+
   constructor() {
     super();
 
-    this._connected = false;
-    this._supportedConstraints = CapturePhoto.isSupported() ? navigator.mediaDevices.getSupportedConstraints() : {};
+    this.#connected = false;
+    this.#supportedConstraints = CapturePhoto.isSupported() ? navigator.mediaDevices.getSupportedConstraints() : {};
 
     if (!this.shadowRoot) {
       this.attachShadow({ mode: 'open' });
       this.shadowRoot.appendChild(template.content.cloneNode(true));
     }
-
-    this._onFacingModeButtonClick = this._onFacingModeButtonClick.bind(this);
-    this._onCapturePhotoButtonClick = this._onCapturePhotoButtonClick.bind(this);
-    this._onVideoLoadedMetaData = this._onVideoLoadedMetaData.bind(this);
-    this._onCaptureButtonSlotChange = this._onCaptureButtonSlotChange.bind(this);
-    this._onFacingModeButtonSlotChange = this._onFacingModeButtonSlotChange.bind(this);
   }
 
   connectedCallback() {
-    this._connected = true;
-    this._canvasElement = this.shadowRoot.querySelector('canvas');
-    this._outputElement = this.shadowRoot.getElementById('output');
-    this._videoElement = this.shadowRoot.querySelector('video');
-    this._videoElement && this._videoElement.addEventListener('loadedmetadata', this._onVideoLoadedMetaData);
-    this._captureButtonSlot = this.shadowRoot.querySelector('slot[name="capture-button"]');
-    this._captureButtonSlot && this._captureButtonSlot.addEventListener('slotchange', this._onCaptureButtonSlotChange);
-    this._captureButton = this._getCaptureButton();
-    this._captureButton && this._captureButton.addEventListener('click', this._onCapturePhotoButtonClick);
-    this._facingModeButtonSlot = this.shadowRoot.querySelector('slot[name="facing-mode-button"]');
-    this._facingModeButtonSlot && this._facingModeButtonSlot.addEventListener('slotchange', this._onFacingModeButtonSlotChange);
-    this._facingModeButton = this._getFacingModeButton();
+    this.#connected = true;
+    this.#canvasElement = this.shadowRoot.querySelector('canvas');
+    this.#outputElement = this.shadowRoot.getElementById('output');
+    this.#videoElement = this.shadowRoot.querySelector('video');
+    this.#videoElement && this.#videoElement.addEventListener('loadedmetadata', this.#onVideoLoadedMetaData);
+    this.#captureButtonSlot = this.shadowRoot.querySelector('slot[name="capture-button"]');
+    this.#captureButtonSlot && this.#captureButtonSlot.addEventListener('slotchange', this.#onCaptureButtonSlotChange);
+    this.#captureButton = this.#getCaptureButton();
+    this.#captureButton && this.#captureButton.addEventListener('click', this.#onCapturePhotoButtonClick);
+    this.#facingModeButtonSlot = this.shadowRoot.querySelector('slot[name="facing-mode-button"]');
+    this.#facingModeButtonSlot && this.#facingModeButtonSlot.addEventListener('slotchange', this.#onFacingModeButtonSlotChange);
+    this.#facingModeButton = this.#getFacingModeButton();
 
-    if (this._facingModeButton) {
-      if (this._supportedConstraints.facingMode) {
-        this._facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+    if (this.#facingModeButton) {
+      if (this.#supportedConstraints.facingMode) {
+        this.#facingModeButton.addEventListener('click', this.#onFacingModeButtonClick);
       } else {
-        this._facingModeButton.hidden = true;
+        this.#facingModeButton.hidden = true;
       }
     }
 
-    this._upgradeProperty('outputDisabled');
-    this._upgradeProperty('facingMode');
-    this._upgradeProperty('cameraResolution');
-    this._upgradeProperty('zoom');
+    this.#upgradeProperty('outputDisabled');
+    this.#upgradeProperty('facingMode');
+    this.#upgradeProperty('cameraResolution');
+    this.#upgradeProperty('zoom');
 
     if (!CapturePhoto.isSupported()) {
       return this.dispatchEvent(new CustomEvent('capture-photo:error', {
@@ -104,30 +111,30 @@ class CapturePhoto extends HTMLElement {
       }));
     }
 
-    this._requestGetUserMedia();
+    this.#requestGetUserMedia();
   }
 
   disconnectedCallback() {
-    this._stopVideoStreaming();
-    this._facingModeButton && this._facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
-    this._captureButton && this._captureButton.removeEventListener('click', this._onCapturePhotoButtonClick);
-    this._videoElement && this._videoElement.removeEventListener('canplay', this._onVideoLoadedMetaData);
-    this._captureButtonSlot && this._captureButtonSlot.removeEventListener('slotchange', this._onCaptureButtonSlotChange);
-    this._facingModeButtonSlot && this._facingModeButtonSlot.removeEventListener('slotchange', this._onFacingModeButtonSlotChange);
+    this.#stopVideoStreaming();
+    this.#facingModeButton && this.#facingModeButton.removeEventListener('click', this.#onFacingModeButtonClick);
+    this.#captureButton && this.#captureButton.removeEventListener('click', this.#onCapturePhotoButtonClick);
+    this.#videoElement && this.#videoElement.removeEventListener('canplay', this.#onVideoLoadedMetaData);
+    this.#captureButtonSlot && this.#captureButtonSlot.removeEventListener('slotchange', this.#onCaptureButtonSlotChange);
+    this.#facingModeButtonSlot && this.#facingModeButtonSlot.removeEventListener('slotchange', this.#onFacingModeButtonSlotChange);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (!this._connected) {
+    if (!this.#connected) {
       return;
     }
 
     if (name === 'output-disabled') {
-      this._emptyOutputElement();
+      this.#emptyOutputElement();
     }
 
-    if (name === 'facing-mode' && this._supportedConstraints.facingMode && oldValue !== newValue) {
-      this._stopVideoStreaming();
-      this._requestGetUserMedia();
+    if (name === 'facing-mode' && this.#supportedConstraints.facingMode && oldValue !== newValue) {
+      this.#stopVideoStreaming();
+      this.#requestGetUserMedia();
       this.dispatchEvent(new CustomEvent('capture-photo:facing-mode-change', {
         bubbles: true,
         composed: true,
@@ -136,8 +143,8 @@ class CapturePhoto extends HTMLElement {
     }
 
     if (name === 'camera-resolution' && oldValue !== newValue) {
-      this._stopVideoStreaming();
-      this._requestGetUserMedia();
+      this.#stopVideoStreaming();
+      this.#requestGetUserMedia();
       this.dispatchEvent(new CustomEvent('capture-photo:camera-resolution-change', {
         bubbles: true,
         composed: true,
@@ -146,7 +153,7 @@ class CapturePhoto extends HTMLElement {
     }
 
     if (name === 'zoom' && oldValue !== newValue) {
-      this._applyZoom(this.zoom);
+      this.#applyZoom(this.zoom);
       this.dispatchEvent(new CustomEvent('capture-photo:zoom-change', {
         bubbles: true,
         composed: true,
@@ -200,18 +207,18 @@ class CapturePhoto extends HTMLElement {
     return this.hasAttribute('loading');
   }
 
-  _stopVideoStreaming() {
-    if (!this._videoElement || !this._stream) {
+  #stopVideoStreaming() {
+    if (!this.#videoElement || !this.#stream) {
       return;
     }
 
-    const [track] = this._stream.getVideoTracks();
+    const [track] = this.#stream.getVideoTracks();
     track && track.stop();
-    this._videoElement.srcObject = null;
-    this._stream = null;
+    this.#videoElement.srcObject = null;
+    this.#stream = null;
   }
 
-  _requestGetUserMedia() {
+  #requestGetUserMedia() {
     if (!CapturePhoto.isSupported()) {
       return;
     }
@@ -234,9 +241,9 @@ class CapturePhoto extends HTMLElement {
     }
 
     navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-      this._videoElement.srcObject = stream;
-      this._stream = stream;
-      this._applyZoom(this.zoom);
+      this.#videoElement.srcObject = stream;
+      this.#stream = stream;
+      this.#applyZoom(this.zoom);
     }).catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
@@ -254,13 +261,13 @@ class CapturePhoto extends HTMLElement {
     }
 
     try {
-      const ctx = this._canvasElement.getContext('2d');
-      const width = this._videoElement.videoWidth;
-      const height = this._videoElement.videoHeight;
-      this._canvasElement.width = width;
-      this._canvasElement.height = height;
-      ctx.drawImage(this._videoElement, 0, 0, width, height);
-      const dataURI = this._canvasElement.toDataURL('image/png');
+      const ctx = this.#canvasElement.getContext('2d');
+      const width = this.#videoElement.videoWidth;
+      const height = this.#videoElement.videoHeight;
+      this.#canvasElement.width = width;
+      this.#canvasElement.height = height;
+      ctx.drawImage(this.#videoElement, 0, 0, width, height);
+      const dataURI = this.#canvasElement.toDataURL('image/png');
 
       if (typeof dataURI === 'string' && dataURI.includes('data:image')) {
         if (!this.outputDisabled) {
@@ -269,8 +276,8 @@ class CapturePhoto extends HTMLElement {
           image.width = width;
           image.height = height;
           image.part = 'output-image';
-          this._emptyOutputElement();
-          this._outputElement && this._outputElement.appendChild(image);
+          this.#emptyOutputElement();
+          this.#outputElement && this.#outputElement.appendChild(image);
         }
 
         this.dispatchEvent(new CustomEvent('capture-photo:success', {
@@ -288,7 +295,7 @@ class CapturePhoto extends HTMLElement {
     }
   }
 
-  _onFacingModeButtonClick(evt) {
+  #onFacingModeButtonClick = evt => {
     evt.preventDefault();
 
     if (this.loading) {
@@ -296,14 +303,14 @@ class CapturePhoto extends HTMLElement {
     }
 
     this.facingMode = this.facingMode === 'user' || !this.facingMode ? 'environment' : 'user';
-  }
+  };
 
-  _onCapturePhotoButtonClick(evt) {
+  #onCapturePhotoButtonClick = evt => {
     evt.preventDefault();
     this.capture();
-  }
+  };
 
-  _onVideoLoadedMetaData(evt) {
+  #onVideoLoadedMetaData = evt => {
     const video = evt.target;
 
     video.play().then(() => {
@@ -321,22 +328,22 @@ class CapturePhoto extends HTMLElement {
     }).finally(() => {
       this.removeAttribute('loading');
     });
-  }
+  };
 
-  _emptyOutputElement() {
-    if (!this._outputElement) {
+  #emptyOutputElement() {
+    if (!this.#outputElement) {
       return;
     }
 
-    Array.from(this._outputElement.childNodes).forEach(node => node.remove());
+    Array.from(this.#outputElement.childNodes).forEach(node => node.remove());
   }
 
-  _applyZoom(zoom) {
-    if (!this._stream || !zoom) {
+  #applyZoom(zoom) {
+    if (!this.#stream || !zoom) {
       return;
     }
 
-    const [track] = this._stream.getVideoTracks();
+    const [track] = this.#stream.getVideoTracks();
 
     if (typeof track.getCapabilities !== 'function' || typeof track.getSettings !== 'function') {
       return;
@@ -354,65 +361,63 @@ class CapturePhoto extends HTMLElement {
     }
   }
 
-  _onCaptureButtonSlotChange(evt) {
+  #onCaptureButtonSlotChange = evt => {
     if (evt.target && evt.target.name === 'capture-button') {
-      this._captureButton && this._captureButton.removeEventListener('click', this._onCapturePhotoButtonClick);
-      this._captureButton = this._getCaptureButton();
+      this.#captureButton && this.#captureButton.removeEventListener('click', this.#onCapturePhotoButtonClick);
+      this.#captureButton = this.#getCaptureButton();
 
-      if (this._captureButton) {
-        this._captureButton.addEventListener('click', this._onCapturePhotoButtonClick);
+      if (this.#captureButton) {
+        this.#captureButton.addEventListener('click', this.#onCapturePhotoButtonClick);
 
-        if (this._captureButton.nodeName !== 'BUTTON' && !this._captureButton.hasAttribute('role')) {
-          this._captureButton.setAttribute('role', 'button');
+        if (this.#captureButton.nodeName !== 'BUTTON' && !this.#captureButton.hasAttribute('role')) {
+          this.#captureButton.setAttribute('role', 'button');
         }
       }
     }
-  }
+  };
 
-  _onFacingModeButtonSlotChange(evt) {
+  #onFacingModeButtonSlotChange = evt => {
     if (evt.target && evt.target.name === 'facing-mode-button') {
-      this._facingModeButton && this._facingModeButton.removeEventListener('click', this._onFacingModeButtonClick);
-      this._facingModeButton = this._getFacingModeButton();
+      this.#facingModeButton && this.#facingModeButton.removeEventListener('click', this.#onFacingModeButtonClick);
+      this.#facingModeButton = this.#getFacingModeButton();
 
-      if (this._facingModeButton) {
-        this._facingModeButton.addEventListener('click', this._onFacingModeButtonClick);
+      if (this.#facingModeButton) {
+        this.#facingModeButton.addEventListener('click', this.#onFacingModeButtonClick);
 
-        if (this._facingModeButton.nodeName !== 'BUTTON' && !this._facingModeButton.hasAttribute('role')) {
-          this._facingModeButton.setAttribute('role', 'button');
+        if (this.#facingModeButton.nodeName !== 'BUTTON' && !this.#facingModeButton.hasAttribute('role')) {
+          this.#facingModeButton.setAttribute('role', 'button');
         }
       }
     }
-  }
+  };
 
-  _getFacingModeButton() {
-    if (!this._facingModeButtonSlot) {
+  #getFacingModeButton() {
+    if (!this.#facingModeButtonSlot) {
       return null;
     }
 
-    return this._facingModeButtonSlot.assignedElements({ flatten: true }).find(el => {
+    return this.#facingModeButtonSlot.assignedElements({ flatten: true }).find(el => {
       return el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'facing-mode-button';
     });
   }
 
-  _getCaptureButton() {
-    if (!this._captureButtonSlot) {
+  #getCaptureButton() {
+    if (!this.#captureButtonSlot) {
       return null;
     }
 
-    return this._captureButtonSlot.assignedElements({ flatten: true }).find(el => {
+    return this.#captureButtonSlot.assignedElements({ flatten: true }).find(el => {
       return el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'capture-button';
     });
   }
 
   /**
    * https://developers.google.com/web/fundamentals/web-components/best-practices#lazy-properties
-   * This is to safe guard against cases where, for instance, a framework
-   * may have added the element to the page and set a value on one of its
-   * properties, but lazy loaded its definition. Without this guard, the
-   * upgraded element would miss that property and the instance property
-   * would prevent the class property setter from ever being called.
+   * This is to safe guard against cases where, for instance, a framework may have added the element to the page and
+   * set a value on one of its properties, but lazy loaded its definition. Without this guard, the upgraded element would
+   * miss that property and the instance property would prevent the class property setter from ever being called.
    */
-  _upgradeProperty(prop) {
+  #upgradeProperty(prop) {
     if (Object.prototype.hasOwnProperty.call(this, prop)) {
       const value = this[prop];
       delete this[prop];

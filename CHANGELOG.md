@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v2.0.0 (2022-11-18)
+
+- Refactor to use private class fields.
+- Replace rollup.js with parcel.js for bundling.
+
+### Breaking Changes
+
+- Only minified production builds will be included in the `dist` folder from now on.
+
 ## v1.3.1 (2022-10-20)
 
 - Fix issue [#2](https://github.com/georapbox/capture-photo-element/issues/2)
