@@ -14,8 +14,8 @@ describe('<capture-photo>', () => {
   it('default properties', async () => {
     const el = await fixture(html`<capture-photo></capture-photo>`);
 
-    expect(el.outputDisabled).to.be.false;
-    expect(el.getAttribute('output-disabled')).to.be.null;
+    expect(el.noImage).to.be.false;
+    expect(el.getAttribute('no-image')).to.be.null;
 
     expect(el.facingMode).to.be.null;
     expect(el.getAttribute('facing-mode')).to.be.null;
@@ -30,15 +30,15 @@ describe('<capture-photo>', () => {
   it('change default properties', async () => {
     const el = await fixture(html`
       <capture-photo
-        output-disabled
+        no-image
         facing-mode="environment"
         camera-resolution="320x240"
         zoom="3"
       ></capture-photo>
     `);
 
-    expect(el.outputDisabled).to.be.true;
-    expect(el.getAttribute('output-disabled')).to.equal('');
+    expect(el.noImage).to.be.true;
+    expect(el.getAttribute('no-image')).to.equal('');
 
     expect(el.facingMode).to.equal('environment');
     expect(el.getAttribute('facing-mode')).to.equal('environment');
@@ -53,15 +53,15 @@ describe('<capture-photo>', () => {
   it('change properties programmatically', async () => {
     const el = await fixture(html`<capture-photo></capture-photo>`);
 
-    el.outputDisabled = true;
+    el.noImage = true;
     el.facingMode = 'environment';
     el.cameraResolution = '320x240';
     el.zoom = 3;
 
     await elementUpdated(el);
 
-    expect(el.outputDisabled).to.be.true;
-    expect(el.getAttribute('output-disabled')).to.equal('');
+    expect(el.noImage).to.be.true;
+    expect(el.getAttribute('no-image')).to.equal('');
 
     expect(el.facingMode).to.equal('environment');
     expect(el.getAttribute('facing-mode')).to.equal('environment');
