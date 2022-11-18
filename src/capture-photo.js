@@ -72,6 +72,11 @@ class CapturePhoto extends HTMLElement {
   }
 
   connectedCallback() {
+    this.#upgradeProperty('noImage');
+    this.#upgradeProperty('facingMode');
+    this.#upgradeProperty('cameraResolution');
+    this.#upgradeProperty('zoom');
+
     this.#connected = true;
     this.#canvasElement = this.shadowRoot.querySelector('canvas');
     this.#outputElement = this.shadowRoot.getElementById('output');
@@ -92,11 +97,6 @@ class CapturePhoto extends HTMLElement {
         this.#facingModeButton.hidden = true;
       }
     }
-
-    this.#upgradeProperty('outputDisabled');
-    this.#upgradeProperty('facingMode');
-    this.#upgradeProperty('cameraResolution');
-    this.#upgradeProperty('zoom');
 
     if (!CapturePhoto.isSupported()) {
       return this.dispatchEvent(new CustomEvent('capture-photo:error', {
@@ -128,7 +128,7 @@ class CapturePhoto extends HTMLElement {
       return;
     }
 
-    if (name === 'output-disabled') {
+    if (name === 'no-image') {
       this.#emptyOutputElement();
     }
 
@@ -163,18 +163,18 @@ class CapturePhoto extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['output-disabled', 'facing-mode', 'camera-resolution', 'zoom'];
+    return ['no-image', 'facing-mode', 'camera-resolution', 'zoom'];
   }
 
-  get outputDisabled() {
-    return this.hasAttribute('output-disabled');
+  get noImage() {
+    return this.hasAttribute('no-image');
   }
 
-  set outputDisabled(value) {
+  set noImage(value) {
     if (value) {
-      this.setAttribute('output-disabled', '');
+      this.setAttribute('no-image', '');
     } else {
-      this.removeAttribute('output-disabled');
+      this.removeAttribute('no-image');
     }
   }
 
@@ -270,7 +270,7 @@ class CapturePhoto extends HTMLElement {
       const dataURI = this.#canvasElement.toDataURL('image/png');
 
       if (typeof dataURI === 'string' && dataURI.includes('data:image')) {
-        if (!this.outputDisabled) {
+        if (!this.noImage) {
           const image = new Image();
           image.src = dataURI;
           image.width = width;

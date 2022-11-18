@@ -4,9 +4,11 @@
 
 - Refactor to use private class fields.
 - Replace rollup.js with parcel.js for bundling.
+- Update dev dependencies.
 
 ### Breaking Changes
 
+- Rename property `outputDisabled` and attribute `output-disabled` to `noImage` and `no-image` accordingly.
 - Only minified production builds will be included in the `dist` folder from now on.
 
 ## v1.3.1 (2022-10-20)
