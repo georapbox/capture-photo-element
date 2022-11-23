@@ -1,6 +1,6 @@
 {
   "name": "@georapbox/capture-photo-element",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A custom element that implements the MediaDevices.getUserMedia() method of the MediaDevices interface to capture a photo in the browser.",
   "main": "dist/capture-photo.js",
   "module": "dist/capture-photo.js",

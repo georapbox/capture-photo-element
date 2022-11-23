@@ -6,6 +6,10 @@
   display: none;
 }
 
+#console {
+  max-height: 300px;
+}
+
 /* Component custom styling */
 capture-photo:not(:defined) {
   display: none;
@@ -47,8 +51,9 @@ capture-photo::part(capture-button) {
   cursor: pointer;
   text-indent: -9999px;
   overflow: hidden;
-  -webkit-appearance: none;
   -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 capture-photo::part(facing-mode-button) {
@@ -63,6 +68,7 @@ capture-photo::part(facing-mode-button) {
   cursor: pointer;
   -webkit-appearance: none;
   -moz-appearance: none;
+  appearance: none;
 }
 
 capture-photo::part(output-container) {

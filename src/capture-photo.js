@@ -30,7 +30,7 @@ template.innerHTML = html`
     <slot name="capture-button">
       <button part="capture-button" type="button"><slot name="capture-button-content">Capture photo</slot></button>
     </slot>
-    <slot name="facing-mode-button"><button part="facing-mode-button" type="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
+    <slot name="facing-mode-button" hidden><button part="facing-mode-button" type="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
   </div>
   <div part="output-container" id="output"></div>
 `;
@@ -63,7 +63,7 @@ class CapturePhoto extends HTMLElement {
     super();
 
     this.#connected = false;
-    this.#supportedConstraints = CapturePhoto.isSupported() ? navigator.mediaDevices.getSupportedConstraints() : {};
+    this.#supportedConstraints = this.getSupportedConstraints();
 
     if (!this.shadowRoot) {
       this.attachShadow({ mode: 'open' });
@@ -93,8 +93,6 @@ class CapturePhoto extends HTMLElement {
     if (this.#facingModeButton) {
       if (this.#supportedConstraints.facingMode) {
         this.#facingModeButton.addEventListener('click', this.#onFacingModeButtonClick);
-      } else {
-        this.#facingModeButton.hidden = true;
       }
     }
 
@@ -128,13 +126,16 @@ class CapturePhoto extends HTMLElement {
       return;
     }
 
-    if (name === 'no-image') {
+    if (name === 'no-image' && oldValue !== newValue) {
       this.#emptyOutputElement();
     }
 
-    if (name === 'facing-mode' && this.#supportedConstraints.facingMode && oldValue !== newValue) {
-      this.#stopVideoStreaming();
-      this.#requestGetUserMedia();
+    if (name === 'facing-mode' && oldValue !== newValue) {
+      if (this.#supportedConstraints.facingMode && 'facingMode' in this.getTrackSettings()) {
+        this.#stopVideoStreaming();
+        this.#requestGetUserMedia();
+      }
+
       this.dispatchEvent(new CustomEvent('capture-photo:facing-mode-change', {
         bubbles: true,
         composed: true,
@@ -145,6 +146,7 @@ class CapturePhoto extends HTMLElement {
     if (name === 'camera-resolution' && oldValue !== newValue) {
       this.#stopVideoStreaming();
       this.#requestGetUserMedia();
+
       this.dispatchEvent(new CustomEvent('capture-photo:camera-resolution-change', {
         bubbles: true,
         composed: true,
@@ -153,7 +155,10 @@ class CapturePhoto extends HTMLElement {
     }
 
     if (name === 'zoom' && oldValue !== newValue) {
-      this.#applyZoom(this.zoom);
+      if (this.#supportedConstraints.zoom && 'zoom' in this.getTrackSettings()) {
+        this.#applyZoom(this.zoom);
+      }
+
       this.dispatchEvent(new CustomEvent('capture-photo:zoom-change', {
         bubbles: true,
         composed: true,
@@ -244,6 +249,10 @@ class CapturePhoto extends HTMLElement {
       this.#videoElement.srcObject = stream;
       this.#stream = stream;
       this.#applyZoom(this.zoom);
+
+      if ('facingMode' in this.getTrackSettings()) {
+        this.#facingModeButtonSlot.hidden = false;
+      }
     }).catch(error => {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
@@ -293,6 +302,42 @@ class CapturePhoto extends HTMLElement {
         detail: { error }
       }));
     }
+  }
+
+  getSupportedConstraints() {
+    if (!CapturePhoto.isSupported()) {
+      return {};
+    }
+
+    return navigator.mediaDevices.getSupportedConstraints() || {};
+  }
+
+  getTrackCapabilities() {
+    if (!this.#stream) {
+      return {};
+    }
+
+    const [track] = this.#stream.getVideoTracks();
+
+    if (track && typeof track.getCapabilities === 'function') {
+      return track.getCapabilities() || {};
+    }
+
+    return {};
+  }
+
+  getTrackSettings() {
+    if (!this.#stream) {
+      return {};
+    }
+
+    const [track] = this.#stream.getVideoTracks();
+
+    if (track && typeof track.getSettings === 'function') {
+      return track.getSettings() || {};
+    }
+
+    return {};
   }
 
   #onFacingModeButtonClick = evt => {
@@ -345,17 +390,13 @@ class CapturePhoto extends HTMLElement {
 
     const [track] = this.#stream.getVideoTracks();
 
-    if (typeof track.getCapabilities !== 'function' || typeof track.getSettings !== 'function') {
-      return;
-    }
+    const trackCapabilities = this.getTrackCapabilities();
+    const trackSettings = this.getTrackSettings();
 
-    const capabilities = track.getCapabilities();
-    const settings = track.getSettings();
-
-    if ('zoom' in settings) {
+    if ('zoom' in trackSettings) {
       track.applyConstraints({
         advanced: [{
-          zoom: clamp(Number(zoom), capabilities.zoom.min, capabilities.zoom.max)
+          zoom: clamp(Number(zoom), trackCapabilities.zoom.min, trackCapabilities.zoom.max)
         }]
       });
     }

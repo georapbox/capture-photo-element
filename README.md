@@ -92,7 +92,7 @@ capture-photo::part(output-image) {
 | ---- | ----------- |
 | `capture-button` | Override the default capture photo button with your own. |
 | `capture-button-content` | Override the default content of the capture photo button with your own content. |
-| `facing-mode-button` | Override the default facing mode button with your own. |
+| `facing-mode-button` | Override the default facing mode button with your own. If `facingMode` is not supported in constrainable properties for the current `MediaStreamTrack`, the slot is hidden. |
 | `facing-mode-button-content` | Override the default content of the facing mode button with your own content. |
 
 #### Slots usage examples
@@ -139,6 +139,9 @@ capture-photo::part(output-image) {
 | `defineCustomElement` | Static | Defines/registers the custom element with the name provided. If no name is provided, the default name is used. The method checks if the element is already defined, hence will skip trying to redefine it. | `elementName='capture-photo'` |
 | `isSupported` | Static | Returns `true` if `MediaDevices.getUserMedia()` is supported by the platform, otherwise returns `false`. | - |
 | `capture` | Prototype | Captures a photo using the element's properties. | - |
+| `getSupportedConstraints` | Prototype | Returns an object based on the `MediaTrackSupportedConstraints` dictionary, whose member fields each specify one of the constrainable properties the user agent understands. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaDevices/getSupportedConstraints) | - |
+| `getTrackCapabilities` | Prototype | Returns a `MediaTrackCapabilities` object which specifies the values or range of values which each constrainable property, based upon the platform and user agent. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getCapabilities) | - |
+| `getTrackSettings` | Prototype | Returns a `MediaTrackSettings` object containing the current values of each of the constrainable properties for the current MediaStreamTrack. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getSettings) | - |
 
 ### Events
 

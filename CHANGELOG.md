@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v2.1.0 (2022-11-23)
+
+- Add public methods `getSupportedConstraints()`, `getTrackCapabilities()` and `getTrackSettings()`.
+- Hide `facing-mode-slot` by default and display it only if `facingMode` is supported by device.
+
 ## v2.0.0 (2022-11-18)
 
 - Refactor to use private class fields.
