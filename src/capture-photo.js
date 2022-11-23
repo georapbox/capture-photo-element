@@ -121,6 +121,10 @@ class CapturePhoto extends HTMLElement {
     this.#facingModeButtonSlot && this.#facingModeButtonSlot.removeEventListener('slotchange', this.#onFacingModeButtonSlotChange);
   }
 
+  static get observedAttributes() {
+    return ['no-image', 'facing-mode', 'camera-resolution', 'zoom'];
+  }
+
   attributeChangedCallback(name, oldValue, newValue) {
     if (!this.#connected) {
       return;
@@ -156,7 +160,7 @@ class CapturePhoto extends HTMLElement {
 
     if (name === 'zoom' && oldValue !== newValue) {
       if (this.#supportedConstraints.zoom && 'zoom' in this.getTrackSettings()) {
-        this.#applyZoom(this.zoom);
+        this.#applyZoomPanTilt('zoom', this.zoom);
       }
 
       this.dispatchEvent(new CustomEvent('capture-photo:zoom-change', {
@@ -165,10 +169,6 @@ class CapturePhoto extends HTMLElement {
         detail: { zoom: this.zoom }
       }));
     }
-  }
-
-  static get observedAttributes() {
-    return ['no-image', 'facing-mode', 'camera-resolution', 'zoom'];
   }
 
   get noImage() {
@@ -248,7 +248,7 @@ class CapturePhoto extends HTMLElement {
     navigator.mediaDevices.getUserMedia(constraints).then(stream => {
       this.#videoElement.srcObject = stream;
       this.#stream = stream;
-      this.#applyZoom(this.zoom);
+      this.#applyZoomPanTilt('zoom', this.zoom);
 
       if ('facingMode' in this.getTrackSettings()) {
         this.#facingModeButtonSlot.hidden = false;
@@ -383,8 +383,8 @@ class CapturePhoto extends HTMLElement {
     Array.from(this.#outputElement.childNodes).forEach(node => node.remove());
   }
 
-  #applyZoom(zoom) {
-    if (!this.#stream || !zoom) {
+  #applyZoomPanTilt(constraintName, constraintValue) {
+    if (!this.#stream || !constraintName || !constraintValue) {
       return;
     }
 
@@ -393,10 +393,10 @@ class CapturePhoto extends HTMLElement {
     const trackCapabilities = this.getTrackCapabilities();
     const trackSettings = this.getTrackSettings();
 
-    if ('zoom' in trackSettings) {
+    if (constraintName in trackSettings) {
       track.applyConstraints({
         advanced: [{
-          zoom: clamp(Number(zoom), trackCapabilities.zoom.min, trackCapabilities.zoom.max)
+          [constraintName]: clamp(Number(constraintValue), trackCapabilities[constraintName].min, trackCapabilities[constraintName].max)
         }]
       });
     }
