@@ -75,6 +75,8 @@ class CapturePhoto extends HTMLElement {
     this.#upgradeProperty('noImage');
     this.#upgradeProperty('facingMode');
     this.#upgradeProperty('cameraResolution');
+    this.#upgradeProperty('pan');
+    this.#upgradeProperty('tilt');
     this.#upgradeProperty('zoom');
 
     this.#connected = true;
@@ -122,7 +124,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['no-image', 'facing-mode', 'camera-resolution', 'zoom'];
+    return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -158,9 +160,33 @@ class CapturePhoto extends HTMLElement {
       }));
     }
 
+    if (name === 'pan' && oldValue !== newValue) {
+      if (this.#supportedConstraints.pan && 'pan' in this.getTrackSettings()) {
+        this.#applyPTZ('pan', this.pan);
+      }
+
+      this.dispatchEvent(new CustomEvent('capture-photo:pan-change', {
+        bubbles: true,
+        composed: true,
+        detail: { pan: this.pan }
+      }));
+    }
+
+    if (name === 'tilt' && oldValue !== newValue) {
+      if (this.#supportedConstraints.tilt && 'tilt' in this.getTrackSettings()) {
+        this.#applyPTZ('tilt', this.tilt);
+      }
+
+      this.dispatchEvent(new CustomEvent('capture-photo:tilt-change', {
+        bubbles: true,
+        composed: true,
+        detail: { tilt: this.tilt }
+      }));
+    }
+
     if (name === 'zoom' && oldValue !== newValue) {
       if (this.#supportedConstraints.zoom && 'zoom' in this.getTrackSettings()) {
-        this.#applyZoomPanTilt('zoom', this.zoom);
+        this.#applyPTZ('zoom', this.zoom);
       }
 
       this.dispatchEvent(new CustomEvent('capture-photo:zoom-change', {
@@ -199,6 +225,24 @@ class CapturePhoto extends HTMLElement {
     this.setAttribute('camera-resolution', value);
   }
 
+  get pan() {
+    return Number(this.getAttribute('pan')) || null;
+  }
+
+  set pan(value) {
+    const numValue = Number(value) || 0;
+    this.setAttribute('pan', numValue > 0 ? Math.floor(numValue) : 0);
+  }
+
+  get tilt() {
+    return Number(this.getAttribute('tilt')) || null;
+  }
+
+  set tilt(value) {
+    const numValue = Number(value) || 0;
+    this.setAttribute('tilt', numValue > 0 ? Math.floor(numValue) : 0);
+  }
+
   get zoom() {
     return Number(this.getAttribute('zoom')) || null;
   }
@@ -223,7 +267,7 @@ class CapturePhoto extends HTMLElement {
     this.#stream = null;
   }
 
-  #requestGetUserMedia() {
+  async #requestGetUserMedia() {
     if (!CapturePhoto.isSupported()) {
       return;
     }
@@ -234,7 +278,10 @@ class CapturePhoto extends HTMLElement {
       video: {
         facingMode: {
           ideal: this.facingMode || 'user'
-        }
+        },
+        pan: true,
+        tilt: true,
+        zoom: true
       },
       audio: false
     };
@@ -245,23 +292,25 @@ class CapturePhoto extends HTMLElement {
       constraints.video.height = height;
     }
 
-    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-      this.#videoElement.srcObject = stream;
-      this.#stream = stream;
-      this.#applyZoomPanTilt('zoom', this.zoom);
+    try {
+      this.#stream = await navigator.mediaDevices.getUserMedia(constraints);
+      this.#videoElement.srcObject = this.#stream;
+      this.#applyPTZ('pan', this.pan);
+      this.#applyPTZ('tilt', this.tilt);
+      this.#applyPTZ('zoom', this.zoom);
 
       if ('facingMode' in this.getTrackSettings()) {
         this.#facingModeButtonSlot.hidden = false;
       }
-    }).catch(error => {
+    } catch (error) {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
         composed: true,
         detail: { error }
       }));
-    }).finally(() => {
+    } finally {
       this.removeAttribute('loading');
-    });
+    }
   }
 
   capture() {
@@ -383,7 +432,7 @@ class CapturePhoto extends HTMLElement {
     Array.from(this.#outputElement.childNodes).forEach(node => node.remove());
   }
 
-  #applyZoomPanTilt(constraintName, constraintValue) {
+  #applyPTZ(constraintName, constraintValue) {
     if (!this.#stream || !constraintName || !constraintValue) {
       return;
     }

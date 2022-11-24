@@ -23,6 +23,12 @@ describe('<capture-photo>', () => {
     expect(el.cameraResolution).to.be.null;
     expect(el.getAttribute('camera-resolution')).to.be.null;
 
+    expect(el.pan).to.be.null;
+    expect(el.getAttribute('pan')).to.be.null;
+
+    expect(el.tilt).to.be.null;
+    expect(el.getAttribute('tilt')).to.be.null;
+
     expect(el.zoom).to.be.null;
     expect(el.getAttribute('zoom')).to.be.null;
   });
@@ -33,7 +39,9 @@ describe('<capture-photo>', () => {
         no-image
         facing-mode="environment"
         camera-resolution="320x240"
-        zoom="3"
+        pan="2"
+        tilt="3"
+        zoom="4"
       ></capture-photo>
     `);
 
@@ -46,8 +54,14 @@ describe('<capture-photo>', () => {
     expect(el.cameraResolution).to.equal('320x240');
     expect(el.getAttribute('camera-resolution')).to.equal('320x240');
 
-    expect(el.zoom).to.equal(3);
-    expect(el.getAttribute('zoom')).to.equal('3');
+    expect(el.pan).to.equal(2);
+    expect(el.getAttribute('pan')).to.equal('2');
+
+    expect(el.tilt).to.equal(3);
+    expect(el.getAttribute('tilt')).to.equal('3');
+
+    expect(el.zoom).to.equal(4);
+    expect(el.getAttribute('zoom')).to.equal('4');
   });
 
   it('change properties programmatically', async () => {
@@ -56,7 +70,9 @@ describe('<capture-photo>', () => {
     el.noImage = true;
     el.facingMode = 'environment';
     el.cameraResolution = '320x240';
-    el.zoom = 3;
+    el.pan = 2;
+    el.tilt = 3;
+    el.zoom = 4;
 
     await elementUpdated(el);
 
@@ -69,8 +85,14 @@ describe('<capture-photo>', () => {
     expect(el.cameraResolution).to.equal('320x240');
     expect(el.getAttribute('camera-resolution')).to.equal('320x240');
 
-    expect(el.zoom).to.equal(3);
-    expect(el.getAttribute('zoom')).to.equal('3');
+    expect(el.pan).to.equal(2);
+    expect(el.getAttribute('pan')).to.equal('2');
+
+    expect(el.tilt).to.equal(3);
+    expect(el.getAttribute('tilt')).to.equal('3');
+
+    expect(el.zoom).to.equal(4);
+    expect(el.getAttribute('zoom')).to.equal('4');
   });
 
   it('change button slots', async () => {
@@ -142,6 +164,36 @@ describe('<capture-photo>', () => {
 
     expect(detail).to.deep.equal({
       cameraResolution: '320x240'
+    });
+  });
+
+  it('capture-photo:pan-change event is emitted', async () => {
+    const el = await fixture(html`<capture-photo></capture-photo>`);
+    const listener = oneEvent(el, 'capture-photo:pan-change');
+
+    el.pan = 2;
+
+    await elementUpdated(el);
+
+    const { detail } = await listener;
+
+    expect(detail).to.deep.equal({
+      pan: 2
+    });
+  });
+
+  it('capture-photo:tilt-change event is emitted', async () => {
+    const el = await fixture(html`<capture-photo></capture-photo>`);
+    const listener = oneEvent(el, 'capture-photo:tilt-change');
+
+    el.tilt = 2;
+
+    await elementUpdated(el);
+
+    const { detail } = await listener;
+
+    expect(detail).to.deep.equal({
+      tilt: 2
     });
   });
 

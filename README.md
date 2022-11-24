@@ -81,9 +81,11 @@ capture-photo::part(output-image) {
 | Name | Reflects | Type | Default | Description |
 | ---- | -------- | ---- | ------- | ----------- |
 | `noImage`<br>*`no-image`* | ✓ | Boolean | `false` | Optional. Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
-| `facingMode`<br>*`facing-mode`* | ✓ | String | `null` | Optional. The preferred camera to be used if the device supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. |
-| `cameraResolution`<br>*`camera-resolution`* | ✓ | String | `null` | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. Please refer to [constraints documentation][constraints] for more details of how constraints work. |
-| `zoom` | ✓ | Number | `null` | Optional. Defines the camera's zoom level if supported by the device. |
+| `facingMode`<br>*`facing-mode`* | ✓ | String | `null` | Optional. The preferred camera to be used if the camera hardware supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera accordingly. |
+| `cameraResolution`<br>*`camera-resolution`* | ✓ | String | `null` | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. You can access the min & max supported values for width and height, using `getTrackCapabilities().width` and `getTrackCapabilities().height` respectively. |
+| `pan` | ✓ | Number | `null` | Optional. Defines the camera's pan level if supported by the camera hardware. You can access the min & max supported values for pan level, using `getTrackCapabilities().pan`. |
+| `tilt` | ✓ | Number | `null` | Optional. Defines the camera's tilt level if supported by the camera hardware. You can access the min & max supported values for tilt level, using `getTrackCapabilities().tilt`. |
+| `zoom` | ✓ | Number | `null` | Optional. Defines the camera's zoom level if supported by the camera hardware. You can access the min & max supported values for zoom level, using `getTrackCapabilities().zoom`. |
 | `loading` | ✓ | Boolean | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
 
 ### Slots
@@ -150,6 +152,8 @@ capture-photo::part(output-image) {
 | `capture-photo:video-play` | Emitted when camera's video stream starts playing. It is triggered during initial load, or when facing mode or camera resolution mode change are requested. | `{ video: HTMLVideoElement }` |
 | `capture-photo:facing-mode-change` | Emitted when the camera's facing mode changes. | `{ facingMode: 'user' \| 'environment' }` |
 | `capture-photo:camera-resolution-change` | Emitted when the camera's resolution changes. | `{ cameraResolution: String }`|
+| `capture-photo:pan-change` | Emitted when the camera's pan level changes. | `{ pan: Number }` |
+| `capture-photo:tilt-change` | Emitted when the camera's tilt level changes. | `{ tilt: Number }` |
 | `capture-photo:zoom-change` | Emitted when the camera's zoom level changes. | `{ zoom: Number }` |
 | `capture-photo:success` | Emitted when a photo is captured successfully. | `{ dataURI: String, width: Number, height: Number }` |
 | `capture-photo:error` | Emitted when an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc. | `{ error: DOMException }` |

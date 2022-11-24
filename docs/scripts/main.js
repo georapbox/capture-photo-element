@@ -31,6 +31,16 @@ import(componentUrl).then(res => {
     $console.innerHTML += `<div>$ capture-photo:camera-resolution-change -> ${JSON.stringify(evt.detail)}</div>`;
   });
 
+  document.addEventListener('capture-photo:pan-change', evt => {
+    console.log('capture-photo:pan-change ->', evt.detail);
+    $console.innerHTML += `<div>$ capture-photo:pan-change -> ${JSON.stringify(evt.detail)}</div>`;
+  });
+
+  document.addEventListener('capture-photo:tilt-change', evt => {
+    console.log('capture-photo:tilt-change ->', evt.detail);
+    $console.innerHTML += `<div>$ capture-photo:tilt-change -> ${JSON.stringify(evt.detail)}</div>`;
+  });
+
   document.addEventListener('capture-photo:zoom-change', evt => {
     console.log('capture-photo:zoom-change ->', evt.detail);
     $console.innerHTML += `<div>$ capture-photo:zoom-change -> ${JSON.stringify(evt.detail)}</div>`;
