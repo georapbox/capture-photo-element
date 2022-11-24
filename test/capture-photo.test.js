@@ -1,4 +1,4 @@
-import { elementUpdated, expect, fixture, fixtureCleanup, html, oneEvent } from '@open-wc/testing';
+import { elementUpdated, expect, fixture, fixtureCleanup, html } from '@open-wc/testing';
 import sinon from 'sinon';
 import { CapturePhoto } from '../src/capture-photo.js';
 
@@ -135,81 +135,6 @@ describe('<capture-photo>', () => {
       <a href="#" slot="capture-button" role="button">Take picture</a>
       <a href="#" slot="facing-mode-button" role="button">Change camera</a>
     `);
-  });
-
-  it('capture-photo:facing-mode-change event is emitted', async () => {
-    const el = await fixture(html`<capture-photo></capture-photo>`);
-    const listener = oneEvent(el, 'capture-photo:facing-mode-change');
-
-    el.facingMode = 'environment';
-
-    await elementUpdated(el);
-
-    const { detail } = await listener;
-
-    expect(detail).to.deep.equal({
-      facingMode: 'environment'
-    });
-  });
-
-  it('capture-photo:camera-resolution-change event is emitted', async () => {
-    const el = await fixture(html`<capture-photo></capture-photo>`);
-    const listener = oneEvent(el, 'capture-photo:camera-resolution-change');
-
-    el.cameraResolution = '320x240';
-
-    await elementUpdated(el);
-
-    const { detail } = await listener;
-
-    expect(detail).to.deep.equal({
-      cameraResolution: '320x240'
-    });
-  });
-
-  it('capture-photo:pan-change event is emitted', async () => {
-    const el = await fixture(html`<capture-photo></capture-photo>`);
-    const listener = oneEvent(el, 'capture-photo:pan-change');
-
-    el.pan = 2;
-
-    await elementUpdated(el);
-
-    const { detail } = await listener;
-
-    expect(detail).to.deep.equal({
-      pan: 2
-    });
-  });
-
-  it('capture-photo:tilt-change event is emitted', async () => {
-    const el = await fixture(html`<capture-photo></capture-photo>`);
-    const listener = oneEvent(el, 'capture-photo:tilt-change');
-
-    el.tilt = 2;
-
-    await elementUpdated(el);
-
-    const { detail } = await listener;
-
-    expect(detail).to.deep.equal({
-      tilt: 2
-    });
-  });
-
-  it('capture-photo:zoom-change event is emitted', async () => {
-    const el = await fixture(html`<capture-photo></capture-photo>`);
-    const listener = oneEvent(el, 'capture-photo:zoom-change');
-
-    el.zoom = 2;
-
-    await elementUpdated(el);
-
-    const { detail } = await listener;
-
-    expect(detail).to.deep.equal({
-      zoom: 2
-    });
   });
 
   it('capture method is called', async () => {

@@ -136,64 +136,72 @@ class CapturePhoto extends HTMLElement {
       this.#emptyOutputElement();
     }
 
-    if (name === 'facing-mode' && oldValue !== newValue) {
-      if (this.#supportedConstraints.facingMode && 'facingMode' in this.getTrackSettings()) {
+    if (name === 'facing-mode' && oldValue !== newValue && this.#supportedConstraints.facingMode) {
+      const trackSettings = this.getTrackSettings();
+
+      if ('facingMode' in trackSettings && ['user', 'environment'].includes(this.facingMode)) {
         this.#stopVideoStreaming();
         this.#requestGetUserMedia();
       }
-
-      this.dispatchEvent(new CustomEvent('capture-photo:facing-mode-change', {
-        bubbles: true,
-        composed: true,
-        detail: { facingMode: newValue }
-      }));
     }
 
     if (name === 'camera-resolution' && oldValue !== newValue) {
-      this.#stopVideoStreaming();
-      this.#requestGetUserMedia();
+      const trackCapabilities = this.getTrackCapabilities();
+      const trackSettings = this.getTrackSettings();
+      const [width, height] = this.cameraResolution.split('x');
+      const nWidth = Number(width);
+      const nHeight = Number(height);
 
-      this.dispatchEvent(new CustomEvent('capture-photo:camera-resolution-change', {
-        bubbles: true,
-        composed: true,
-        detail: { cameraResolution: newValue }
-      }));
+      if (
+        'width' in trackSettings && 'height' in trackSettings
+        && nWidth >= trackCapabilities?.width?.min && nWidth <= trackCapabilities?.width?.max
+        && nHeight >= trackCapabilities?.height?.min && nHeight <= trackCapabilities?.height?.max
+      ) {
+        this.#stopVideoStreaming();
+        this.#requestGetUserMedia();
+      }
     }
 
-    if (name === 'pan' && oldValue !== newValue) {
-      if (this.#supportedConstraints.pan && 'pan' in this.getTrackSettings()) {
+    if (name === 'pan' && oldValue !== newValue && this.#supportedConstraints.pan) {
+      const trackCapabilities = this.getTrackCapabilities();
+      const trackSettings = this.getTrackSettings();
+      const nPan = Number(this.pan);
+
+      if (
+        'pan' in trackSettings
+        && nPan >= trackCapabilities?.pan?.min
+        && nPan <= trackCapabilities?.pan?.max
+      ) {
         this.#applyPTZ('pan', this.pan);
       }
-
-      this.dispatchEvent(new CustomEvent('capture-photo:pan-change', {
-        bubbles: true,
-        composed: true,
-        detail: { pan: this.pan }
-      }));
     }
 
-    if (name === 'tilt' && oldValue !== newValue) {
-      if (this.#supportedConstraints.tilt && 'tilt' in this.getTrackSettings()) {
+    if (name === 'tilt' && oldValue !== newValue && this.#supportedConstraints.tilt) {
+      const trackCapabilities = this.getTrackCapabilities();
+      const trackSettings = this.getTrackSettings();
+      const nTilt = Number(this.tilt);
+
+      if (
+        'tilt' in trackSettings
+        && nTilt >= trackCapabilities?.tilt?.min
+        && nTilt <= trackCapabilities?.tilt?.max
+      ) {
         this.#applyPTZ('tilt', this.tilt);
       }
-
-      this.dispatchEvent(new CustomEvent('capture-photo:tilt-change', {
-        bubbles: true,
-        composed: true,
-        detail: { tilt: this.tilt }
-      }));
     }
 
-    if (name === 'zoom' && oldValue !== newValue) {
-      if (this.#supportedConstraints.zoom && 'zoom' in this.getTrackSettings()) {
+    if (name === 'zoom' && oldValue !== newValue && this.#supportedConstraints.zoom) {
+      const trackCapabilities = this.getTrackCapabilities();
+      const trackSettings = this.getTrackSettings();
+      const nZoom = Number(this.zoom);
+
+      if (
+        'zoom' in trackSettings
+        && nZoom >= trackCapabilities?.zoom?.min
+        && nZoom <= trackCapabilities?.zoom?.max
+      ) {
         this.#applyPTZ('zoom', this.zoom);
       }
-
-      this.dispatchEvent(new CustomEvent('capture-photo:zoom-change', {
-        bubbles: true,
-        composed: true,
-        detail: { zoom: this.zoom }
-      }));
     }
   }
 
@@ -230,8 +238,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   set pan(value) {
-    const numValue = Number(value) || 0;
-    this.setAttribute('pan', numValue > 0 ? Math.floor(numValue) : 0);
+    this.setAttribute('pan', Number(value) || null);
   }
 
   get tilt() {
@@ -239,8 +246,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   set tilt(value) {
-    const numValue = Number(value) || 0;
-    this.setAttribute('tilt', numValue > 0 ? Math.floor(numValue) : 0);
+    this.setAttribute('tilt', Number(value) || null);
   }
 
   get zoom() {
@@ -248,8 +254,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   set zoom(value) {
-    const numValue = Number(value) || 0;
-    this.setAttribute('zoom', numValue > 0 ? Math.floor(numValue) : 0);
+    this.setAttribute('zoom', Number(value) || null);
   }
 
   get loading() {
@@ -445,7 +450,7 @@ class CapturePhoto extends HTMLElement {
     if (constraintName in trackSettings) {
       track.applyConstraints({
         advanced: [{
-          [constraintName]: clamp(Number(constraintValue), trackCapabilities[constraintName].min, trackCapabilities[constraintName].max)
+          [constraintName]: clamp(Number(constraintValue), trackCapabilities[constraintName]?.min, trackCapabilities[constraintName]?.max)
         }]
       });
     }
