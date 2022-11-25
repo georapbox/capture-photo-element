@@ -1,5 +1,6 @@
-const template = document.createElement('template');
+import { clamp } from './utils/clamp.js';
 
+const template = document.createElement('template');
 const html = String.raw;
 
 template.innerHTML = html`
@@ -34,18 +35,6 @@ template.innerHTML = html`
   </div>
   <div part="output-container" id="output"></div>
 `;
-
-const clamp = (value, lower, upper) => {
-  if (Number.isNaN(lower)) {
-    lower = 0;
-  }
-
-  if (Number.isNaN(upper)) {
-    upper = 0;
-  }
-
-  return Math.min(Math.max(value, Math.min(lower, upper)), Math.max(lower, upper));
-};
 
 class CapturePhoto extends HTMLElement {
   #connected;
@@ -83,17 +72,18 @@ class CapturePhoto extends HTMLElement {
     this.#canvasElement = this.shadowRoot.querySelector('canvas');
     this.#outputElement = this.shadowRoot.getElementById('output');
     this.#videoElement = this.shadowRoot.querySelector('video');
-    this.#videoElement && this.#videoElement.addEventListener('loadedmetadata', this.#onVideoLoadedMetaData);
     this.#captureButtonSlot = this.shadowRoot.querySelector('slot[name="capture-button"]');
-    this.#captureButtonSlot && this.#captureButtonSlot.addEventListener('slotchange', this.#onCaptureButtonSlotChange);
     this.#captureButton = this.#getCaptureButton();
-    this.#captureButton && this.#captureButton.addEventListener('click', this.#onCapturePhotoButtonClick);
     this.#facingModeButtonSlot = this.shadowRoot.querySelector('slot[name="facing-mode-button"]');
-    this.#facingModeButtonSlot && this.#facingModeButtonSlot.addEventListener('slotchange', this.#onFacingModeButtonSlotChange);
     this.#facingModeButton = this.#getFacingModeButton();
 
+    this.#videoElement?.addEventListener('loadedmetadata', this.#onVideoLoadedMetaData);
+    this.#captureButtonSlot?.addEventListener('slotchange', this.#onCaptureButtonSlotChange);
+    this.#captureButton?.addEventListener('click', this.#onCapturePhotoButtonClick);
+    this.#facingModeButtonSlot?.addEventListener('slotchange', this.#onFacingModeButtonSlotChange);
+
     if (this.#facingModeButton) {
-      if (this.#supportedConstraints.facingMode) {
+      if (this.#supportedConstraints?.facingMode) {
         this.#facingModeButton.addEventListener('click', this.#onFacingModeButtonClick);
       }
     }
@@ -116,11 +106,11 @@ class CapturePhoto extends HTMLElement {
 
   disconnectedCallback() {
     this.#stopVideoStreaming();
-    this.#facingModeButton && this.#facingModeButton.removeEventListener('click', this.#onFacingModeButtonClick);
-    this.#captureButton && this.#captureButton.removeEventListener('click', this.#onCapturePhotoButtonClick);
-    this.#videoElement && this.#videoElement.removeEventListener('canplay', this.#onVideoLoadedMetaData);
-    this.#captureButtonSlot && this.#captureButtonSlot.removeEventListener('slotchange', this.#onCaptureButtonSlotChange);
-    this.#facingModeButtonSlot && this.#facingModeButtonSlot.removeEventListener('slotchange', this.#onFacingModeButtonSlotChange);
+    this.#facingModeButton?.removeEventListener('click', this.#onFacingModeButtonClick);
+    this.#captureButton?.removeEventListener('click', this.#onCapturePhotoButtonClick);
+    this.#videoElement?.removeEventListener('canplay', this.#onVideoLoadedMetaData);
+    this.#captureButtonSlot?.removeEventListener('slotchange', this.#onCaptureButtonSlotChange);
+    this.#facingModeButtonSlot?.removeEventListener('slotchange', this.#onFacingModeButtonSlotChange);
   }
 
   static get observedAttributes() {
@@ -132,74 +122,53 @@ class CapturePhoto extends HTMLElement {
       return;
     }
 
+    const trackCapabilities = this.getTrackCapabilities();
+    const trackSettings = this.getTrackSettings();
+
     if (name === 'no-image' && oldValue !== newValue) {
       this.#emptyOutputElement();
     }
 
-    if (name === 'facing-mode' && oldValue !== newValue && this.#supportedConstraints.facingMode) {
-      const trackSettings = this.getTrackSettings();
+    if (name === 'facing-mode' && oldValue !== newValue && this.#supportedConstraints?.facingMode) {
+      const isValidFacingMode = ['user', 'environment'].includes(this.facingMode);
 
-      if ('facingMode' in trackSettings && ['user', 'environment'].includes(this.facingMode)) {
+      if (trackSettings?.facingMode && isValidFacingMode) {
         this.#stopVideoStreaming();
         this.#requestGetUserMedia();
       }
     }
 
     if (name === 'camera-resolution' && oldValue !== newValue) {
-      const trackCapabilities = this.getTrackCapabilities();
-      const trackSettings = this.getTrackSettings();
-      const [width, height] = this.cameraResolution.split('x');
-      const nWidth = Number(width);
-      const nHeight = Number(height);
+      const [width, height] = this.cameraResolution.split('x').map(x => Number(x));
+      const widthInAllowedRange = width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max;
+      const heightInAllowedRange = height >= trackCapabilities?.height?.min && height <= trackCapabilities?.height?.max;
 
-      if (
-        'width' in trackSettings && 'height' in trackSettings
-        && nWidth >= trackCapabilities?.width?.min && nWidth <= trackCapabilities?.width?.max
-        && nHeight >= trackCapabilities?.height?.min && nHeight <= trackCapabilities?.height?.max
-      ) {
+      if (trackSettings?.width && trackSettings?.height && widthInAllowedRange && heightInAllowedRange) {
         this.#stopVideoStreaming();
         this.#requestGetUserMedia();
       }
     }
 
-    if (name === 'pan' && oldValue !== newValue && this.#supportedConstraints.pan) {
-      const trackCapabilities = this.getTrackCapabilities();
-      const trackSettings = this.getTrackSettings();
-      const nPan = Number(this.pan);
+    if (name === 'pan' && oldValue !== newValue && this.#supportedConstraints?.pan) {
+      const panInAllowedRange = this.pan >= trackCapabilities?.pan?.min && this.pan <= trackCapabilities?.pan?.max;
 
-      if (
-        'pan' in trackSettings
-        && nPan >= trackCapabilities?.pan?.min
-        && nPan <= trackCapabilities?.pan?.max
-      ) {
+      if (trackSettings?.pan && panInAllowedRange) {
         this.#applyPTZ('pan', this.pan);
       }
     }
 
-    if (name === 'tilt' && oldValue !== newValue && this.#supportedConstraints.tilt) {
-      const trackCapabilities = this.getTrackCapabilities();
-      const trackSettings = this.getTrackSettings();
-      const nTilt = Number(this.tilt);
+    if (name === 'tilt' && oldValue !== newValue && this.#supportedConstraints?.tilt) {
+      const tiltInAllowedRange = this.tilt >= trackCapabilities?.tilt?.min && this.tilt <= trackCapabilities?.tilt?.max;
 
-      if (
-        'tilt' in trackSettings
-        && nTilt >= trackCapabilities?.tilt?.min
-        && nTilt <= trackCapabilities?.tilt?.max
-      ) {
+      if (trackSettings?.tilt && tiltInAllowedRange) {
         this.#applyPTZ('tilt', this.tilt);
       }
     }
 
-    if (name === 'zoom' && oldValue !== newValue && this.#supportedConstraints.zoom) {
-      const trackCapabilities = this.getTrackCapabilities();
-      const trackSettings = this.getTrackSettings();
-      const nZoom = Number(this.zoom);
+    if (name === 'zoom' && oldValue !== newValue && this.#supportedConstraints?.zoom) {
+      const zoomInAllowedRange = this.zoom >= trackCapabilities?.zoom?.min && this.zoom <= trackCapabilities?.zoom?.max;
 
-      if (
-        'zoom' in trackSettings
-        && nZoom >= trackCapabilities?.zoom?.min
-        && nZoom <= trackCapabilities?.zoom?.max
-      ) {
+      if (trackSettings?.zoom && zoomInAllowedRange) {
         this.#applyPTZ('zoom', this.zoom);
       }
     }
@@ -267,7 +236,8 @@ class CapturePhoto extends HTMLElement {
     }
 
     const [track] = this.#stream.getVideoTracks();
-    track && track.stop();
+
+    track?.stop();
     this.#videoElement.srcObject = null;
     this.#stream = null;
   }
@@ -292,7 +262,8 @@ class CapturePhoto extends HTMLElement {
     };
 
     if (typeof this.cameraResolution === 'string') {
-      const [width, height] = this.cameraResolution.split('x');
+      const [width, height] = this.cameraResolution.split('x').map(x => Number(x));
+
       constraints.video.width = width;
       constraints.video.height = height;
     }
@@ -304,7 +275,9 @@ class CapturePhoto extends HTMLElement {
       this.#applyPTZ('tilt', this.tilt);
       this.#applyPTZ('zoom', this.zoom);
 
-      if ('facingMode' in this.getTrackSettings()) {
+      const trackSettings = this.getTrackSettings();
+
+      if (trackSettings?.facingMode) {
         this.#facingModeButtonSlot.hidden = false;
       }
     } catch (error) {
@@ -340,7 +313,7 @@ class CapturePhoto extends HTMLElement {
           image.height = height;
           image.part = 'output-image';
           this.#emptyOutputElement();
-          this.#outputElement && this.#outputElement.appendChild(image);
+          this.#outputElement?.appendChild(image);
         }
 
         this.dispatchEvent(new CustomEvent('capture-photo:success', {
@@ -443,22 +416,21 @@ class CapturePhoto extends HTMLElement {
     }
 
     const [track] = this.#stream.getVideoTracks();
-
     const trackCapabilities = this.getTrackCapabilities();
     const trackSettings = this.getTrackSettings();
 
-    if (constraintName in trackSettings) {
+    if (trackSettings?.[constraintName]) {
       track.applyConstraints({
         advanced: [{
-          [constraintName]: clamp(Number(constraintValue), trackCapabilities[constraintName]?.min, trackCapabilities[constraintName]?.max)
+          [constraintName]: clamp(Number(constraintValue), trackCapabilities?.[constraintName]?.min, trackCapabilities?.[constraintName]?.max)
         }]
       });
     }
   }
 
   #onCaptureButtonSlotChange = evt => {
-    if (evt.target && evt.target.name === 'capture-button') {
-      this.#captureButton && this.#captureButton.removeEventListener('click', this.#onCapturePhotoButtonClick);
+    if (evt.target?.name === 'capture-button') {
+      this.#captureButton?.removeEventListener('click', this.#onCapturePhotoButtonClick);
       this.#captureButton = this.#getCaptureButton();
 
       if (this.#captureButton) {
@@ -472,8 +444,8 @@ class CapturePhoto extends HTMLElement {
   };
 
   #onFacingModeButtonSlotChange = evt => {
-    if (evt.target && evt.target.name === 'facing-mode-button') {
-      this.#facingModeButton && this.#facingModeButton.removeEventListener('click', this.#onFacingModeButtonClick);
+    if (evt.target?.name === 'facing-mode-button') {
+      this.#facingModeButton?.removeEventListener('click', this.#onFacingModeButtonClick);
       this.#facingModeButton = this.#getFacingModeButton();
 
       if (this.#facingModeButton) {
@@ -521,7 +493,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   static isSupported() {
-    return Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    return Boolean(navigator.mediaDevices?.getUserMedia);
   }
 
   static defineCustomElement(elementName = 'capture-photo') {
