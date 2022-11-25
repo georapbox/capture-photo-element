@@ -16,6 +16,7 @@ capture-photo:not(:defined) {
 }
 
 capture-photo {
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -40,22 +41,28 @@ capture-photo::part(actions-container) {
 }
 
 capture-photo::part(capture-button) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 60px;
   width: 60px;
   height: 60px;
-  background-color: #cccccc;
-  border: 5px solid #383838;
-  color: #000000;
-  border-radius: 50%;
-  font-size: 1rem;
+  color: #d0cfcf;
+  background-color: transparent;
+  border: 0;
+  line-height: 1;
   cursor: pointer;
   overflow: hidden;
   -webkit-appearance: none;
   appearance: none;
+  transition: 0.15s color ease-in-out;
 }
 
-capture-photo [slot="capture-button-content"] {
-  /* Visually hidden */
+capture-photo::part(capture-button):hover {
+  color: #ffffff;
+}
+
+.visually-hidden {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -68,14 +75,15 @@ capture-photo [slot="capture-button-content"] {
 }
 
 capture-photo::part(facing-mode-button) {
-  margin-right: calc(-40px - 2rem);
-  min-width: 40px;
-  width: 40px;
-  height: 40px;
-  background-color: #ffffff;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--background);
+  color: var(--text-main);
   border: 0;
+  border-radius: 0.25rem;
   line-height: 1;
-  border-radius: 50%;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
