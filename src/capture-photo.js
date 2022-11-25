@@ -81,12 +81,7 @@ class CapturePhoto extends HTMLElement {
     this.#captureButtonSlot?.addEventListener('slotchange', this.#onCaptureButtonSlotChange);
     this.#captureButton?.addEventListener('click', this.#onCapturePhotoButtonClick);
     this.#facingModeButtonSlot?.addEventListener('slotchange', this.#onFacingModeButtonSlotChange);
-
-    if (this.#facingModeButton) {
-      if (this.#supportedConstraints?.facingMode) {
-        this.#facingModeButton.addEventListener('click', this.#onFacingModeButtonClick);
-      }
-    }
+    this.#facingModeButton?.addEventListener('click', this.#onFacingModeButtonClick);
 
     if (!CapturePhoto.isSupported()) {
       return this.dispatchEvent(new CustomEvent('capture-photo:error', {
