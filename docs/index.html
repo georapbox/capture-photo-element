@@ -7,9 +7,9 @@
   <title>&lt;capture-photo&gt;</title>
   <meta name="description" content="A custom element that implements the MediaDevices.getUserMedia() method of the MediaDevices interface to capture a photo in the browser.">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="stylesheet" href="styles/water.css">
-  <link rel="stylesheet" href="styles/main.css">
-  <script type="module" src="scripts/main.js"></script>
+  <link rel="stylesheet" href="css/water.css">
+  <link rel="stylesheet" href="css/main.css">
+  <script type="module" src="js/main.js"></script>
 </head>
 <body>
   <div class="container">
@@ -17,9 +17,11 @@
 
     <p>A custom element that implements the <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia" target="_blank" rel="noopener noreferrer">MediaDevices.getUserMedia()</a> method of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices" target="_blank" rel="noopener noreferrer">MediaDevices</a> interface to capture a photo in the browser.</p>
 
-    <h2>Example</h2>
+    <h2>Demo</h2>
 
     <capture-photo>
+      <span slot="capture-button-content">Capture photo</span>
+
       <span slot="facing-mode-button-content">
         <img src="assets/icons/reverse.svg" width="26" height="26" alt="Change facing mode">
       </span>

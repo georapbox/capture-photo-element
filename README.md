@@ -5,8 +5,6 @@
 [getUserMedia]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 [MediaDevices]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices
 [constraints]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#parameters
-[support]: https://caniuse.com/#feat=custom-elementsv1
-[polyfill]: https://github.com/webcomponents/polyfills/tree/master/packages/custom-elements
 [license]: https://georapbox.mit-license.org/@2022
 [changelog]: https://github.com/georapbox/capture-photo-element/blob/main/CHANGELOG.md
 
@@ -202,10 +200,22 @@ Below is a full usage example, with custom configuration and styling. Check the 
       border-radius: 50%;
       font-size: 1rem;
       cursor: pointer;
-      text-indent: -9999px;
       overflow: hidden;
       -webkit-appearance: none;
-      -moz-appearance: none;
+      appearance: none;
+    }
+
+    capture-photo [slot="capture-button-content"] {
+      /* Visually hidden */
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
     }
 
     capture-photo::part(facing-mode-button) {
@@ -219,7 +229,7 @@ Below is a full usage example, with custom configuration and styling. Check the 
       border-radius: 50%;
       cursor: pointer;
       -webkit-appearance: none;
-      -moz-appearance: none;
+      appearance: none;
     }
 
     capture-photo::part(output-container) {
@@ -265,15 +275,6 @@ Below is a full usage example, with custom configuration and styling. Check the 
 ## Changelog
 
 For API updates and breaking changes, check the [CHANGELOG][changelog].
-
-## Browser support
-
-Browsers without native [custom element support][support] require a [polyfill][polyfill].
-
-- Firefox
-- Chrome
-- Microsoft Edge
-- Safari
 
 ## License
 
