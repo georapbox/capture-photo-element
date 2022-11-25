@@ -1,5 +1,6 @@
-const template = document.createElement('template');
+import { clamp } from './utils/clamp.js';
 
+const template = document.createElement('template');
 const html = String.raw;
 
 template.innerHTML = html`
@@ -30,22 +31,10 @@ template.innerHTML = html`
     <slot name="capture-button">
       <button part="capture-button" type="button"><slot name="capture-button-content">Capture photo</slot></button>
     </slot>
-    <slot name="facing-mode-button"><button part="facing-mode-button" type="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
+    <slot name="facing-mode-button" hidden><button part="facing-mode-button" type="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
   </div>
   <div part="output-container" id="output"></div>
 `;
-
-const clamp = (value, lower, upper) => {
-  if (Number.isNaN(lower)) {
-    lower = 0;
-  }
-
-  if (Number.isNaN(upper)) {
-    upper = 0;
-  }
-
-  return Math.min(Math.max(value, Math.min(lower, upper)), Math.max(lower, upper));
-};
 
 class CapturePhoto extends HTMLElement {
   #connected;
@@ -63,7 +52,7 @@ class CapturePhoto extends HTMLElement {
     super();
 
     this.#connected = false;
-    this.#supportedConstraints = CapturePhoto.isSupported() ? navigator.mediaDevices.getSupportedConstraints() : {};
+    this.#supportedConstraints = this.getSupportedConstraints();
 
     if (!this.shadowRoot) {
       this.attachShadow({ mode: 'open' });
@@ -75,28 +64,24 @@ class CapturePhoto extends HTMLElement {
     this.#upgradeProperty('noImage');
     this.#upgradeProperty('facingMode');
     this.#upgradeProperty('cameraResolution');
+    this.#upgradeProperty('pan');
+    this.#upgradeProperty('tilt');
     this.#upgradeProperty('zoom');
 
     this.#connected = true;
     this.#canvasElement = this.shadowRoot.querySelector('canvas');
     this.#outputElement = this.shadowRoot.getElementById('output');
     this.#videoElement = this.shadowRoot.querySelector('video');
-    this.#videoElement && this.#videoElement.addEventListener('loadedmetadata', this.#onVideoLoadedMetaData);
     this.#captureButtonSlot = this.shadowRoot.querySelector('slot[name="capture-button"]');
-    this.#captureButtonSlot && this.#captureButtonSlot.addEventListener('slotchange', this.#onCaptureButtonSlotChange);
     this.#captureButton = this.#getCaptureButton();
-    this.#captureButton && this.#captureButton.addEventListener('click', this.#onCapturePhotoButtonClick);
     this.#facingModeButtonSlot = this.shadowRoot.querySelector('slot[name="facing-mode-button"]');
-    this.#facingModeButtonSlot && this.#facingModeButtonSlot.addEventListener('slotchange', this.#onFacingModeButtonSlotChange);
     this.#facingModeButton = this.#getFacingModeButton();
 
-    if (this.#facingModeButton) {
-      if (this.#supportedConstraints.facingMode) {
-        this.#facingModeButton.addEventListener('click', this.#onFacingModeButtonClick);
-      } else {
-        this.#facingModeButton.hidden = true;
-      }
-    }
+    this.#videoElement?.addEventListener('loadedmetadata', this.#onVideoLoadedMetaData);
+    this.#captureButtonSlot?.addEventListener('slotchange', this.#onCaptureButtonSlotChange);
+    this.#captureButton?.addEventListener('click', this.#onCapturePhotoButtonClick);
+    this.#facingModeButtonSlot?.addEventListener('slotchange', this.#onFacingModeButtonSlotChange);
+    this.#facingModeButton?.addEventListener('click', this.#onFacingModeButtonClick);
 
     if (!CapturePhoto.isSupported()) {
       return this.dispatchEvent(new CustomEvent('capture-photo:error', {
@@ -116,11 +101,15 @@ class CapturePhoto extends HTMLElement {
 
   disconnectedCallback() {
     this.#stopVideoStreaming();
-    this.#facingModeButton && this.#facingModeButton.removeEventListener('click', this.#onFacingModeButtonClick);
-    this.#captureButton && this.#captureButton.removeEventListener('click', this.#onCapturePhotoButtonClick);
-    this.#videoElement && this.#videoElement.removeEventListener('canplay', this.#onVideoLoadedMetaData);
-    this.#captureButtonSlot && this.#captureButtonSlot.removeEventListener('slotchange', this.#onCaptureButtonSlotChange);
-    this.#facingModeButtonSlot && this.#facingModeButtonSlot.removeEventListener('slotchange', this.#onFacingModeButtonSlotChange);
+    this.#facingModeButton?.removeEventListener('click', this.#onFacingModeButtonClick);
+    this.#captureButton?.removeEventListener('click', this.#onCapturePhotoButtonClick);
+    this.#videoElement?.removeEventListener('canplay', this.#onVideoLoadedMetaData);
+    this.#captureButtonSlot?.removeEventListener('slotchange', this.#onCaptureButtonSlotChange);
+    this.#facingModeButtonSlot?.removeEventListener('slotchange', this.#onFacingModeButtonSlotChange);
+  }
+
+  static get observedAttributes() {
+    return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -128,42 +117,56 @@ class CapturePhoto extends HTMLElement {
       return;
     }
 
-    if (name === 'no-image') {
+    const trackCapabilities = this.getTrackCapabilities();
+    const trackSettings = this.getTrackSettings();
+
+    if (name === 'no-image' && oldValue !== newValue) {
       this.#emptyOutputElement();
     }
 
-    if (name === 'facing-mode' && this.#supportedConstraints.facingMode && oldValue !== newValue) {
-      this.#stopVideoStreaming();
-      this.#requestGetUserMedia();
-      this.dispatchEvent(new CustomEvent('capture-photo:facing-mode-change', {
-        bubbles: true,
-        composed: true,
-        detail: { facingMode: newValue }
-      }));
+    if (name === 'facing-mode' && oldValue !== newValue && this.#supportedConstraints?.facingMode) {
+      const isValidFacingMode = ['user', 'environment'].includes(this.facingMode);
+
+      if (trackSettings?.facingMode && isValidFacingMode) {
+        this.#stopVideoStreaming();
+        this.#requestGetUserMedia();
+      }
     }
 
     if (name === 'camera-resolution' && oldValue !== newValue) {
-      this.#stopVideoStreaming();
-      this.#requestGetUserMedia();
-      this.dispatchEvent(new CustomEvent('capture-photo:camera-resolution-change', {
-        bubbles: true,
-        composed: true,
-        detail: { cameraResolution: newValue }
-      }));
+      const [width, height] = this.cameraResolution.split('x').map(x => Number(x));
+      const widthInAllowedRange = width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max;
+      const heightInAllowedRange = height >= trackCapabilities?.height?.min && height <= trackCapabilities?.height?.max;
+
+      if (trackSettings?.width && trackSettings?.height && widthInAllowedRange && heightInAllowedRange) {
+        this.#stopVideoStreaming();
+        this.#requestGetUserMedia();
+      }
     }
 
-    if (name === 'zoom' && oldValue !== newValue) {
-      this.#applyZoom(this.zoom);
-      this.dispatchEvent(new CustomEvent('capture-photo:zoom-change', {
-        bubbles: true,
-        composed: true,
-        detail: { zoom: this.zoom }
-      }));
-    }
-  }
+    if (name === 'pan' && oldValue !== newValue && this.#supportedConstraints?.pan) {
+      const panInAllowedRange = this.pan >= trackCapabilities?.pan?.min && this.pan <= trackCapabilities?.pan?.max;
 
-  static get observedAttributes() {
-    return ['no-image', 'facing-mode', 'camera-resolution', 'zoom'];
+      if (trackSettings?.pan && panInAllowedRange) {
+        this.#applyPTZ('pan', this.pan);
+      }
+    }
+
+    if (name === 'tilt' && oldValue !== newValue && this.#supportedConstraints?.tilt) {
+      const tiltInAllowedRange = this.tilt >= trackCapabilities?.tilt?.min && this.tilt <= trackCapabilities?.tilt?.max;
+
+      if (trackSettings?.tilt && tiltInAllowedRange) {
+        this.#applyPTZ('tilt', this.tilt);
+      }
+    }
+
+    if (name === 'zoom' && oldValue !== newValue && this.#supportedConstraints?.zoom) {
+      const zoomInAllowedRange = this.zoom >= trackCapabilities?.zoom?.min && this.zoom <= trackCapabilities?.zoom?.max;
+
+      if (trackSettings?.zoom && zoomInAllowedRange) {
+        this.#applyPTZ('zoom', this.zoom);
+      }
+    }
   }
 
   get noImage() {
@@ -194,13 +197,28 @@ class CapturePhoto extends HTMLElement {
     this.setAttribute('camera-resolution', value);
   }
 
+  get pan() {
+    return Number(this.getAttribute('pan')) || null;
+  }
+
+  set pan(value) {
+    this.setAttribute('pan', Number(value) || null);
+  }
+
+  get tilt() {
+    return Number(this.getAttribute('tilt')) || null;
+  }
+
+  set tilt(value) {
+    this.setAttribute('tilt', Number(value) || null);
+  }
+
   get zoom() {
     return Number(this.getAttribute('zoom')) || null;
   }
 
   set zoom(value) {
-    const numValue = Number(value) || 0;
-    this.setAttribute('zoom', numValue > 0 ? Math.floor(numValue) : 0);
+    this.setAttribute('zoom', Number(value) || null);
   }
 
   get loading() {
@@ -213,12 +231,13 @@ class CapturePhoto extends HTMLElement {
     }
 
     const [track] = this.#stream.getVideoTracks();
-    track && track.stop();
+
+    track?.stop();
     this.#videoElement.srcObject = null;
     this.#stream = null;
   }
 
-  #requestGetUserMedia() {
+  async #requestGetUserMedia() {
     if (!CapturePhoto.isSupported()) {
       return;
     }
@@ -229,30 +248,42 @@ class CapturePhoto extends HTMLElement {
       video: {
         facingMode: {
           ideal: this.facingMode || 'user'
-        }
+        },
+        pan: true,
+        tilt: true,
+        zoom: true
       },
       audio: false
     };
 
     if (typeof this.cameraResolution === 'string') {
-      const [width, height] = this.cameraResolution.split('x');
+      const [width, height] = this.cameraResolution.split('x').map(x => Number(x));
+
       constraints.video.width = width;
       constraints.video.height = height;
     }
 
-    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-      this.#videoElement.srcObject = stream;
-      this.#stream = stream;
-      this.#applyZoom(this.zoom);
-    }).catch(error => {
+    try {
+      this.#stream = await navigator.mediaDevices.getUserMedia(constraints);
+      this.#videoElement.srcObject = this.#stream;
+      this.#applyPTZ('pan', this.pan);
+      this.#applyPTZ('tilt', this.tilt);
+      this.#applyPTZ('zoom', this.zoom);
+
+      const trackSettings = this.getTrackSettings();
+
+      if (trackSettings?.facingMode) {
+        this.#facingModeButtonSlot.hidden = false;
+      }
+    } catch (error) {
       this.dispatchEvent(new CustomEvent('capture-photo:error', {
         bubbles: true,
         composed: true,
         detail: { error }
       }));
-    }).finally(() => {
+    } finally {
       this.removeAttribute('loading');
-    });
+    }
   }
 
   capture() {
@@ -277,7 +308,7 @@ class CapturePhoto extends HTMLElement {
           image.height = height;
           image.part = 'output-image';
           this.#emptyOutputElement();
-          this.#outputElement && this.#outputElement.appendChild(image);
+          this.#outputElement?.appendChild(image);
         }
 
         this.dispatchEvent(new CustomEvent('capture-photo:success', {
@@ -293,6 +324,42 @@ class CapturePhoto extends HTMLElement {
         detail: { error }
       }));
     }
+  }
+
+  getSupportedConstraints() {
+    if (!CapturePhoto.isSupported()) {
+      return {};
+    }
+
+    return navigator.mediaDevices.getSupportedConstraints() || {};
+  }
+
+  getTrackCapabilities() {
+    if (!this.#stream) {
+      return {};
+    }
+
+    const [track] = this.#stream.getVideoTracks();
+
+    if (track && typeof track.getCapabilities === 'function') {
+      return track.getCapabilities() || {};
+    }
+
+    return {};
+  }
+
+  getTrackSettings() {
+    if (!this.#stream) {
+      return {};
+    }
+
+    const [track] = this.#stream.getVideoTracks();
+
+    if (track && typeof track.getSettings === 'function') {
+      return track.getSettings() || {};
+    }
+
+    return {};
   }
 
   #onFacingModeButtonClick = evt => {
@@ -338,32 +405,27 @@ class CapturePhoto extends HTMLElement {
     Array.from(this.#outputElement.childNodes).forEach(node => node.remove());
   }
 
-  #applyZoom(zoom) {
-    if (!this.#stream || !zoom) {
+  #applyPTZ(constraintName, constraintValue) {
+    if (!this.#stream || !constraintName || !constraintValue) {
       return;
     }
 
     const [track] = this.#stream.getVideoTracks();
+    const trackCapabilities = this.getTrackCapabilities();
+    const trackSettings = this.getTrackSettings();
 
-    if (typeof track.getCapabilities !== 'function' || typeof track.getSettings !== 'function') {
-      return;
-    }
-
-    const capabilities = track.getCapabilities();
-    const settings = track.getSettings();
-
-    if ('zoom' in settings) {
+    if (trackSettings?.[constraintName]) {
       track.applyConstraints({
         advanced: [{
-          zoom: clamp(Number(zoom), capabilities.zoom.min, capabilities.zoom.max)
+          [constraintName]: clamp(Number(constraintValue), trackCapabilities?.[constraintName]?.min, trackCapabilities?.[constraintName]?.max)
         }]
       });
     }
   }
 
   #onCaptureButtonSlotChange = evt => {
-    if (evt.target && evt.target.name === 'capture-button') {
-      this.#captureButton && this.#captureButton.removeEventListener('click', this.#onCapturePhotoButtonClick);
+    if (evt.target?.name === 'capture-button') {
+      this.#captureButton?.removeEventListener('click', this.#onCapturePhotoButtonClick);
       this.#captureButton = this.#getCaptureButton();
 
       if (this.#captureButton) {
@@ -377,8 +439,8 @@ class CapturePhoto extends HTMLElement {
   };
 
   #onFacingModeButtonSlotChange = evt => {
-    if (evt.target && evt.target.name === 'facing-mode-button') {
-      this.#facingModeButton && this.#facingModeButton.removeEventListener('click', this.#onFacingModeButtonClick);
+    if (evt.target?.name === 'facing-mode-button') {
+      this.#facingModeButton?.removeEventListener('click', this.#onFacingModeButtonClick);
       this.#facingModeButton = this.#getFacingModeButton();
 
       if (this.#facingModeButton) {
@@ -426,7 +488,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   static isSupported() {
-    return Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    return Boolean(navigator.mediaDevices?.getUserMedia);
   }
 
   static defineCustomElement(elementName = 'capture-photo') {

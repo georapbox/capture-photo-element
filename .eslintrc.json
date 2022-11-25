@@ -15,14 +15,12 @@
     "sourceType": "module"
   },
   "rules": {
-    // Possible Errors
     "no-empty": ["error", {
       "allowEmptyCatch": true
     }],
     "no-use-before-define": ["error", {
       "functions": false
     }],
-    // Stylistic Issues
     "indent": ["warn", 2, {
       "SwitchCase": 1,
       "ignoredNodes": ["TemplateLiteral"]
@@ -53,7 +51,6 @@
     }],
     "padded-blocks": ["warn", "never"],
     "comma-dangle": ["warn", "never"],
-    // Best Practices
     "curly": ["warn"],
     "eqeqeq": ["error", "always", {
       "null": "ignore"
@@ -63,6 +60,7 @@
       "exceptions": {
         "Property": false
       }
-    }]
+    }],
+    "prefer-const": ["warn"]
   }
 }

@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v3.0.0 (2022-11-25)
+
+- Add `pan` and `tilt` properties to support panning and tilting respectively if supported by the camera harware.
+- Add public methods `getSupportedConstraints()`, `getTrackCapabilities()` and `getTrackSettings()`.
+- Hide `facing-mode-slot` by default and display it only if `facingMode` is supported by device.
+
+### Breaking Changes
+
+Remove the following events: `capture-photo:facing-mode-change`, `capture-photo:camera-resolution-change` and `capture-photo:zoom-change`. The reason for removing them is because they would be emitted every time a relevant property/attribute would change but there was no guarantee that the value updated, was supported by the camera hardware.
+
 ## v2.0.0 (2022-11-18)
 
 - Refactor to use private class fields.

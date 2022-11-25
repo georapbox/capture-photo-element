@@ -1,4 +1,4 @@
-import { elementUpdated, expect, fixture, fixtureCleanup, html, oneEvent } from '@open-wc/testing';
+import { elementUpdated, expect, fixture, fixtureCleanup, html } from '@open-wc/testing';
 import sinon from 'sinon';
 import { CapturePhoto } from '../src/capture-photo.js';
 
@@ -23,6 +23,12 @@ describe('<capture-photo>', () => {
     expect(el.cameraResolution).to.be.null;
     expect(el.getAttribute('camera-resolution')).to.be.null;
 
+    expect(el.pan).to.be.null;
+    expect(el.getAttribute('pan')).to.be.null;
+
+    expect(el.tilt).to.be.null;
+    expect(el.getAttribute('tilt')).to.be.null;
+
     expect(el.zoom).to.be.null;
     expect(el.getAttribute('zoom')).to.be.null;
   });
@@ -33,7 +39,9 @@ describe('<capture-photo>', () => {
         no-image
         facing-mode="environment"
         camera-resolution="320x240"
-        zoom="3"
+        pan="2"
+        tilt="3"
+        zoom="4"
       ></capture-photo>
     `);
 
@@ -46,8 +54,14 @@ describe('<capture-photo>', () => {
     expect(el.cameraResolution).to.equal('320x240');
     expect(el.getAttribute('camera-resolution')).to.equal('320x240');
 
-    expect(el.zoom).to.equal(3);
-    expect(el.getAttribute('zoom')).to.equal('3');
+    expect(el.pan).to.equal(2);
+    expect(el.getAttribute('pan')).to.equal('2');
+
+    expect(el.tilt).to.equal(3);
+    expect(el.getAttribute('tilt')).to.equal('3');
+
+    expect(el.zoom).to.equal(4);
+    expect(el.getAttribute('zoom')).to.equal('4');
   });
 
   it('change properties programmatically', async () => {
@@ -56,7 +70,9 @@ describe('<capture-photo>', () => {
     el.noImage = true;
     el.facingMode = 'environment';
     el.cameraResolution = '320x240';
-    el.zoom = 3;
+    el.pan = 2;
+    el.tilt = 3;
+    el.zoom = 4;
 
     await elementUpdated(el);
 
@@ -69,8 +85,14 @@ describe('<capture-photo>', () => {
     expect(el.cameraResolution).to.equal('320x240');
     expect(el.getAttribute('camera-resolution')).to.equal('320x240');
 
-    expect(el.zoom).to.equal(3);
-    expect(el.getAttribute('zoom')).to.equal('3');
+    expect(el.pan).to.equal(2);
+    expect(el.getAttribute('pan')).to.equal('2');
+
+    expect(el.tilt).to.equal(3);
+    expect(el.getAttribute('tilt')).to.equal('3');
+
+    expect(el.zoom).to.equal(4);
+    expect(el.getAttribute('zoom')).to.equal('4');
   });
 
   it('change button slots', async () => {
@@ -113,51 +135,6 @@ describe('<capture-photo>', () => {
       <a href="#" slot="capture-button" role="button">Take picture</a>
       <a href="#" slot="facing-mode-button" role="button">Change camera</a>
     `);
-  });
-
-  it('capture-photo:facing-mode-change event is emitted', async () => {
-    const el = await fixture(html`<capture-photo></capture-photo>`);
-    const listener = oneEvent(el, 'capture-photo:facing-mode-change');
-
-    el.facingMode = 'environment';
-
-    await elementUpdated(el);
-
-    const { detail } = await listener;
-
-    expect(detail).to.deep.equal({
-      facingMode: 'environment'
-    });
-  });
-
-  it('capture-photo:camera-resolution-change event is emitted', async () => {
-    const el = await fixture(html`<capture-photo></capture-photo>`);
-    const listener = oneEvent(el, 'capture-photo:camera-resolution-change');
-
-    el.cameraResolution = '320x240';
-
-    await elementUpdated(el);
-
-    const { detail } = await listener;
-
-    expect(detail).to.deep.equal({
-      cameraResolution: '320x240'
-    });
-  });
-
-  it('capture-photo:zoom-change event is emitted', async () => {
-    const el = await fixture(html`<capture-photo></capture-photo>`);
-    const listener = oneEvent(el, 'capture-photo:zoom-change');
-
-    el.zoom = 2;
-
-    await elementUpdated(el);
-
-    const { detail } = await listener;
-
-    expect(detail).to.deep.equal({
-      zoom: 2
-    });
   });
 
   it('capture method is called', async () => {
