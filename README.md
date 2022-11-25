@@ -76,15 +76,15 @@ capture-photo::part(output-image) {
 ## API
 
 ### Properties
-| Name | Reflects | Type | Default | Description |
-| ---- | -------- | ---- | ------- | ----------- |
-| `noImage`<br>*`no-image`* | ✓ | Boolean | `false` | Optional. Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
-| `facingMode`<br>*`facing-mode`*<sup>1</sup> | ✓ | String | `null` | Optional. The preferred camera to be used if the camera hardware supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera respectively. |
-| `cameraResolution`<br>*`camera-resolution`*<sup>1</sup> | ✓ | String | `null` | Optional. Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. You can access the min & max supported values for width and height, using `getTrackCapabilities().width` and `getTrackCapabilities().height` respectively. |
-| `pan`<sup>1</sup> | ✓ | Number | `null` | Optional. Defines the camera's pan level if supported by the camera hardware. You can access the min & max supported values for pan level, using `getTrackCapabilities().pan`. |
-| `tilt`<sup>1</sup> | ✓ | Number | `null` | Optional. Defines the camera's tilt level if supported by the camera hardware. You can access the min & max supported values for tilt level, using `getTrackCapabilities().tilt`. |
-| `zoom`<sup>1</sup> | ✓ | Number | `null` | Optional. Defines the camera's zoom level if supported by the camera hardware. You can access the min & max supported values for zoom level, using `getTrackCapabilities().zoom`. |
-| `loading` | ✓ | Boolean | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
+| Name | Reflects | Type | Required | Default | Description |
+| ---- | -------- | ---- | -------- | ------- | ----------- |
+| `noImage`<br>*`no-image`* | ✓ | Boolean | - | `false` | Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
+| `facingMode`<br>*`facing-mode`*<sup>1</sup> | ✓ | String | - | `null` | The preferred camera to be used if the camera hardware supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera respectively. |
+| `cameraResolution`<br>*`camera-resolution`*<sup>1</sup> | ✓ | String | - | `null` | Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. You can access the min & max supported values for width and height, using `getTrackCapabilities().width` and `getTrackCapabilities().height` respectively. |
+| `pan`<sup>1</sup> | ✓ | Number | - | `null` | Defines the camera's pan level if supported by the camera hardware. You can access the min & max supported values for pan level, using `getTrackCapabilities().pan`. |
+| `tilt`<sup>1</sup> | ✓ | Number | - | `null` | Defines the camera's tilt level if supported by the camera hardware. You can access the min & max supported values for tilt level, using `getTrackCapabilities().tilt`. |
+| `zoom`<sup>1</sup> | ✓ | Number | - | `null` | Defines the camera's zoom level if supported by the camera hardware. You can access the min & max supported values for zoom level, using `getTrackCapabilities().zoom`. |
+| `loading` | ✓ | Boolean | - | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
 
 <sup>1</sup> Changing any of these properties/attributes may not always guarantee the desired result, because they all depend on the camera hardware support. For example, `zoom=3` might not result to the camera to zoom if the camera hardware does not support zooming. Using `getTrackCapabilities()` and `getTrackSettings()` can prove helpful to check the campera hardware support.
 
