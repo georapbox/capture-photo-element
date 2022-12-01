@@ -5,34 +5,28 @@ const html = String.raw;
 
 template.innerHTML = html`
   <style>
-    :host {
-      all: initial;
-      display: block;
-      box-sizing: border-box;
-    }
-    :host *,
-    :host *::before,
-    :host *::after {
-      box-sizing: inherit;
-    }
-    :host video {
-      display: block;
-    }
-    :host #output:empty {
-      display: none;
-    }
-    [hidden] {
-      display: none !important;
-    }
+    :host { all: initial; display: block; box-sizing: border-box; }
+    :host *, :host *::before, :host *::after { box-sizing: inherit; }
+    :host([hidden]), [hidden] { display: none; }
+    :host video { display: block; }
+    :host #output:empty { display: none; }
   </style>
   <video part="video" playsinline></video>
   <canvas hidden></canvas>
   <div part="actions-container">
     <slot name="capture-button">
-      <button part="capture-button" type="button"><slot name="capture-button-content">Capture photo</slot></button>
+      <button part="capture-button" type="button">
+        <slot name="capture-button-content">Capture photo</slot>
+      </button>
     </slot>
-    <slot name="facing-mode-button" hidden><button part="facing-mode-button" type="button"><slot name="facing-mode-button-content">Toggle facing mode</slot></button></slot>
+    <slot name="facing-mode-button" hidden>
+      <button part="facing-mode-button" type="button">
+        <slot name="facing-mode-button-content">Toggle facing mode</slot>
+      </button>
+    </slot>
+    <slot name="actions"></slot>
   </div>
+  <slot></slot>
   <div part="output-container" id="output"></div>
 `;
 

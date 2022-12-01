@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v3.1.0 (2022-12-01)
+
+- Add a default un-named slot to add content inside the component.
+- Add `actions` slot to add content inside the actions container element.
+
 ## v3.0.0 (2022-11-25)
 
 - Add `pan` and `tilt` properties to support panning and tilting respectively if supported by the camera harware.

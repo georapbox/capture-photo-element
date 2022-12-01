@@ -96,6 +96,8 @@ capture-photo::part(output-image) {
 | `capture-button-content` | Override the default content of the capture photo button with your own content. |
 | `facing-mode-button` | Override the default facing mode button with your own. If `facingMode` is not supported in constrainable properties for the current `MediaStreamTrack`, the slot is hidden. |
 | `facing-mode-button-content` | Override the default content of the facing mode button with your own content. |
+| `actions` | Slot to add content inside the actions container element. |
+| (default) | Un-named slot to add content inside the component. |
 
 #### Slots usage examples
 

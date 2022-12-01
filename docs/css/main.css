@@ -10,6 +10,18 @@
   max-height: 300px;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Component custom styling */
 capture-photo:not(:defined) {
   display: none;
@@ -60,18 +72,6 @@ capture-photo::part(capture-button) {
 
 capture-photo::part(capture-button):hover {
   color: #ffffff;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  white-space: nowrap;
-  border: 0;
 }
 
 capture-photo::part(facing-mode-button) {

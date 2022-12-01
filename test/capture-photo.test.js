@@ -137,6 +137,26 @@ describe('<capture-photo>', () => {
     `);
   });
 
+  it('adds content in actions slot', async () => {
+    const el = await fixture(html`
+      <capture-photo>
+        <div slot="actions">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>
+      </capture-photo>
+    `);
+
+    expect(el).lightDom.to.equal('<div slot="actions">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>');
+  });
+
+  it('adds content in default slot', async () => {
+    const el = await fixture(html`
+      <capture-photo>
+        <div class="content">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>
+      </capture-photo>
+    `);
+
+    expect(el).lightDom.to.equal('<div class="content">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>');
+  });
+
   it('capture method is called', async () => {
     const el = await fixture(html`<capture-photo></capture-photo>`);
     const captureSlot = el.shadowRoot.querySelector('slot[name="capture-button"]');
