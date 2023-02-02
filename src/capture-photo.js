@@ -1,9 +1,8 @@
 import { clamp } from './utils/clamp.js';
 
 const template = document.createElement('template');
-const html = String.raw;
 
-template.innerHTML = html`
+template.innerHTML = /* html */`
   <style>
     :host { all: initial; display: block; box-sizing: border-box; }
     :host *, :host *::before, :host *::after { box-sizing: inherit; }
