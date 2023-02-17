@@ -1,5 +1,5 @@
 const isLocalhost = window.location.href.includes('127.0.0.1') || window.location.href.includes('localhost');
-const componentUrl = isLocalhost ? '../../dist/capture-photo.js' : 'https://unpkg.com/@georapbox/capture-photo-element';
+const componentUrl = isLocalhost ? '../../dist/capture-photo.js' : '../lib/capture-photo.js';
 
 import(componentUrl).then(res => {
   const { CapturePhoto } = res;
