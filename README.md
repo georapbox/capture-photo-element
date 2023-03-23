@@ -85,6 +85,7 @@ capture-photo::part(output-image) {
 | `tilt`<sup>1</sup> | ✓ | Number | - | `null` | Defines the camera's tilt level if supported by the camera hardware. You can access the min & max supported values for tilt level, using `getTrackCapabilities().tilt`. |
 | `zoom`<sup>1</sup> | ✓ | Number | - | `null` | Defines the camera's zoom level if supported by the camera hardware. You can access the min & max supported values for zoom level, using `getTrackCapabilities().zoom`. |
 | `loading` | ✓ | Boolean | - | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
+| `calculateFileSize`<br>*`calculate-file-size`* | ✓ | Boolean | - | `false` | Indicates if the component should calculate the file size of the generated image. If set to `true` the file size (in bytes) will be included in the event detail object when the `capture-photo:success` event is fired. The reason for not calculating the file size by default is that it might be an "expensive" operation, especially for large images, therefore it is recommended to set this property to `true` only if you need the file size. |
 
 <sup>1</sup> Changing any of these properties/attributes may not always guarantee the desired result, because they all depend on the camera hardware support. For example, `zoom=3` might not result to the camera to zoom if the camera hardware does not support zooming. Using `getTrackCapabilities()` and `getTrackSettings()` can prove helpful to check the campera hardware support.
 
@@ -142,17 +143,21 @@ capture-photo::part(output-image) {
 | ---- | ---- | ----------- | --------- |
 | `defineCustomElement` | Static | Defines/registers the custom element with the name provided. If no name is provided, the default name is used. The method checks if the element is already defined, hence will skip trying to redefine it. | `elementName='capture-photo'` |
 | `isSupported` | Static | Returns `true` if `MediaDevices.getUserMedia()` is supported by the platform, otherwise returns `false`. | - |
-| `capture` | Prototype | Captures a photo using the element's properties. | - |
-| `getSupportedConstraints` | Prototype | Returns an object based on the `MediaTrackSupportedConstraints` dictionary, whose member fields each specify one of the constrainable properties the user agent understands. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaDevices/getSupportedConstraints) | - |
-| `getTrackCapabilities` | Prototype | Returns a `MediaTrackCapabilities` object which specifies the values or range of values which each constrainable property, based upon the platform and user agent. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getCapabilities) | - |
-| `getTrackSettings` | Prototype | Returns a `MediaTrackSettings` object containing the current values of each of the constrainable properties for the current MediaStreamTrack. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getSettings) | - |
+| `capture`<sup>1</sup> | Prototype | Captures a photo using the element's properties. | - |
+| `getSupportedConstraints`<sup>1</sup> | Prototype | Returns an object based on the `MediaTrackSupportedConstraints` dictionary, whose member fields each specify one of the constrainable properties the user agent understands. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaDevices/getSupportedConstraints) | - |
+| `getTrackCapabilities`<sup>1</sup> | Prototype | Returns a `MediaTrackCapabilities` object which specifies the values or range of values which each constrainable property, based upon the platform and user agent. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getCapabilities) | - |
+| `getTrackSettings`<sup>1</sup> | Prototype | Returns a `MediaTrackSettings` object containing the current values of each of the constrainable properties for the current MediaStreamTrack. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getSettings) | - |
+| `startVideoStream`<sup>1</sup> | Prototype | Starts the video stream. Use this method if you want to start the video stream manually, if you have previously stopped it using `stopVideoStream()`. | - |
+| `stopVideoStream`<sup>1</sup> | Prototype | Stops the video stream and releases the camera. Use this method if you want to stop the video stream manually. | - |
+
+<sup>1</sup> These methods are only available after the component has been defined. To ensure the component is defined, you can use `whenDefined` method of the `CustomElementRegistry` interface, eg `customElements.whenDefined('capture-photo').then(() => { /* call methods here */ });`
 
 ### Events
 
 | Name | Description | Event Detail |
 | ---- | ----------- | ------------ |
 | `capture-photo:video-play` | Emitted when camera's video stream starts playing. It is triggered during initial load, or when facing mode or camera resolution mode change are requested. | `{ video: HTMLVideoElement }` |
-| `capture-photo:success` | Emitted when a photo is captured successfully. | `{ dataURI: String, width: Number, height: Number }` |
+| `capture-photo:success` | Emitted when a photo is captured successfully. | `{ dataURI: string, width: number, height: number, size?: number }` |
 | `capture-photo:error` | Emitted when an error occurs. An error might occur because camera permission is denied, a photo cannot be captured for any reason, the video stream cannot start for any reason, etc. | `{ error: DOMException }` |
 
 ## Changelog

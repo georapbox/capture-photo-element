@@ -2,12 +2,21 @@
   --body-max-width: 600px;
 }
 
-#console:empty {
-  display: none;
+.console-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  font-size: 0.9rem;
 }
 
-#console {
-  max-height: 300px;
+.console-info svg {
+  min-width: 20px;
+  color: var(--links);
 }
 
 .visually-hidden {
