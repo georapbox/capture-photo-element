@@ -31,6 +31,9 @@ describe('<capture-photo>', () => {
 
     expect(el.zoom).to.be.null;
     expect(el.getAttribute('zoom')).to.be.null;
+
+    expect(el.calculateFileSize).to.be.false;
+    expect(el.getAttribute('calculate-file-size')).to.be.null;
   });
 
   it('change default properties', async () => {
@@ -42,6 +45,7 @@ describe('<capture-photo>', () => {
         pan="2"
         tilt="3"
         zoom="4"
+        calculate-file-size
       ></capture-photo>
     `);
 
@@ -62,6 +66,9 @@ describe('<capture-photo>', () => {
 
     expect(el.zoom).to.equal(4);
     expect(el.getAttribute('zoom')).to.equal('4');
+
+    expect(el.calculateFileSize).to.be.true;
+    expect(el.getAttribute('calculate-file-size')).to.equal('');
   });
 
   it('change properties programmatically', async () => {
@@ -73,6 +80,7 @@ describe('<capture-photo>', () => {
     el.pan = 2;
     el.tilt = 3;
     el.zoom = 4;
+    el.calculateFileSize = true;
 
     await elementUpdated(el);
 
@@ -93,6 +101,9 @@ describe('<capture-photo>', () => {
 
     expect(el.zoom).to.equal(4);
     expect(el.getAttribute('zoom')).to.equal('4');
+
+    expect(el.calculateFileSize).to.be.true;
+    expect(el.getAttribute('calculate-file-size')).to.equal('');
   });
 
   it('change button slots', async () => {

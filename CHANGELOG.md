@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v3.2.0 (2023-03-23)
+
+- Add public methods `startVideoStream()` and `stopVideoStream()` to start and stop the video stream respectively.
+- Add `calculate-file-size` attribute to optionally calculate the file size of the generated image and add it to the `capture-photo:success` event detail object.
+- Update `devDependencies`.
+
 ## v3.1.0 (2022-12-01)
 
 - Add a default un-named slot to add content inside the component.
