@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
   <title>&lt;capture-photo&gt;</title>
   <meta name="description" content="A custom element that implements the MediaDevices.getUserMedia() method of the MediaDevices interface to capture a photo in the browser.">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -15,46 +16,107 @@
   <div class="container">
     <h1>&lt;capture-photo&gt;</h1>
 
-    <p>A custom element that implements the <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia" target="_blank" rel="noopener noreferrer">MediaDevices.getUserMedia()</a> method of the <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices" target="_blank" rel="noopener noreferrer">MediaDevices</a> interface to capture a photo in the browser.</p>
+    <p>A custom element that implements the <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia" target="_blank" rel="noopener noreferrer">MediaDevices.getUserMedia()</a> method to capture a photo in the browser.</p>
 
     <h2>Demo</h2>
 
-    <p class="console-info">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-info-lg" viewBox="0 0 16 16">
-        <path d="m9.708 6.075-3.024.379-.108.502.595.108c.387.093.464.232.38.619l-.975 4.577c-.255 1.183.14 1.74 1.067 1.74.72 0 1.554-.332 1.933-.789l.116-.549c-.263.232-.65.325-.905.325-.363 0-.494-.255-.402-.704l1.323-6.208Zm.091-2.755a1.32 1.32 0 1 1-2.64 0 1.32 1.32 0 0 1 2.64 0Z"></path>
-      </svg>
-      <em>Open the browser's console to watch fired events.</em>
+    <p class="alert alert-info">
+      Open the browser's console to watch fired events.
     </p>
 
-    <capture-photo calculate-file-size>
-      <div slot="capture-button-content">
-        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512" width="60" height="60">
-          <path fill="currentColor" d="M250.54 129.17l-67.8-67.8A209.65 209.65 0 0086.32 136h161.4a4 4 0 002.82-6.83zM167.72 168H67.63a207.34 207.34 0 00-16.15 125.9l119.06-119.07a4 4 0 00-2.82-6.83zM344 167.72V67.56a207.82 207.82 0 00-125.89-16.08l119.06 119.06a4 4 0 006.83-2.82zM460.52 218.1L341.46 337.17a4 4 0 002.82 6.83h100.09a207.34 207.34 0 0016.15-125.9zM382.83 250.54l67.83-67.82A209.08 209.08 0 00376 86.2v161.52a4 4 0 006.83 2.82zM221.68 341.77a8 8 0 005.54 2.23h59.66a8 8 0 005.7-2.39l49.18-50a8 8 0 002.3-5.62l-.06-60.81a8 8 0 00-2.38-5.69l-50-49.25a8 8 0 00-5.63-2.3l-60.84.06a8 8 0 00-5.69 2.38l-49.25 50a8 8 0 00-2.3 5.63l.06 60.78a8 8 0 002.45 5.76zM261.46 382.83l67.8 67.8A209.65 209.65 0 00425.68 376h-161.4a4 4 0 00-2.82 6.83zM168 344.28v100.16a207.82 207.82 0 00125.89 16.08L174.83 341.46a4 4 0 00-6.83 2.82zM129.17 261.46l-67.83 67.83A209.1 209.1 0 00136 425.8V264.28a4 4 0 00-6.83-2.82z"/>
-        </svg>
-        <span class="visually-hidden">Capture photo</span>
+    <div class="demo-container">
+      <div class="capture-photo-container">
+        <capture-photo></capture-photo>
+
+        <div id="errorPlaceholder"></div>
       </div>
 
-      <div slot="facing-mode-button-content">
-        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512" width="24" height="24">
-          <path d="M350.54 148.68l-26.62-42.06C318.31 100.08 310.62 96 302 96h-92c-8.62 0-16.31 4.08-21.92 10.62l-26.62 42.06C155.85 155.23 148.62 160 140 160H80a32 32 0 00-32 32v192a32 32 0 0032 32h352a32 32 0 0032-32V192a32 32 0 00-32-32h-59c-8.65 0-16.85-4.77-22.46-11.32z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/>
-          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M124 158v-22h-24v22M335.76 285.22v-13.31a80 80 0 00-131-61.6M176 258.78v13.31a80 80 0 00130.73 61.8"/>
-          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M196 272l-20-20-20 20M356 272l-20 20-20-20"/>
-        </svg>
-        <span class="visually-hidden">Switch camera</span>
+      <div class="form-container">
+        <h4 class="mt-0">Customize component</h4>
+
+        <p class="note">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-info-lg" viewBox="0 0 16 16">
+            <path d="m9.708 6.075-3.024.379-.108.502.595.108c.387.093.464.232.38.619l-.975 4.577c-.255 1.183.14 1.74 1.067 1.74.72 0 1.554-.332 1.933-.789l.116-.549c-.263.232-.65.325-.905.325-.363 0-.494-.255-.402-.704l1.323-6.208Zm.091-2.755a1.32 1.32 0 1 1-2.64 0 1.32 1.32 0 0 1 2.64 0Z"></path>
+          </svg>
+          <em>Note, that some of the attributes depend on the camera hardware support, so they may not work on all devices.</em>
+        </p>
+
+        <form id="form" class="form">
+          <fieldset disabled>
+            <legend>Attributes</legend>
+
+            <div class="form-row">
+              <div class="form-col">
+                <label for="facing-mode">facing-mode</label>
+                <select name="facing-mode" id="facing-mode">
+                  <option value="user">user</option>
+                  <option value="environment">environment</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <label>camera-resolution</label>
+
+                <div class="form-row align-items-center">
+                  <div class="form-col">
+                    <input type="number" name="width" id="width" placeholder="Width (px)" class="m-0">
+                  </div>
+
+                  <div class="form-col">
+                    <input type="number" name="height" id="height" placeholder="Height (px)" class="m-0">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <label for="zoom">zoom</label>
+                <input type="range" name="zoom" id="zoom">
+              </div>
+
+              <div class="form-col">
+                <label for="pan">pan</label>
+                <input type="range" name="pan" id="pan">
+              </div>
+
+              <div class="form-col">
+                <label for="tilt">tilt</label>
+                <input type="range" name="tilt" id="tilt">
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 1rem;">
+              <div class="form-col flex-row gap-3">
+                <div>
+                  <input type="checkbox" name="calculate-file-size" id="calculate-file-size">
+                  <label for="calculate-file-size">calculate-file-size</label>
+                </div>
+
+                <div>
+                  <input type="checkbox" name="no-image" id="no-image">
+                  <label for="no-image">no-image</label>
+                </div>
+              </div>
+            </div>
+
+            <input type="submit" value="Submit">
+          </fieldset>
+        </form>
+
+        <pre><code id="codePreview">&lt;capture-photo&gt;&lt;/capture-photo&gt;</code></pre>
       </div>
-    </capture-photo>
+    </div>
 
     <h2>Source</h2>
 
-    <p>
-      Source code and documentation can be found in <a href="https://github.com/georapbox/capture-photo-element" target="_blank" rel="noreferrer noopener">Github repository</a>.
-    </p>
+    <p>Source code and documentation can be found in <a href="https://github.com/georapbox/capture-photo-element" target="_blank" rel="noreferrer noopener">Github repository</a>.</p>
 
     <h2>License</h2>
 
-    <p>
-      <a href="https://georapbox.mit-license.org/@2022" target="_blank" rel="noreferrer noopener">The MIT License (MIT)</a>
-    </p>
+    <p><a href="https://georapbox.mit-license.org/@2022" target="_blank" rel="noreferrer noopener">The MIT License (MIT)</a></p>
   </div>
 </body>
 </html>

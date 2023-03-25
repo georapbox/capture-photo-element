@@ -1,112 +1,85 @@
 :root {
-  --body-max-width: 600px;
+  --body-max-width: 1024px;
+  --video-max-width: 400px;
 }
 
-.console-info {
+.note {
   display: flex;
-  align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
-  padding: 0.75rem 0.5rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--border);
-  background-color: var(--background);
   font-size: 0.9rem;
 }
 
-.console-info svg {
+.note svg {
   min-width: 20px;
   color: var(--links);
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-/* Component custom styling */
+.form-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-col input[type="text"],
+.form-col input[type="number"],
+.form-col select {
+  margin-right: 0;
+}
+
+.demo-container {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  background-color: var(--background);
+}
+
+.capture-photo-container {
+  min-width: var(--video-max-width);
+}
+
+.form-container {
+  flex: 1;
+  padding: 1rem;
+  border-radius: calc(var(--border-radius) / 2);
+  background: var(--background-body);
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius);
+  background-color: var(--background-alt);
+  color: var(--text-main);
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #58151c;
+}
+
+.alert-info {
+  background-color: #cff4fc;
+  color: #055160;
+}
+
 capture-photo:not(:defined) {
   display: none;
 }
 
-capture-photo {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
 capture-photo::part(video) {
   width: 100%;
+  max-width: var(--video-max-width);
   height: auto;
-  padding: 1rem 1rem 0 1rem;
   background-color: #000000;
-  box-sizing: border-box;
-}
-
-capture-photo::part(actions-container) {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-  padding: 1rem 0;
-  margin-bottom: 1rem;
-  background-color: #000000;
-}
-
-capture-photo::part(capture-button) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 60px;
-  width: 60px;
-  height: 60px;
-  color: #d0cfcf;
-  background-color: transparent;
-  border: 0;
-  line-height: 1;
-  cursor: pointer;
-  overflow: hidden;
-  -webkit-appearance: none;
-  appearance: none;
-  transition: 0.15s color ease-in-out;
-}
-
-capture-photo::part(capture-button):hover {
-  color: #ffffff;
-}
-
-capture-photo::part(facing-mode-button) {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  padding: 0.25rem 0.5rem;
-  background-color: var(--background);
-  color: var(--text-main);
-  border: 0;
-  border-radius: 0.25rem;
-  line-height: 1;
-  cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-capture-photo::part(output-container) {
-  overflow-x: auto;
-  margin-bottom: 1rem;
-}
-
-capture-photo::part(output-image) {
-  max-width: 100%;
-  height: auto;
-  border: 5px solid #000;
+  border-radius: calc(var(--border-radius) / 2);
 }
 
 capture-photo[loading]::part(video) {
@@ -121,3 +94,49 @@ capture-photo[loading]::part(facing-mode-button) {
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+capture-photo::part(actions-container) {
+  margin-top: 1rem;
+}
+
+capture-photo::part(output-image) {
+  width: 100%;
+  max-width: var(--video-max-width);
+  height: auto;
+  margin-top: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+  .demo-container {
+    flex-direction: column;
+  }
+
+  .capture-photo-container {
+    min-width: 0;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  :root {
+    --video-max-width: 200px;
+  }
+}
+
+/* Utils */
+.flex-1 { flex: 1 !important; }
+.d-flex { display: flex !important; }
+.flex-row { flex-direction: row !important; }
+.flex-column { flex-direction: column !important; }
+.flex-wrap { flex-wrap: wrap !important; }
+.flex-nowrap { flex-wrap: nowrap !important; }
+.align-items-center { align-items: center !important; }
+.justify-content-center { justify-content: center !important; }
+.gap-0 { gap: 0 !important; }
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 1rem !important; }
+.m-0 { margin: 0 !important; }
+.mt-0 { margin-top: 0 !important; }
+.mr-0 { margin-right: 0 !important; }
+.mb-0 { margin-bottom: 0 !important; }
+.ml-0 { margin-left: 0 !important; }
