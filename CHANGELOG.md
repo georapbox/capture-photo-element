@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v3.2.1 (2023-03-27)
+## v3.2.1 (2023-03-25)
 
 - Fix throwing Uncaught TypeError when totally removing attribute `camera-resolution`.
 
