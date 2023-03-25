@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v3.2.1 (2023-03-27)
+
+- Fix throwing Uncaught TypeError when totally removing attribute `camera-resolution`.
+
 ## v3.2.0 (2023-03-23)
 
 - Add public methods `startVideoStream()` and `stopVideoStream()` to start and stop the video stream respectively.

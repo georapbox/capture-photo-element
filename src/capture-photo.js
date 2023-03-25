@@ -139,13 +139,15 @@ class CapturePhoto extends HTMLElement {
     }
 
     if (name === 'camera-resolution' && oldValue !== newValue) {
-      const [width, height] = this.cameraResolution.split('x').map(x => Number(x));
-      const widthInAllowedRange = width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max;
-      const heightInAllowedRange = height >= trackCapabilities?.height?.min && height <= trackCapabilities?.height?.max;
+      if (typeof this.cameraResolution === 'string') {
+        const [width, height] = this.cameraResolution.split('x').map(x => Number(x));
+        const widthInAllowedRange = width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max;
+        const heightInAllowedRange = height >= trackCapabilities?.height?.min && height <= trackCapabilities?.height?.max;
 
-      if (trackSettings?.width && trackSettings?.height && widthInAllowedRange && heightInAllowedRange) {
-        this.stopVideoStream();
-        this.startVideoStream();
+        if (trackSettings?.width && trackSettings?.height && widthInAllowedRange && heightInAllowedRange) {
+          this.stopVideoStream();
+          this.startVideoStream();
+        }
       }
     }
 
