@@ -8,9 +8,9 @@
   <title>&lt;capture-photo&gt;</title>
   <meta name="description" content="A custom element that implements the MediaDevices.getUserMedia() method of the MediaDevices interface to capture a photo in the browser.">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="stylesheet" href="lib/highlight/highlight-github.min.css">
   <link rel="stylesheet" href="css/water.css">
   <link rel="stylesheet" href="css/main.css">
-  <script type="module" src="js/main.js"></script>
 </head>
 <body>
   <div class="container">
@@ -41,7 +41,7 @@
           <em>Note, that some of the attributes depend on the camera hardware support, so they may not work on all devices.</em>
         </p>
 
-        <form id="form" class="form">
+        <form id="form" class="form" autocomplete="off">
           <fieldset disabled>
             <legend>Attributes</legend>
 
@@ -61,11 +61,11 @@
 
                 <div class="form-row align-items-center">
                   <div class="form-col">
-                    <input type="number" name="width" id="width" placeholder="Width (px)" class="m-0">
+                    <input type="number" name="width" id="width" placeholder="Width (px)" class="m-0" min="1">
                   </div>
 
                   <div class="form-col">
-                    <input type="number" name="height" id="height" placeholder="Height (px)" class="m-0">
+                    <input type="number" name="height" id="height" placeholder="Height (px)" class="m-0" min="1">
                   </div>
                 </div>
               </div>
@@ -74,17 +74,17 @@
             <div class="form-row">
               <div class="form-col">
                 <label for="zoom">zoom</label>
-                <input type="range" name="zoom" id="zoom">
+                <input type="range" name="zoom" id="zoom" min="0" value="1">
               </div>
 
               <div class="form-col">
                 <label for="pan">pan</label>
-                <input type="range" name="pan" id="pan">
+                <input type="range" name="pan" id="pan" min="0" value="0">
               </div>
 
               <div class="form-col">
                 <label for="tilt">tilt</label>
-                <input type="range" name="tilt" id="tilt">
+                <input type="range" name="tilt" id="tilt" min="0" value="0">
               </div>
             </div>
 
@@ -118,5 +118,8 @@
 
     <p><a href="https://georapbox.mit-license.org/@2022" target="_blank" rel="noreferrer noopener">The MIT License (MIT)</a></p>
   </div>
+
+  <script src="./lib/highlight/highlight.min.js" defer></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

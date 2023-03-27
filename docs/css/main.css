@@ -3,6 +3,10 @@
   --video-max-width: 400px;
 }
 
+code {
+  white-space: normal;
+}
+
 .note {
   display: flex;
   gap: 0.5rem;
@@ -48,6 +52,7 @@
 
 .form-container {
   flex: 1;
+  min-width: 0;
   padding: 1rem;
   border-radius: calc(var(--border-radius) / 2);
   background: var(--background-body);

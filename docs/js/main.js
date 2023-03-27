@@ -36,8 +36,6 @@ import(componentUrl).then(res => {
     console.log('capture-photo:success ->', evt.detail);
   });
 
-  CapturePhoto.defineCustomElement();
-
   form.addEventListener('submit', evt => {
     evt.preventDefault();
 
@@ -83,7 +81,20 @@ import(componentUrl).then(res => {
     capturePhotoEl.toggleAttribute('calculate-file-size', calculateFileSize.checked);
     capturePhotoEl.toggleAttribute('no-image', noImage.checked);
 
-    codePreviewEl.innerHTML = escapeHTML(capturePhotoEl.outerHTML.replace(new RegExp(`(\\s)?loading=""`, 'g'), '').replace(/=""/g, ''));
+    let attrs = '';
+
+    for (const { name, value } of capturePhotoEl.attributes) {
+      if (name === 'loading') {
+        continue;
+      }
+
+      attrs += value ? ` ${name}="${value}"` : ` ${name}`;
+    }
+
+    const codePreview = `<capture-photo${attrs}></capture-photo>`;
+    codePreviewEl.innerHTML = escapeHTML(codePreview);
+
+    window.hljs.highlightElement(codePreviewEl);
   });
 
   capturePhotoEl.addEventListener('capture-photo:video-play', () => {
@@ -103,9 +114,11 @@ import(componentUrl).then(res => {
     }
 
     if ('zoom' in settings) {
-      zoomInput.min = capabilities.zoom.min;
-      zoomInput.max = capabilities.zoom.max;
-      zoomInput.step = capabilities.zoom.step || 1;
+      if (capabilities?.zoom) {
+        zoomInput.min = capabilities.zoom?.min || 1;
+        zoomInput.max = capabilities.zoom?.max;
+        zoomInput.step = capabilities.zoom?.step || 1;
+      }
       zoomInput.value = settings.zoom;
     } else {
       zoomInput.disabled = true;
@@ -113,9 +126,11 @@ import(componentUrl).then(res => {
     }
 
     if ('pan' in settings) {
-      panInput.min = capabilities.pan.min;
-      panInput.max = capabilities.pan.max;
-      panInput.step = capabilities.pan.step || 1;
+      if (capabilities?.pan) {
+        panInput.min = capabilities.pan?.min || 0;
+        panInput.max = capabilities.pan?.max;
+        panInput.step = capabilities.pan?.step || 1;
+      }
       panInput.value = settings.pan;
     } else {
       panInput.disabled = true;
@@ -123,9 +138,11 @@ import(componentUrl).then(res => {
     }
 
     if ('tilt' in settings) {
-      tiltInput.min = capabilities.tilt.min;
-      tiltInput.max = capabilities.tilt.max;
-      tiltInput.step = capabilities.tilt.step || 1;
+      if (capabilities?.tilt) {
+        tiltInput.min = capabilities.tilt?.min || 0;
+        tiltInput.max = capabilities.tilt?.max;
+        tiltInput.step = capabilities.tilt?.step || 1;
+      }
       tiltInput.value = settings.tilt;
     } else {
       tiltInput.disabled = true;
@@ -133,15 +150,19 @@ import(componentUrl).then(res => {
     }
 
     if ('width' in settings) {
-      widthInput.min = capabilities.width.min;
-      widthInput.max = capabilities.width.max;
+      if (capabilities?.width) {
+        widthInput.min = capabilities.width?.min || 1;
+        widthInput.max = capabilities.width?.max;
+      }
     } else {
       widthInput.disabled = true;
     }
 
     if ('height' in settings) {
-      heightInput.min = capabilities.height.min;
-      heightInput.max = capabilities.height.max;
+      if (capabilities?.height) {
+        heightInput.min = capabilities.height?.min || 1;
+        heightInput.max = capabilities.height?.max;
+      }
     } else {
       heightInput.disabled = true;
     }
@@ -157,6 +178,10 @@ import(componentUrl).then(res => {
     errorEl.innerHTML = evt.detail.error?.message || 'Unknown error';
     document.getElementById('errorPlaceholder').appendChild(errorEl);
   });
+
+  CapturePhoto.defineCustomElement();
+
+  window.hljs.highlightElement(codePreviewEl);
 }).catch(err => {
   console.error(err);
 });
