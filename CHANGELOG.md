@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v4.0.0 (2023-12-XX)
+
+## Breaking Changes
+
+- As of `v4.0.0`, the video stream will not start automatically when the component is connected to the DOM. If you want to start the video stream automatically, you can use the `auto-play` attribute.
+
+## Other Changes
+
+- Update dev dependencies.
+
 ## v3.2.1 (2023-03-25)
 
 - Fix throwing Uncaught TypeError when totally removing attribute `camera-resolution`.
@@ -17,24 +27,28 @@
 
 ## v3.0.0 (2022-11-25)
 
+### Breaking Changes
+
+- Remove the following events: `capture-photo:facing-mode-change`, `capture-photo:camera-resolution-change` and `capture-photo:zoom-change`. The reason for removing them is because they would be emitted every time a relevant property/attribute would change but there was no guarantee that the value updated, was supported by the camera hardware.
+
+### Other Changes
+
 - Add `pan` and `tilt` properties to support panning and tilting respectively if supported by the camera harware.
 - Add public methods `getSupportedConstraints()`, `getTrackCapabilities()` and `getTrackSettings()`.
 - Hide `facing-mode-slot` by default and display it only if `facingMode` is supported by device.
 
-### Breaking Changes
-
-Remove the following events: `capture-photo:facing-mode-change`, `capture-photo:camera-resolution-change` and `capture-photo:zoom-change`. The reason for removing them is because they would be emitted every time a relevant property/attribute would change but there was no guarantee that the value updated, was supported by the camera hardware.
-
 ## v2.0.0 (2022-11-18)
-
-- Refactor to use private class fields.
-- Replace rollup.js with parcel.js for bundling.
-- Update dev dependencies.
 
 ### Breaking Changes
 
 - Rename property `outputDisabled` and attribute `output-disabled` to `noImage` and `no-image` accordingly.
 - Only minified production builds will be included in the `dist` folder from now on.
+
+### Other Changes
+
+- Refactor to use private class fields.
+- Replace rollup.js with parcel.js for bundling.
+- Update dev dependencies.
 
 ## v1.3.1 (2022-10-20)
 

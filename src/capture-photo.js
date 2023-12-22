@@ -31,7 +31,6 @@ template.innerHTML = /* html */`
 `;
 
 class CapturePhoto extends HTMLElement {
-  #connected;
   #supportedConstraints;
   #stream;
   #canvasElement;
@@ -59,7 +58,6 @@ class CapturePhoto extends HTMLElement {
   constructor() {
     super();
 
-    this.#connected = false;
     this.#supportedConstraints = this.getSupportedConstraints();
 
     if (!this.shadowRoot) {
@@ -77,7 +75,6 @@ class CapturePhoto extends HTMLElement {
     this.#upgradeProperty('zoom');
     this.#upgradeProperty('calculateFileSize');
 
-    this.#connected = true;
     this.#canvasElement = this.shadowRoot.querySelector('canvas');
     this.#outputElement = this.shadowRoot.getElementById('output');
     this.#videoElement = this.shadowRoot.querySelector('video');
@@ -105,7 +102,9 @@ class CapturePhoto extends HTMLElement {
       }));
     }
 
-    this.startVideoStream();
+    if (this.autoPlay) {
+      this.startVideoStream();
+    }
   }
 
   disconnectedCallback() {
@@ -118,7 +117,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (!this.#connected) {
+    if (!this.isConnected) {
       return;
     }
 
@@ -241,6 +240,18 @@ class CapturePhoto extends HTMLElement {
       this.setAttribute('calculate-file-size', '');
     } else {
       this.removeAttribute('calculate-file-size');
+    }
+  }
+
+  get autoPlay() {
+    return this.hasAttribute('auto-play');
+  }
+
+  set autoPlay(value) {
+    if (value) {
+      this.setAttribute('auto-play', '');
+    } else {
+      this.removeAttribute('auto-play');
     }
   }
 
@@ -369,18 +380,6 @@ class CapturePhoto extends HTMLElement {
     }
   }
 
-  stopVideoStream() {
-    if (!this.#videoElement || !this.#stream) {
-      return;
-    }
-
-    const [track] = this.#stream.getVideoTracks();
-
-    track?.stop();
-    this.#videoElement.srcObject = null;
-    this.#stream = null;
-  }
-
   async startVideoStream() {
     if (!CapturePhoto.isSupported() || this.#stream) {
       return;
@@ -428,6 +427,18 @@ class CapturePhoto extends HTMLElement {
     } finally {
       this.removeAttribute('loading');
     }
+  }
+
+  stopVideoStream() {
+    if (!this.#videoElement || !this.#stream) {
+      return;
+    }
+
+    const [track] = this.#stream.getVideoTracks();
+
+    track?.stop();
+    this.#videoElement.srcObject = null;
+    this.#stream = null;
   }
 
   async capture() {

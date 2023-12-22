@@ -14,6 +14,9 @@ describe('<capture-photo>', () => {
   it('default properties', async () => {
     const el = await fixture(html`<capture-photo></capture-photo>`);
 
+    expect(el.autoPlay).to.be.false;
+    expect(el.getAttribute('auto-play')).to.be.null;
+
     expect(el.noImage).to.be.false;
     expect(el.getAttribute('no-image')).to.be.null;
 
@@ -39,6 +42,7 @@ describe('<capture-photo>', () => {
   it('change default properties', async () => {
     const el = await fixture(html`
       <capture-photo
+        auto-play
         no-image
         facing-mode="environment"
         camera-resolution="320x240"
@@ -48,6 +52,9 @@ describe('<capture-photo>', () => {
         calculate-file-size
       ></capture-photo>
     `);
+
+    expect(el.autoPlay).to.be.true;
+    expect(el.getAttribute('auto-play')).to.equal('');
 
     expect(el.noImage).to.be.true;
     expect(el.getAttribute('no-image')).to.equal('');
@@ -74,6 +81,7 @@ describe('<capture-photo>', () => {
   it('change properties programmatically', async () => {
     const el = await fixture(html`<capture-photo></capture-photo>`);
 
+    el.autoPlay = true;
     el.noImage = true;
     el.facingMode = 'environment';
     el.cameraResolution = '320x240';
@@ -83,6 +91,9 @@ describe('<capture-photo>', () => {
     el.calculateFileSize = true;
 
     await elementUpdated(el);
+
+    expect(el.autoPlay).to.be.true;
+    expect(el.getAttribute('auto-play')).to.equal('');
 
     expect(el.noImage).to.be.true;
     expect(el.getAttribute('no-image')).to.equal('');

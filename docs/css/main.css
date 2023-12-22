@@ -118,6 +118,7 @@ capture-photo::part(output-image) {
   max-width: var(--video-max-width);
   height: auto;
   margin-top: 1rem;
+  border-radius: calc(var(--border-radius) / 2);
 }
 
 @media screen and (max-width: 768px) {
