@@ -35,7 +35,10 @@
 
     <div class="demo-container">
       <div class="capture-photo-container">
-        <capture-photo auto-play></capture-photo>
+        <capture-photo auto-play>
+          <button slot="capture-button">Capture photo</button>
+          <button slot="facing-mode-button">Change facing mode</button>
+        </capture-photo>
 
         <div class="info-box" style="background-color: var(--background-body); margin-top: 16px;">
           <svg xmlns="http://www.w3.org/2000/svg" style="min-width: 16px;" width="16" height="16" fill="var(--links)" class="bi bi-terminal" viewBox="0 0 16 16">

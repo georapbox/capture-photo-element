@@ -110,7 +110,9 @@ capture-photo[loading]::part(facing-mode-button) {
 }
 
 capture-photo::part(actions-container) {
+  display: flex;
   margin-top: 1rem;
+  column-gap: 0.5rem;
 }
 
 capture-photo::part(output-image) {
@@ -119,6 +121,13 @@ capture-photo::part(output-image) {
   height: auto;
   margin-top: 1rem;
   border-radius: calc(var(--border-radius) / 2);
+}
+
+capture-photo button {
+  flex: 1;
+  max-width: var(--video-max-width);
+  padding: 0.75rem 0.5rem;
+  margin: 0;
 }
 
 @media screen and (max-width: 768px) {
@@ -132,8 +141,12 @@ capture-photo::part(output-image) {
 }
 
 @media screen and (max-width: 500px) {
-  :root {
-    --video-max-width: 200px;
+  capture-photo::part(video) {
+    max-height: 200px;
+  }
+
+  capture-photo button {
+    font-size: 0.9rem;
   }
 }
 
