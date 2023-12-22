@@ -4,6 +4,10 @@ const capturePhotoEl = document.querySelector('capture-photo');
 const form = document.getElementById('form');
 const codePreviewEl = document.getElementById('codePreview');
 
+const el = document.createElement('capture-photo');
+el.cameraResolution = '2x2';
+// document.body.appendChild(el);
+
 const escapeHTML = subjectString => {
   if (typeof subjectString !== 'string') {
     throw new TypeError('Expected a string for first argument');
@@ -180,8 +184,6 @@ import(componentUrl).then(res => {
   });
 
   CapturePhoto.defineCustomElement();
-
-  window.hljs.highlightElement(codePreviewEl);
 }).catch(err => {
   console.error(err);
 });

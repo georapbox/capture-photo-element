@@ -8,25 +8,42 @@
   <title>&lt;capture-photo&gt;</title>
   <meta name="description" content="A custom element that implements the MediaDevices.getUserMedia() method of the MediaDevices interface to capture a photo in the browser.">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="stylesheet" href="lib/highlight/highlight-github.min.css">
+  <link rel="stylesheet" href="lib/highlight/highlight-github.css">
   <link rel="stylesheet" href="css/water.css">
   <link rel="stylesheet" href="css/main.css">
+  <script src="lib/highlight/highlight.min.js" defer></script>
+  <script src="js/main.js" type="module"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());</script>
 </head>
 <body>
-  <div class="container">
-    <h1>&lt;capture-photo&gt;</h1>
+  <noscript>
+    <div class="noscript-banner">
+      This page requires JavaScript to work properly.
+      Please enable JavaScript in your browser settings.
+    </div>
+  </noscript>
 
+  <h1>&lt;capture-photo&gt;</h1>
+
+  <div class="component-description">
     <p>A custom element that implements the <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia" target="_blank" rel="noopener noreferrer">MediaDevices.getUserMedia()</a> method to capture a photo in the browser.</p>
+    <p><a href="https://github.com/georapbox/capture-photo-element" target="_blank" rel="noreferrer noopener">Source code & documentation</a></p>
+  </div>
 
+  <div class="container">
     <h2>Demo</h2>
-
-    <p class="alert alert-info">
-      Open the browser's console to watch fired events.
-    </p>
 
     <div class="demo-container">
       <div class="capture-photo-container">
-        <capture-photo></capture-photo>
+        <capture-photo auto-play></capture-photo>
+
+        <div class="info-box" style="background-color: var(--background-alt); margin-top: 16px;">
+          <svg xmlns="http://www.w3.org/2000/svg" style="min-width: 16px;" width="16" height="16" fill="var(--links)" class="bi bi-terminal" viewBox="0 0 16 16">
+            <path d="M6 9a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3A.5.5 0 0 1 6 9M3.854 4.146a.5.5 0 1 0-.708.708L4.793 6.5 3.146 8.146a.5.5 0 1 0 .708.708l2-2a.5.5 0 0 0 0-.708l-2-2z"/>
+            <path d="M2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/>
+          </svg>
+          <small><em>Open the browser's console to watch fired events.</em></small>
+        </div>
 
         <div id="errorPlaceholder"></div>
       </div>
@@ -34,16 +51,16 @@
       <div class="form-container">
         <h4 class="mt-0">Customize component</h4>
 
-        <p class="note">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-info-lg" viewBox="0 0 16 16">
-            <path d="m9.708 6.075-3.024.379-.108.502.595.108c.387.093.464.232.38.619l-.975 4.577c-.255 1.183.14 1.74 1.067 1.74.72 0 1.554-.332 1.933-.789l.116-.549c-.263.232-.65.325-.905.325-.363 0-.494-.255-.402-.704l1.323-6.208Zm.091-2.755a1.32 1.32 0 1 1-2.64 0 1.32 1.32 0 0 1 2.64 0Z"></path>
-          </svg>
-          <em>Note, that some of the attributes depend on the camera hardware support, so they may not work on all devices.</em>
-        </p>
-
         <form id="form" class="form" autocomplete="off">
           <fieldset disabled>
             <legend>Attributes</legend>
+
+            <div class="info-box" style="margin-bottom: 16px;">
+              <svg xmlns="http://www.w3.org/2000/svg" style="min-width: 16px;" width="16" height="16" fill="var(--links)" class="bi bi-info-lg" viewBox="0 0 16 16">
+                <path d="m9.708 6.075-3.024.379-.108.502.595.108c.387.093.464.232.38.619l-.975 4.577c-.255 1.183.14 1.74 1.067 1.74.72 0 1.554-.332 1.933-.789l.116-.549c-.263.232-.65.325-.905.325-.363 0-.494-.255-.402-.704l1.323-6.208Zm.091-2.755a1.32 1.32 0 1 1-2.64 0 1.32 1.32 0 0 1 2.64 0Z"></path>
+              </svg>
+              <small><em>Note, that some of the attributes depend on the camera hardware support, so they may not work on all devices.</em></small>
+            </div>
 
             <div class="form-row">
               <div class="form-col">
@@ -106,20 +123,15 @@
           </fieldset>
         </form>
 
-        <pre><code id="codePreview">&lt;capture-photo&gt;&lt;/capture-photo&gt;</code></pre>
+        <details open>
+          <summary>Source code</summary>
+          <pre><code id="codePreview">&lt;capture-photo&gt;&lt;/capture-photo&gt;</code></pre>
+        </details>
       </div>
     </div>
 
-    <h2>Source</h2>
-
-    <p>Source code and documentation can be found in <a href="https://github.com/georapbox/capture-photo-element" target="_blank" rel="noreferrer noopener">Github repository</a>.</p>
-
     <h2>License</h2>
-
     <p><a href="https://georapbox.mit-license.org/@2022" target="_blank" rel="noreferrer noopener">The MIT License (MIT)</a></p>
   </div>
-
-  <script src="./lib/highlight/highlight.min.js" defer></script>
-  <script type="module" src="js/main.js"></script>
 </body>
 </html>

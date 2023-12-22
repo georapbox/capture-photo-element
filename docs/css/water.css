@@ -607,6 +607,10 @@ details[open] {
   padding: 10px;
 }
 
+details summary {
+  transition: margin var(--animation-duration) ease;
+}
+
 details> :last-child {
   margin-bottom: 0;
 }

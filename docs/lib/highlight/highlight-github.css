@@ -1,0 +1,160 @@
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+}
+
+code.hljs {
+  padding: 3px 5px;
+}
+
+:root {
+  --italic: italic;
+  --bold: 700;
+}
+
+/*!
+ * Theme: GitHub
+ * Description: Light theme as seen on github.com
+ * Author: github.com
+ * Maintainer: @Hirse
+ * Updated: 2021-05-15
+ *
+ * Outdated base version: https://github.com/primer/github-syntax-light
+ * Current colors taken from GitHub's CSS
+ */
+:root {
+  --text-color: #24292e;
+  --background-color: #ffffff;
+  --keyword-color: #d73a49;
+  --title-color: #6f42c1;
+  --syntax-color: #005cc5;
+  --string-color: #032f62;
+  --built-in-color: #e36209;
+  --code-color: #6a737d;
+  --name-color: #22863a;
+  --subst-color: #24292e;
+  --section-color: #005cc5;
+  --bullet-color: #735c0f;
+  --emphasis-color: #24292e;
+  --strong-color: #24292e;
+  --addition-color: #22863a;
+  --deletion-color: #b31d28;
+  --addition-background: #f0fff4;
+  --deletion-background: #ffeef0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-color: #c9d1d9;
+    --background-color: #0d1117;
+    --keyword-color: #ff7b72;
+    --title-color: #d2a8ff;
+    --syntax-color: #79c0ff;
+    --string-color: #a5d6ff;
+    --built-in-color: #ffa657;
+    --code-color: #8b949e;
+    --name-color: #7ee787;
+    --subst-color: #c9d1d9;
+    --section-color: #1f6feb;
+    --bullet-color: #f2cc60;
+    --emphasis-color: #c9d1d9;
+    --strong-color: #c9d1d9;
+    --addition-color: #aff5b4;
+    --deletion-color: #ffdcd7;
+    --addition-background: #033a16;
+    --deletion-background: #67060c;
+  }
+}
+
+.hljs {
+  color: var(--text-color);
+  background: var(--background-color);
+}
+
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable.language_ {
+  color: var(--keyword-color);
+}
+
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-title.function_ {
+  color: var(--title-color);
+}
+
+.hljs-attr,
+.hljs-attribute,
+.hljs-literal,
+.hljs-meta,
+.hljs-number,
+.hljs-operator,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-variable {
+  color: var(--syntax-color);
+}
+
+.hljs-meta .hljs-string,
+.hljs-regexp,
+.hljs-string {
+  color: var(--string-color);
+}
+
+.hljs-built_in,
+.hljs-symbol {
+  color: var(--built-in-color);
+}
+
+.hljs-code,
+.hljs-comment,
+.hljs-formula {
+  color: var(--code-color);
+}
+
+.hljs-name,
+.hljs-quote,
+.hljs-selector-pseudo,
+.hljs-selector-tag {
+  color: var(--name-color);
+}
+
+.hljs-subst {
+  color: var(--subst-color);
+}
+
+.hljs-section {
+  color: var(--section-color);
+  font-weight: var(--bold);
+}
+
+.hljs-bullet {
+  color: var(--bullet-color);
+}
+
+.hljs-emphasis {
+  color: var(--emphasis-color);
+  font-style: var(--italic);
+}
+
+.hljs-strong {
+  color: var(--strong-color);
+  font-weight: var(--bold);
+}
+
+.hljs-addition {
+  color: var(--addition-color);
+  background-color: var(--addition-background);
+}
+
+.hljs-deletion {
+  color: var(--deletion-color);
+  background-color: var(--deletion-background);
+}

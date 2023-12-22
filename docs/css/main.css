@@ -3,19 +3,24 @@
   --video-max-width: 400px;
 }
 
+.noscript-banner {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius);
+  background-color: var(--focus);
+  text-align: center;
+}
+
 code {
   white-space: normal;
 }
 
-.note {
-  display: flex;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+.component-description p {
+  margin: 0 0 0.5rem 0;
 }
 
-.note svg {
-  min-width: 20px;
-  color: var(--links);
+.component-description p:last-child {
+  margin-bottom: 0;
 }
 
 .form-row {
@@ -59,7 +64,7 @@ code {
 }
 
 .alert {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: var(--border-radius);
   background-color: var(--background-alt);
   color: var(--text-main);
@@ -70,9 +75,13 @@ code {
   color: #58151c;
 }
 
-.alert-info {
-  background-color: #cff4fc;
-  color: #055160;
+.info-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  background-color: var(--background);
 }
 
 capture-photo:not(:defined) {
