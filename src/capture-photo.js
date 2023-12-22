@@ -1,45 +1,74 @@
 import { clamp } from './utils/clamp.js';
 
 const COMPONENT_NAME = 'capture-photo';
+
+const styles = /* css */`
+  :host {
+    display: block;
+    box-sizing: border-box;
+  }
+
+  :host *,
+  :host *::before,
+  :host *::after {
+    box-sizing: inherit;
+  }
+
+  :host([hidden]),
+  [hidden],
+  ::slotted([hidden]) {
+    display: none;
+  }
+
+  video {
+    display: block;
+  }
+
+  #output:empty {
+    display: none;
+  }
+`;
+
 const template = document.createElement('template');
 
 template.innerHTML = /* html */`
-  <style>
-    :host { all: initial; display: block; box-sizing: border-box; }
-    :host *, :host *::before, :host *::after { box-sizing: inherit; }
-    :host([hidden]), [hidden] { display: none; }
-    :host video { display: block; }
-    :host #output:empty { display: none; }
-  </style>
+  <style>${styles}</style>
+
   <video part="video" playsinline></video>
+
   <canvas hidden></canvas>
+
   <div part="actions-container">
     <slot name="capture-button">
       <button part="capture-button" type="button">
         <slot name="capture-button-content">Capture photo</slot>
       </button>
     </slot>
+
     <slot name="facing-mode-button" hidden>
       <button part="facing-mode-button" type="button">
         <slot name="facing-mode-button-content">Toggle facing mode</slot>
       </button>
     </slot>
+
     <slot name="actions"></slot>
   </div>
+
   <slot></slot>
+
   <div part="output-container" id="output"></div>
 `;
 
 class CapturePhoto extends HTMLElement {
-  #supportedConstraints;
-  #stream;
-  #canvasElement;
-  #outputElement;
-  #videoElement;
-  #captureButtonSlot;
-  #captureButton;
-  #facingModeButtonSlot;
-  #facingModeButton;
+  #supportedConstraints = {};
+  #stream = null;
+  #canvasElement = null;
+  #outputElement = null;
+  #videoElement = null;
+  #captureButtonSlot = null;
+  #captureButton = null;
+  #facingModeButtonSlot = null;
+  #facingModeButton = null;
 
   static get observedAttributes() {
     return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom'];
