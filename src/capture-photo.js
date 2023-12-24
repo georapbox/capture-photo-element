@@ -218,8 +218,13 @@ class CapturePhoto extends HTMLElement {
         const [width, height] = this.cameraResolution.split('x').map(x => Number(x));
 
         if ('width' in trackCapabilities && 'height' in trackCapabilities) {
-          const widthInAllowedRange = width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max;
-          const heightInAllowedRange = height >= trackCapabilities?.height?.min && height <= trackCapabilities?.height?.max;
+          const widthInAllowedRange = trackCapabilities.width?.min && trackCapabilities.width?.max
+            ? width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max
+            : false;
+
+          const heightInAllowedRange = trackCapabilities.height?.min && trackCapabilities.height?.max
+            ? height >= trackCapabilities?.height?.min && height <= trackCapabilities?.height?.max
+            : false;
 
           if ('width' in trackSettings && 'height' in trackSettings && widthInAllowedRange && heightInAllowedRange) {
             this.stopVideoStream();
@@ -465,7 +470,7 @@ class CapturePhoto extends HTMLElement {
         composed: true,
         detail: { video }
       }));
-    }).catch(error => {
+    }).catch(/** @param {Error} error */error => {
       this.dispatchEvent(new CustomEvent(`${COMPONENT_NAME}:error`, {
         bubbles: true,
         composed: true,
@@ -628,7 +633,6 @@ class CapturePhoto extends HTMLElement {
 
     if (typeof this.cameraResolution === 'string') {
       const [width, height] = this.cameraResolution.split('x').map(x => Number(x));
-
       constraints.video.width = width;
       constraints.video.height = height;
     }
@@ -681,7 +685,7 @@ class CapturePhoto extends HTMLElement {
    * @returns Promise<void>
    */
   async capture() {
-    if (this.loading) {
+    if (this.loading || !this.#canvasElement || !this.#videoElement) {
       return;
     }
 
@@ -691,7 +695,7 @@ class CapturePhoto extends HTMLElement {
       const height = this.#videoElement.videoHeight;
       this.#canvasElement.width = width;
       this.#canvasElement.height = height;
-      ctx.drawImage(this.#videoElement, 0, 0, width, height);
+      ctx?.drawImage(this.#videoElement, 0, 0, width, height);
       const dataURI = this.#canvasElement.toDataURL('image/png');
 
       if (typeof dataURI === 'string' && dataURI.includes('data:image')) {
@@ -705,6 +709,7 @@ class CapturePhoto extends HTMLElement {
           this.#outputElement?.appendChild(image);
         }
 
+        /** @type {{ dataURI: string, width: number, height: number, size?: number }} */
         const eventDetail = { dataURI, width, height };
 
         if (this.calculateFileSize) {
