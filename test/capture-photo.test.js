@@ -20,19 +20,19 @@ describe('<capture-photo>', () => {
     expect(el.noImage).to.be.false;
     expect(el.getAttribute('no-image')).to.be.null;
 
-    expect(el.facingMode).to.be.null;
+    expect(el.facingMode).to.equal('user');
     expect(el.getAttribute('facing-mode')).to.be.null;
 
-    expect(el.cameraResolution).to.be.null;
+    expect(el.cameraResolution).to.equal('');
     expect(el.getAttribute('camera-resolution')).to.be.null;
 
-    expect(el.pan).to.be.null;
+    expect(el.pan).to.equal(1);
     expect(el.getAttribute('pan')).to.be.null;
 
-    expect(el.tilt).to.be.null;
+    expect(el.tilt).to.equal(1);
     expect(el.getAttribute('tilt')).to.be.null;
 
-    expect(el.zoom).to.be.null;
+    expect(el.zoom).to.equal(1);
     expect(el.getAttribute('zoom')).to.be.null;
 
     expect(el.calculateFileSize).to.be.false;

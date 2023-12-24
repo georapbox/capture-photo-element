@@ -8,6 +8,7 @@
 
 ## Other Changes
 
+- Add types declarations.
 - Update dev dependencies.
 
 ## v3.2.1 (2023-03-25)
