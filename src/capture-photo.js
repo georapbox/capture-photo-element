@@ -8,23 +8,19 @@
  */
 
 /**
- * @typedef {Object} MediaTrackCapabilities
- * @property {'user' | 'environment'} [facingMode] - The facing mode of the video track.
- * @property {{ min: number, max: number }} [width] - The width of the video track.
- * @property {{ min: number, max: number }} [height] - The height of the video track.
- * @property {{ min: number, max: number }} [zoom] - The zoom level of the camera.
- * @property {{ min: number, max: number }} [pan] - The pan level of the camera.
- * @property {{ min: number, max: number }} [tilt] - The tilt level of the camera.
+ * @typedef {Object} ExtendedMediaTrackCapabilities
+ * @property {ULongRange} [width] - The width of the video track.
+ * @property {ULongRange} [height] - The height of the video track.
+ * @property {ULongRange} [zoom] - The zoom level of the camera.
+ * @property {ULongRange} [pan] - The pan level of the camera.
+ * @property {ULongRange} [tilt] - The tilt level of the camera.
+ * @property {MediaTrackCapabilities} [nativeMediaTrackCapabilities] - The native track capabilities.
  */
 
 /**
- * @typedef {Object} MediaTrackSettings
- * @property {'user' | 'environment'} [facingMode] - The facing mode of the video track.
- * @property {{ min: number, max: number }} [width] - The width of the video track.
- * @property {{ min: number, max: number }} [height] - The height of the video track.
- * @property {{ min: number, max: number }} [zoom] - The zoom level of the camera.
- * @property {{ min: number, max: number }} [pan] - The pan level of the camera.
- * @property {{ min: number, max: number }} [tilt] - The tilt level of the camera.
+ * @typedef {Object} ExtendedMediaTrackConstraints
+ * @property {MediaTrackConstraints & {zoom: boolean, pan: boolean, tilt: boolean}} video - The video constraints.
+ * @property {MediaTrackConstraints | boolean} audio - The audio constraints.
  */
 
 import { clamp } from './utils/clamp.js';
@@ -197,6 +193,7 @@ class CapturePhoto extends HTMLElement {
       return;
     }
 
+    /** @type {ExtendedMediaTrackCapabilities} */
     const trackCapabilities = this.getTrackCapabilities();
     const trackSettings = this.getTrackSettings();
 
@@ -504,7 +501,7 @@ class CapturePhoto extends HTMLElement {
     }
 
     const [track] = this.#stream.getVideoTracks();
-    /** @type {MediaTrackCapabilities} */
+    /** @type {ExtendedMediaTrackCapabilities} */
     const trackCapabilities = this.getTrackCapabilities();
     const trackSettings = this.getTrackSettings();
 
@@ -619,6 +616,7 @@ class CapturePhoto extends HTMLElement {
 
     this.setAttribute('loading', '');
 
+    /** @type {ExtendedMediaTrackConstraints} */
     const constraints = {
       video: {
         facingMode: {
@@ -800,6 +798,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * Checks if the `MediaDevices.getUserMedia()` method is supported.
+   *
    * @returns {boolean}
    */
   static isSupported() {
