@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v4.0.0 (2023-12-XX)
+## v4.0.0 (2023-12-26)
 
 ## Breaking Changes
 

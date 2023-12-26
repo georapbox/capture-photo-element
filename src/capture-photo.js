@@ -321,7 +321,6 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} autoPlay - Whether or not to start the video stream automatically.
-   * @default false
    * @attribute auto-play - Reflects the autoPlay attribute.
    */
   get autoPlay() {
@@ -334,7 +333,6 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} noImage - Whether or not to show the captured image.
-   * @default false
    * @attribute no-image - Reflects the noImage attribute.
    */
   get noImage() {
@@ -395,7 +393,6 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {number} zoom - The zoom value of the camera.
-   * @default 1
    * @attribute zoom - Reflects the zoom attribute.
    */
   get zoom() {
@@ -408,7 +405,6 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} loading - Whether or not the video stream is loading.
-   * @default false
    * @attribute loading - Reflects the loading attribute.
    */
   get loading() {
@@ -417,7 +413,6 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} calculateFileSize - Whether or not to calculate the file size of the captured image.
-   * @default false
    * @attribute calculate-file-size - Reflects the calculateFileSize attribute.
    */
   get calculateFileSize() {
