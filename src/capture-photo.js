@@ -11,15 +11,15 @@
  * @typedef {Object} ExtendedMediaTrackCapabilities
  * @property {ULongRange} [width] - The width of the video track.
  * @property {ULongRange} [height] - The height of the video track.
- * @property {ULongRange} [zoom] - The zoom level of the camera.
  * @property {ULongRange} [pan] - The pan level of the camera.
  * @property {ULongRange} [tilt] - The tilt level of the camera.
+ * @property {ULongRange} [zoom] - The zoom level of the camera.
  * @property {MediaTrackCapabilities} [nativeMediaTrackCapabilities] - The native track capabilities.
  */
 
 /**
  * @typedef {Object} ExtendedMediaTrackConstraints
- * @property {MediaTrackConstraints & {zoom: boolean, pan: boolean, tilt: boolean}} video - The video constraints.
+ * @property {MediaTrackConstraints & {pan: boolean, tilt: boolean, zoom: boolean}} video - The video constraints.
  * @property {MediaTrackConstraints | boolean} audio - The audio constraints.
  */
 
@@ -372,7 +372,7 @@ class CapturePhoto extends HTMLElement {
    * @attribute pan - Reflects the pan attribute.
    */
   get pan() {
-    return Number(this.getAttribute('pan')) || 1;
+    return Number(this.getAttribute('pan')) || 0;
   }
 
   set pan(value) {
@@ -384,7 +384,7 @@ class CapturePhoto extends HTMLElement {
    * @attribute tilt - Reflects the tilt attribute.
    */
   get tilt() {
-    return Number(this.getAttribute('tilt')) || 1;
+    return Number(this.getAttribute('tilt')) || 0;
   }
 
   set tilt(value) {

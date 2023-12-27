@@ -1,10 +1,15 @@
 # CHANGELOG
 
-## v4.0.0 (2023-12-26)
+## v4.0.0 (2023-12-27)
 
 ## Breaking Changes
 
 - As of `v4.0.0`, the video stream will not start automatically when the component is connected to the DOM. If you want to start the video stream automatically, you can use the `auto-play` attribute.
+- Change the default value of property `facingMode` from `null` to `"user"`.
+- Change the default value of property `cameraResolution` from `null` to `""`.
+- Change the default value of property `pan` from `null` to `0`.
+- Change the default value of property `tilt` from `null` to `0`.
+- Change the default value of property `zoom` from `null` to `1`.
 
 ## Other Changes
 

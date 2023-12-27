@@ -112,9 +112,9 @@ describe('<capture-photo>', () => {
     });
 
     // pan property
-    it('property pan is 1 when attribute pan is not set', async () => {
+    it('property pan is 0 when attribute pan is not set', async () => {
       const el = await fixture(html`<capture-photo></capture-photo>`);
-      expect(el.pan).to.equal(1);
+      expect(el.pan).to.equal(0);
     });
 
     it('property pan is 2 when attribute pan is set to 2', async () => {
@@ -130,9 +130,9 @@ describe('<capture-photo>', () => {
     });
 
     // tilt property
-    it('property tilt is 1 when attribute tilt is not set', async () => {
+    it('property tilt is 0 when attribute tilt is not set', async () => {
       const el = await fixture(html`<capture-photo></capture-photo>`);
-      expect(el.tilt).to.equal(1);
+      expect(el.tilt).to.equal(0);
     });
 
     it('property tilt is 2 when attribute tilt is set to 2', async () => {
