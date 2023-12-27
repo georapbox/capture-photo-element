@@ -211,10 +211,10 @@ class CapturePhoto extends HTMLElement {
     }
 
     if (name === 'camera-resolution' && oldValue !== newValue) {
-      if (typeof this.cameraResolution === 'string') {
-        const [width, height] = this.cameraResolution.split('x').map(x => Number(x));
+      if (typeof this.cameraResolution === 'string' && this.cameraResolution.trim().length > 0) {
+        const [width = 0, height = 0] = this.cameraResolution.split('x').map(x => Number(x));
 
-        if ('width' in trackCapabilities && 'height' in trackCapabilities) {
+        if (width > 0 && height > 0 && 'width' in trackCapabilities && 'height' in trackCapabilities) {
           const widthInAllowedRange = trackCapabilities.width?.min && trackCapabilities.width?.max
             ? width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max
             : false;
