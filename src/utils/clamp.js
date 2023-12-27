@@ -1,13 +1,15 @@
+// @ts-check
+
 /**
  * Clamps number within the inclusive `min` and `max` bounds,
  * making sure it does not go beyond them on either side.
  * If `min` is greater than `max` the parameters are swapped to support inverted ranges.
  *
- * @param {Number} value The number to clamp.
- * @param {Number} min The lower bound.
- * @param {Number} max The upper bound.
- * @throws {TypeError} If one or more of the arguments passed is not a number.
- * @returns {Number} The clamped number.
+ * @param {number} value - The number to clamp.
+ * @param {number} lower - The lower bound.
+ * @param {number} upper - The upper bound.
+ * @throws {TypeError} - If one or more of the arguments passed is not a number.
+ * @returns {number} - The clamped number.
  * @example
  *
  * clamp(10, -5, 5);

@@ -5,7 +5,7 @@
 
 .noscript-banner {
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 8px 12px;
   border-radius: var(--border-radius);
   background-color: var(--focus);
   text-align: center;
@@ -16,7 +16,7 @@ code {
 }
 
 .component-description p {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 8px 0;
 }
 
 .component-description p:last-child {
@@ -26,9 +26,8 @@ code {
 .form-row {
   display: flex;
   flex-wrap: wrap;
-  flex: 1;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .form-col {
@@ -43,10 +42,14 @@ code {
   margin-right: 0;
 }
 
+.form-col input[type="range"] {
+  width: 100%;
+}
+
 .demo-container {
   display: flex;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 16px;
+  padding: 16px;
   border-radius: var(--border-radius);
   background-color: var(--background);
 }
@@ -56,15 +59,14 @@ code {
 }
 
 .form-container {
-  flex: 1;
   min-width: 0;
-  padding: 1rem;
+  padding: 16px;
   border-radius: calc(var(--border-radius) / 2);
   background: var(--background-body);
 }
 
 .alert {
-  padding: 0.5rem 1rem;
+  padding: 8px 16px;
   border-radius: var(--border-radius);
   background-color: var(--background-alt);
   color: var(--text-main);
@@ -78,8 +80,9 @@ code {
 .info-box {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-top: 16px;
   border-radius: var(--border-radius);
   background-color: var(--background);
 }
@@ -110,14 +113,24 @@ capture-photo[loading]::part(facing-mode-button) {
 }
 
 capture-photo::part(actions-container) {
-  margin-top: 1rem;
+  display: flex;
+  margin-top: 16px;
+  column-gap: 8px;
 }
 
 capture-photo::part(output-image) {
   width: 100%;
   max-width: var(--video-max-width);
   height: auto;
-  margin-top: 1rem;
+  margin-top: 16px;
+  border-radius: calc(var(--border-radius) / 2);
+}
+
+capture-photo button {
+  flex: 1;
+  max-width: var(--video-max-width);
+  padding: 12px 8px;
+  margin: 0;
 }
 
 @media screen and (max-width: 768px) {
@@ -131,8 +144,12 @@ capture-photo::part(output-image) {
 }
 
 @media screen and (max-width: 500px) {
-  :root {
-    --video-max-width: 200px;
+  capture-photo::part(video) {
+    max-height: 200px;
+  }
+
+  capture-photo button {
+    font-size: 0.9rem;
   }
 }
 
@@ -146,9 +163,9 @@ capture-photo::part(output-image) {
 .align-items-center { align-items: center !important; }
 .justify-content-center { justify-content: center !important; }
 .gap-0 { gap: 0 !important; }
-.gap-1 { gap: 0.25rem !important; }
-.gap-2 { gap: 0.5rem !important; }
-.gap-3 { gap: 1rem !important; }
+.gap-1 { gap: 4px !important; }
+.gap-2 { gap: 8px !important; }
+.gap-3 { gap: 16px !important; }
 .m-0 { margin: 0 !important; }
 .mt-0 { margin-top: 0 !important; }
 .mr-0 { margin-right: 0 !important; }

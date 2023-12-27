@@ -61,6 +61,11 @@
         "Property": false
       }
     }],
-    "prefer-const": ["warn"]
+    "prefer-const": ["warn"],
+    "no-extra-parens": ["warn", "all", {
+      "allowParensAfterCommentPattern": "@type"
+    }],
+    "wc/no-child-traversal-in-connectedcallback": "off",
+    "wc/no-child-traversal-in-attributechangedcallback": "off"
   }
 }

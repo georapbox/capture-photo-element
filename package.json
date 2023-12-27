@@ -1,11 +1,12 @@
 {
   "name": "@georapbox/capture-photo-element",
-  "version": "3.2.1",
+  "version": "4.0.0",
   "description": "A custom element that implements the MediaDevices.getUserMedia() method of the MediaDevices interface to capture a photo in the browser.",
   "main": "dist/capture-photo.js",
   "module": "dist/capture-photo.js",
   "unpkg": "dist/capture-photo.js",
   "type": "module",
+  "types": "dist/capture-photo.d.ts",
   "targets": {
     "capture-photo": {
       "context": "browser",
@@ -39,12 +40,13 @@
     "test": "web-test-runner",
     "test:watch": "npm run test -- --watch",
     "test:coverage": "npm run test -- --coverage",
+    "types": "tsc --project tsconfig.json",
     "dev:parcel": "parcel watch",
     "dev": "npm-run-all clean dev:parcel",
     "build:parcel": "parcel build",
     "build": "npm-run-all clean build:parcel",
     "clean": "rimraf dist .parcel-cache",
-    "prepare": "npm-run-all clean lint test build"
+    "prepare": "npm-run-all clean lint test build types"
   },
   "keywords": [
     "custom element",
@@ -66,14 +68,15 @@
   "homepage": "https://github.com/georapbox/capture-photo-element#readme",
   "devDependencies": {
     "@esm-bundle/chai": "~4.3.4-fix.0",
-    "@open-wc/testing": "~3.1.7",
-    "@web/test-runner": "~0.15.1",
-    "@web/test-runner-playwright": "~0.9.0",
-    "eslint": "~8.36.0",
-    "eslint-plugin-wc": "~1.4.0",
+    "@open-wc/testing": "~4.0.0",
+    "@web/test-runner": "~0.18.0",
+    "@web/test-runner-playwright": "~0.11.0",
+    "eslint": "~8.56.0",
+    "eslint-plugin-wc": "~2.0.4",
     "npm-run-all": "~4.1.5",
-    "parcel": "~2.8.3",
-    "rimraf": "~4.4.1",
-    "sinon": "~15.0.2"
+    "parcel": "~2.9.3",
+    "rimraf": "~5.0.5",
+    "sinon": "~17.0.1",
+    "typescript": "~5.3.3"
   }
 }

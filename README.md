@@ -78,12 +78,13 @@ capture-photo::part(output-image) {
 ### Properties
 | Name | Reflects | Type | Required | Default | Description |
 | ---- | -------- | ---- | -------- | ------- | ----------- |
-| `noImage`<br>*`no-image`* | ✓ | Boolean | - | `false` | Defines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
-| `facingMode`<br>*`facing-mode`*<sup>1</sup> | ✓ | String | - | `null` | The preferred camera to be used if the camera hardware supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera respectively. |
-| `cameraResolution`<br>*`camera-resolution`*<sup>1</sup> | ✓ | String | - | `null` | Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. You can access the min & max supported values for width and height, using `getTrackCapabilities().width` and `getTrackCapabilities().height` respectively. |
-| `pan`<sup>1</sup> | ✓ | Number | - | `null` | Defines the camera's pan level if supported by the camera hardware. You can access the min & max supported values for pan level, using `getTrackCapabilities().pan`. |
-| `tilt`<sup>1</sup> | ✓ | Number | - | `null` | Defines the camera's tilt level if supported by the camera hardware. You can access the min & max supported values for tilt level, using `getTrackCapabilities().tilt`. |
-| `zoom`<sup>1</sup> | ✓ | Number | - | `null` | Defines the camera's zoom level if supported by the camera hardware. You can access the min & max supported values for zoom level, using `getTrackCapabilities().zoom`. |
+| `autoPlay`<br>*`auto-play`* | ✓ | Boolean | - | `false` | Determines if the video stream should start playing automatically when the component is connected to the DOM. If set to `false`, you can start the video stream manually using `startVideoStream()` method. |
+| `noImage`<br>*`no-image`* | ✓ | Boolean | - | `false` | Determines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
+| `facingMode`<br>*`facing-mode`*<sup>1</sup> | ✓ | String | - | `"user"` | The preferred camera to be used if the camera hardware supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera respectively. |
+| `cameraResolution`<br>*`camera-resolution`*<sup>1</sup> | ✓ | String | - | `""` | Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. You can access the min & max supported values for width and height, using `getTrackCapabilities().width` and `getTrackCapabilities().height` respectively. |
+| `pan`<sup>1</sup> | ✓ | Number | - | `0` | Defines the camera's pan level if supported by the camera hardware. You can access the min & max supported values for pan level, using `getTrackCapabilities().pan`. |
+| `tilt`<sup>1</sup> | ✓ | Number | - | `0` | Defines the camera's tilt level if supported by the camera hardware. You can access the min & max supported values for tilt level, using `getTrackCapabilities().tilt`. |
+| `zoom`<sup>1</sup> | ✓ | Number | - | `1` | Defines the camera's zoom level if supported by the camera hardware. You can access the min & max supported values for zoom level, using `getTrackCapabilities().zoom`. |
 | `loading` | ✓ | Boolean | - | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
 | `calculateFileSize`<br>*`calculate-file-size`* | ✓ | Boolean | - | `false` | Indicates if the component should calculate the file size of the generated image. If set to `true` the file size (in bytes) will be included in the event detail object when the `capture-photo:success` event is fired. The reason for not calculating the file size by default is that it might be an "expensive" operation, especially for large images, therefore it is recommended to set this property to `true` only if you need the file size. |
 
@@ -121,7 +122,6 @@ capture-photo::part(output-image) {
 ```html
 <capture-photo>
   <span slot="capture-button-content">Take picture</span>
-  
   <span slot="facing-mode-button-content">Change camera</span>
 </capture-photo>
 ```
@@ -143,14 +143,14 @@ capture-photo::part(output-image) {
 | ---- | ---- | ----------- | --------- |
 | `defineCustomElement` | Static | Defines/registers the custom element with the name provided. If no name is provided, the default name is used. The method checks if the element is already defined, hence will skip trying to redefine it. | `elementName='capture-photo'` |
 | `isSupported` | Static | Returns `true` if `MediaDevices.getUserMedia()` is supported by the platform, otherwise returns `false`. | - |
-| `capture`<sup>1</sup> | Prototype | Captures a photo using the element's properties. | - |
-| `getSupportedConstraints`<sup>1</sup> | Prototype | Returns an object based on the `MediaTrackSupportedConstraints` dictionary, whose member fields each specify one of the constrainable properties the user agent understands. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaDevices/getSupportedConstraints) | - |
-| `getTrackCapabilities`<sup>1</sup> | Prototype | Returns a `MediaTrackCapabilities` object which specifies the values or range of values which each constrainable property, based upon the platform and user agent. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getCapabilities) | - |
-| `getTrackSettings`<sup>1</sup> | Prototype | Returns a `MediaTrackSettings` object containing the current values of each of the constrainable properties for the current MediaStreamTrack. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getSettings) | - |
-| `startVideoStream`<sup>1</sup> | Prototype | Starts the video stream. Use this method if you want to start the video stream manually, if you have previously stopped it using `stopVideoStream()`. | - |
-| `stopVideoStream`<sup>1</sup> | Prototype | Stops the video stream and releases the camera. Use this method if you want to stop the video stream manually. | - |
+| `capture`<sup>1</sup> | Instance | Captures a photo using the element's properties. | - |
+| `getSupportedConstraints`<sup>1</sup> | Instance | Returns an object based on the `MediaTrackSupportedConstraints` dictionary, whose member fields each specify one of the constrainable properties the user agent understands. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaDevices/getSupportedConstraints) | - |
+| `getTrackCapabilities`<sup>1</sup> | Instance | Returns a `MediaTrackCapabilities` object which specifies the values or range of values which each constrainable property, based upon the platform and user agent. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getCapabilities) | - |
+| `getTrackSettings`<sup>1</sup> | Instance | Returns a `MediaTrackSettings` object containing the current values of each of the constrainable properties for the current MediaStreamTrack. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getSettings) | - |
+| `startVideoStream`<sup>1</sup> | Instance | Starts the video stream. Use this method to start the video stream manually, if `autoPlay` is set to `false` or if you want to restart the video stream after it has been previously stopped by calling `stopVideoStream()` method. | - |
+| `stopVideoStream`<sup>1</sup> | Instance | Stops the video stream and releases the camera. Use this method if you want to stop the video stream manually. | - |
 
-<sup>1</sup> These methods are only available after the component has been defined. To ensure the component is defined, you can use `whenDefined` method of the `CustomElementRegistry` interface, eg `customElements.whenDefined('capture-photo').then(() => { /* call methods here */ });`
+<sup>1</sup> Instance methods are only available after the component has been defined. To ensure the component is defined, you can use `whenDefined` method of the `CustomElementRegistry` interface, eg `customElements.whenDefined('capture-photo').then(() => { /* call methods here */ });`
 
 ### Events
 
