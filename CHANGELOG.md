@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v4.0.1 (2023-12-27)
+
+- Fix bug that set the camera resolution to the lowest value when `camera-resolution` attribute was not provided. This was a regression introduced in `v4.0.0`.
+
 ## v4.0.0 (2023-12-27)
 
 ## Breaking Changes

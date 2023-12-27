@@ -624,10 +624,13 @@ class CapturePhoto extends HTMLElement {
       audio: false
     };
 
-    if (typeof this.cameraResolution === 'string') {
-      const [width, height] = this.cameraResolution.split('x').map(x => Number(x));
-      constraints.video.width = width;
-      constraints.video.height = height;
+    if (typeof this.cameraResolution === 'string' && this.cameraResolution.trim().length > 0) {
+      const [width = 0, height = 0] = this.cameraResolution.split('x').map(x => Number(x));
+
+      if (width > 0 && height > 0) {
+        constraints.video.width = width;
+        constraints.video.height = height;
+      }
     }
 
     try {
