@@ -3,6 +3,9 @@
 ## v4.1.0 (2024-08-21)
 
 - Add support for `torch` property to turn on/off the fill light if supported by the camera hardware.
+- Replace parcel with esbuild for bundling.
+- Update ESLint to use flat configuration.
+- Use Prettier for code formatting.
 - Update dev dependencies.
 
 ## v4.0.1 (2023-12-27)

@@ -252,7 +252,9 @@ describe('<capture-photo>', () => {
         </capture-photo>
       `);
 
-      expect(el).lightDom.to.equal('<div slot="actions">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>');
+      expect(el).lightDom.to.equal(
+        '<div slot="actions">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>'
+      );
     });
 
     it('adds content in default slot', async () => {
@@ -262,7 +264,9 @@ describe('<capture-photo>', () => {
         </capture-photo>
       `);
 
-      expect(el).lightDom.to.equal('<div class="content">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>');
+      expect(el).lightDom.to.equal(
+        '<div class="content">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>'
+      );
     });
   });
 
