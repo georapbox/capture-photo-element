@@ -13,7 +13,7 @@
   --text-main: #363636;
   --text-bright: #000;
   --text-muted: #70777f;
-  --links: #0076d1;
+  --links: #0063af;
   --focus: #0096bfab;
   --border: #dbdbdb;
   --border-radius: 6px;
@@ -26,6 +26,8 @@
   --variable: #39a33c;
   --highlight: #ff0;
   --select-arrow: url("data:image/svg+xml;charset=utf-8,%3C?xml version='1.0' encoding='utf-8'?%3E %3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='62.5' width='116.9' fill='%23161f27'%3E %3Cpath d='M115.3,1.6 C113.7,0 111.1,0 109.5,1.6 L58.5,52.7 L7.4,1.6 C5.8,0 3.2,0 1.6,1.6 C0,3.2 0,5.8 1.6,7.4 L55.5,61.3 C56.3,62.1 57.3,62.5 58.4,62.5 C59.4,62.5 60.5,62.1 61.3,61.3 L115.2,7.4 C116.9,5.8 116.9,3.2 115.3,1.6Z'/%3E %3C/svg%3E");
+
+  accent-color: var(--links);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -51,7 +53,7 @@
     --form-text: #fff;
     --variable: #d941e2;
     --highlight: #efdb43;
-    --select-arrow: svg-load('./assets/select-arrow.svg', fill: #efefef);
+    --select-arrow: url("data:image/svg+xml;charset=utf-8,%3C?xml version='1.0' encoding='utf-8'?%3E %3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='62.5' width='116.9' fill='%23ffffff'%3E %3Cpath d='M115.3,1.6 C113.7,0 111.1,0 109.5,1.6 L58.5,52.7 L7.4,1.6 C5.8,0 3.2,0 1.6,1.6 C0,3.2 0,5.8 1.6,7.4 L55.5,61.3 C56.3,62.1 57.3,62.5 58.4,62.5 C59.4,62.5 60.5,62.1 61.3,61.3 L115.2,7.4 C116.9,5.8 116.9,3.2 115.3,1.6Z'/%3E %3C/svg%3E");
   }
 }
 
@@ -60,7 +62,7 @@ body {
   line-height: 1.4;
   max-width: var(--body-max-width);
   margin: 20px auto;
-  padding: 0 16px;
+  padding: 0 10px;
   word-wrap: break-word;
   color: var(--text-main);
   background: var(--background-body);
@@ -86,6 +88,15 @@ input {
 }
 
 textarea {
+  transition:
+    background-color var(--animation-duration) linear,
+    border-color var(--animation-duration) linear,
+    color var(--animation-duration) linear,
+    box-shadow var(--animation-duration) linear,
+    transform var(--animation-duration) ease;
+}
+
+select {
   transition:
     background-color var(--animation-duration) linear,
     border-color var(--animation-duration) linear,
@@ -214,7 +225,6 @@ input {
   padding: 10px;
   border: none;
   border-radius: var(--border-radius);
-
   outline: none;
 }
 
@@ -281,7 +291,7 @@ input[type='button'] {
   padding-left: 30px;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   background: var(--button-hover);
 }
 
@@ -434,6 +444,7 @@ input[type='range']::-webkit-slider-thumb {
   border-radius: 50%;
   background: var(--border);
   -webkit-appearance: none;
+  appearance: none;
   margin-top: -7px;
 }
 
@@ -499,12 +510,9 @@ input[type='range']:focus::-ms-fill-upper {
   background: var(--background);
 }
 
-a {
-  text-decoration: none;
-  color: var(--links);
-}
-
+a,
 a:hover {
+  color: var(--links);
   text-decoration: underline;
 }
 
@@ -607,15 +615,15 @@ details[open] {
   padding: 10px;
 }
 
-details summary {
-  transition: margin var(--animation-duration) ease;
-}
-
 details> :last-child {
   margin-bottom: 0;
 }
 
-details[open] summary {
+details > summary {
+  transition: margin var(--animation-duration) ease-out;
+}
+
+details[open] > summary {
   margin-bottom: 10px;
 }
 
@@ -634,6 +642,10 @@ details> :not(summary) {
 
 summary::-webkit-details-marker {
   color: var(--text-main);
+}
+
+summary:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--focus);
 }
 
 dialog {
