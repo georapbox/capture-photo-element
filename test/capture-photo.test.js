@@ -165,6 +165,24 @@ describe('<capture-photo>', () => {
       expect(el.getAttribute('zoom')).to.equal('2');
     });
 
+    // torch property
+    it('property torch is false when attribute torch is not set', async () => {
+      const el = await fixture(html`<capture-photo></capture-photo>`);
+      expect(el.torch).to.be.false;
+    });
+
+    it('property torch is true when attribute torch is set', async () => {
+      const el = await fixture(html`<capture-photo torch></capture-photo>`);
+      expect(el.torch).to.be.true;
+    });
+
+    it('attribute torch is set when property torch is set', async () => {
+      const el = await fixture(html`<capture-photo></capture-photo>`);
+      el.torch = true;
+      await elementUpdated(el);
+      expect(el.hasAttribute('torch')).to.be.true;
+    });
+
     // calculateFileSize property
     it('property calculateFileSize is false when attribute calculate-file-size is not set', async () => {
       const el = await fixture(html`<capture-photo></capture-photo>`);
@@ -234,7 +252,9 @@ describe('<capture-photo>', () => {
         </capture-photo>
       `);
 
-      expect(el).lightDom.to.equal('<div slot="actions">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>');
+      expect(el).lightDom.to.equal(
+        '<div slot="actions">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>'
+      );
     });
 
     it('adds content in default slot', async () => {
@@ -244,7 +264,9 @@ describe('<capture-photo>', () => {
         </capture-photo>
       `);
 
-      expect(el).lightDom.to.equal('<div class="content">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>');
+      expect(el).lightDom.to.equal(
+        '<div class="content">Lorem ipsum dolor, sit amet consectetur adipisicing elit.</div>'
+      );
     });
   });
 

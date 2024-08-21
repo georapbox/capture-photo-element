@@ -19,7 +19,7 @@
 
 /**
  * @typedef {Object} ExtendedMediaTrackConstraints
- * @property {MediaTrackConstraints & {pan: boolean, tilt: boolean, zoom: boolean}} video - The video constraints.
+ * @property {MediaTrackConstraints & {pan: boolean, tilt: boolean, zoom: boolean, torch: boolean}} video - The video constraints.
  * @property {MediaTrackConstraints | boolean} audio - The audio constraints.
  */
 
@@ -27,7 +27,7 @@ import { clamp } from './utils/clamp.js';
 
 const COMPONENT_NAME = 'capture-photo';
 
-const styles = /* css */`
+const styles = /* css */ `
   :host {
     display: block;
     box-sizing: border-box;
@@ -56,7 +56,7 @@ const styles = /* css */`
 
 const template = document.createElement('template');
 
-template.innerHTML = /* html */`
+template.innerHTML = /* html */ `
   <style>${styles}</style>
 
   <video part="video" playsinline></video>
@@ -98,6 +98,7 @@ template.innerHTML = /* html */`
  * @property {number} pan - The pan value of the camera.
  * @property {number} tilt - The tilt value of the camera.
  * @property {number} zoom - The zoom value of the camera.
+ * @property {boolean} torch - Whether or not the fill light is connected.
  * @property {boolean} loading - Whether or not the video stream is loading.
  * @property {boolean} calculateFileSize - Whether or not to calculate the file size of the captured image.
  *
@@ -108,6 +109,7 @@ template.innerHTML = /* html */`
  * @atttribute {number} pan - Reflects the pan property.
  * @atttribute {number} tilt - Reflects the tilt property.
  * @atttribute {number} zoom - Reflects the zoom property.
+ * @atttribute {boolean} torch - Reflects the torch property.
  * @atttribute {boolean} loading - Reflects the loading property.
  * @atttribute {boolean} calculate-file-size - Reflects the calculateFileSize property.
  *
@@ -178,7 +180,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom'];
+    return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom', 'torch'];
   }
 
   /**
@@ -205,8 +207,7 @@ class CapturePhoto extends HTMLElement {
       const isValidFacingMode = ['user', 'environment'].includes(this.facingMode || '');
 
       if ('facingMode' in trackSettings && isValidFacingMode) {
-        this.stopVideoStream();
-        this.startVideoStream();
+        this.#restartVideoStream();
       }
     }
 
@@ -215,50 +216,58 @@ class CapturePhoto extends HTMLElement {
         const [width = 0, height = 0] = this.cameraResolution.split('x').map(x => Number(x));
 
         if (width > 0 && height > 0 && 'width' in trackCapabilities && 'height' in trackCapabilities) {
-          const widthInAllowedRange = trackCapabilities.width?.min && trackCapabilities.width?.max
-            ? width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max
-            : false;
+          const widthInAllowedRange =
+            trackCapabilities.width?.min && trackCapabilities.width?.max
+              ? width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max
+              : false;
 
-          const heightInAllowedRange = trackCapabilities.height?.min && trackCapabilities.height?.max
-            ? height >= trackCapabilities?.height?.min && height <= trackCapabilities?.height?.max
-            : false;
+          const heightInAllowedRange =
+            trackCapabilities.height?.min && trackCapabilities.height?.max
+              ? height >= trackCapabilities?.height?.min && height <= trackCapabilities?.height?.max
+              : false;
 
           if ('width' in trackSettings && 'height' in trackSettings && widthInAllowedRange && heightInAllowedRange) {
-            this.stopVideoStream();
-            this.startVideoStream();
+            this.#restartVideoStream();
           }
         }
       }
     }
 
     if (name === 'pan' && oldValue !== newValue && 'pan' in this.#supportedConstraints) {
-      const panInAllowedRange = 'pan' in trackCapabilities && trackCapabilities.pan?.min && trackCapabilities.pan?.max
-        ? this.pan >= trackCapabilities.pan.min && this.pan <= trackCapabilities.pan.max
-        : false;
+      const panInAllowedRange =
+        'pan' in trackCapabilities && trackCapabilities.pan?.min && trackCapabilities.pan?.max
+          ? this.pan >= trackCapabilities.pan.min && this.pan <= trackCapabilities.pan.max
+          : false;
 
-      if ('pan' in trackSettings && typeof this.pan === 'number' && panInAllowedRange) {
-        this.#applyPTZ('pan', this.pan);
+      if (typeof this.pan === 'number' && panInAllowedRange) {
+        this.#applyConstraint('pan', this.pan);
       }
     }
 
     if (name === 'tilt' && oldValue !== newValue && 'tilt' in this.#supportedConstraints) {
-      const tiltInAllowedRange = 'tilt' in trackCapabilities && trackCapabilities.tilt?.min && trackCapabilities.tilt?.max
-        ? this.tilt >= trackCapabilities.tilt.min && this.tilt <= trackCapabilities.tilt.max
-        : false;
+      const tiltInAllowedRange =
+        'tilt' in trackCapabilities && trackCapabilities.tilt?.min && trackCapabilities.tilt?.max
+          ? this.tilt >= trackCapabilities.tilt.min && this.tilt <= trackCapabilities.tilt.max
+          : false;
 
-      if ('tilt' in trackSettings && typeof this.tilt === 'number' && tiltInAllowedRange) {
-        this.#applyPTZ('tilt', this.tilt);
+      if (typeof this.tilt === 'number' && tiltInAllowedRange) {
+        this.#applyConstraint('tilt', this.tilt);
       }
     }
 
     if (name === 'zoom' && oldValue !== newValue && 'zoom' in this.#supportedConstraints) {
-      const zoomInAllowedRange = 'zoom' in trackCapabilities && trackCapabilities.zoom?.min && trackCapabilities.zoom?.max
-        ? this.zoom >= trackCapabilities.zoom.min && this.zoom <= trackCapabilities.zoom.max
-        : false;
+      const zoomInAllowedRange =
+        'zoom' in trackCapabilities && trackCapabilities.zoom?.min && trackCapabilities.zoom?.max
+          ? this.zoom >= trackCapabilities.zoom.min && this.zoom <= trackCapabilities.zoom.max
+          : false;
 
-      if ('zoom' in trackSettings && typeof this.zoom === 'number' && zoomInAllowedRange) {
-        this.#applyPTZ('zoom', this.zoom);
+      if (typeof this.zoom === 'number' && zoomInAllowedRange) {
+        this.#applyConstraint('zoom', this.zoom);
       }
+    }
+
+    if (name === 'torch' && oldValue !== newValue && 'torch' in this.#supportedConstraints) {
+      this.#applyConstraint('torch', this.torch);
     }
   }
 
@@ -273,6 +282,7 @@ class CapturePhoto extends HTMLElement {
     this.#upgradeProperty('pan');
     this.#upgradeProperty('tilt');
     this.#upgradeProperty('zoom');
+    this.#upgradeProperty('torch');
     this.#upgradeProperty('calculateFileSize');
 
     this.#canvasElement = this.shadowRoot?.querySelector('canvas') || null;
@@ -290,16 +300,18 @@ class CapturePhoto extends HTMLElement {
     this.#facingModeButton?.addEventListener('click', this.#onFacingModeButtonClick);
 
     if (!CapturePhoto.isSupported()) {
-      return this.dispatchEvent(new CustomEvent(`${COMPONENT_NAME}:error`, {
-        bubbles: true,
-        composed: true,
-        detail: {
-          error: {
-            name: 'NotSupportedError',
-            message: 'Not supported'
+      return this.dispatchEvent(
+        new CustomEvent(`${COMPONENT_NAME}:error`, {
+          bubbles: true,
+          composed: true,
+          detail: {
+            error: {
+              name: 'NotSupportedError',
+              message: 'Not supported'
+            }
           }
-        }
-      }));
+        })
+      );
     }
 
     if (this.autoPlay) {
@@ -404,6 +416,18 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
+   * @type {boolean} torch - Whether or not the fill light is connected.
+   * @attribute torch - Reflects the torch attribute.
+   */
+  get torch() {
+    return this.hasAttribute('torch');
+  }
+
+  set torch(value) {
+    this.toggleAttribute('torch', !!value);
+  }
+
+  /**
    * @type {boolean} loading - Whether or not the video stream is loading.
    * @attribute loading - Reflects the loading attribute.
    */
@@ -456,21 +480,31 @@ class CapturePhoto extends HTMLElement {
   #onVideoLoadedMetaData = evt => {
     const video = evt.target;
 
-    video.play().then(() => {
-      this.dispatchEvent(new CustomEvent(`${COMPONENT_NAME}:video-play`, {
-        bubbles: true,
-        composed: true,
-        detail: { video }
-      }));
-    }).catch(/** @param {Error} error */error => {
-      this.dispatchEvent(new CustomEvent(`${COMPONENT_NAME}:error`, {
-        bubbles: true,
-        composed: true,
-        detail: { error }
-      }));
-    }).finally(() => {
-      this.removeAttribute('loading');
-    });
+    video
+      .play()
+      .then(() => {
+        this.dispatchEvent(
+          new CustomEvent(`${COMPONENT_NAME}:video-play`, {
+            bubbles: true,
+            composed: true,
+            detail: { video }
+          })
+        );
+      })
+      .catch(
+        /** @param {Error} error */ error => {
+          this.dispatchEvent(
+            new CustomEvent(`${COMPONENT_NAME}:error`, {
+              bubbles: true,
+              composed: true,
+              detail: { error }
+            })
+          );
+        }
+      )
+      .finally(() => {
+        this.removeAttribute('loading');
+      });
   };
 
   /**
@@ -485,13 +519,13 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
-   * Applies the pan, tilt or zoom constraint.
+   * Applies a constraint to the video track.
    *
-   * @param {'pan' | 'tilt' | 'zoom'} constraintName - The name of the constraint.
-   * @param {number} constraintValue - The value of the constraint.
+   * @param {string} constraint - The name of the constraint.
+   * @param {any} value - The value of the constraint.
    */
-  #applyPTZ(constraintName, constraintValue) {
-    if (!this.#stream || !constraintName || !constraintValue) {
+  #applyConstraint(constraint, value) {
+    if (!this.#stream) {
       return;
     }
 
@@ -500,12 +534,19 @@ class CapturePhoto extends HTMLElement {
     const trackCapabilities = this.getTrackCapabilities();
     const trackSettings = this.getTrackSettings();
 
-    if (constraintName in trackSettings) {
-      track.applyConstraints({
-        advanced: [{
-          [constraintName]: clamp(Number(constraintValue), trackCapabilities[constraintName]?.min || 1, trackCapabilities[constraintName]?.max || 1)
-        }]
-      });
+    const constraintValue =
+      constraint === 'pan' || constraint === 'tilt' || constraint === 'zoom'
+        ? clamp(Number(value), trackCapabilities[constraint]?.min || 1, trackCapabilities[constraint]?.max || 1)
+        : value;
+
+    if (constraint in trackSettings) {
+      track
+        .applyConstraints({
+          advanced: [{ [constraint]: constraintValue }]
+        })
+        .catch(() => {
+          // Fail silently...
+        });
     }
   }
 
@@ -559,9 +600,11 @@ class CapturePhoto extends HTMLElement {
       return null;
     }
 
-    return this.#facingModeButtonSlot.assignedElements({ flatten: true }).find(el => {
-      return el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'facing-mode-button';
-    }) || null;
+    return (
+      this.#facingModeButtonSlot.assignedElements({ flatten: true }).find(el => {
+        return el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'facing-mode-button';
+      }) || null
+    );
   }
 
   /**
@@ -574,9 +617,19 @@ class CapturePhoto extends HTMLElement {
       return null;
     }
 
-    return this.#captureButtonSlot.assignedElements({ flatten: true }).find(el => {
-      return el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'capture-button';
-    }) || null;
+    return (
+      this.#captureButtonSlot.assignedElements({ flatten: true }).find(el => {
+        return el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'capture-button';
+      }) || null
+    );
+  }
+
+  /**
+   * Restarts the video stream.
+   */
+  #restartVideoStream() {
+    this.stopVideoStream();
+    this.startVideoStream();
   }
 
   /**
@@ -586,7 +639,7 @@ class CapturePhoto extends HTMLElement {
    *
    * https://developers.google.com/web/fundamentals/web-components/best-practices#lazy-properties
    *
-   * @param {'autpoPlay' | 'noImage' | 'facingMode' | 'cameraResolution' | 'pan' | 'tilt' | 'zoom' | 'calculateFileSize'} prop
+   * @param {'autpoPlay' | 'noImage' | 'facingMode' | 'cameraResolution' | 'pan' | 'tilt' | 'zoom' | 'calculateFileSize' | 'torch'} prop
    */
   #upgradeProperty(prop) {
     /** @type {any} */
@@ -619,7 +672,8 @@ class CapturePhoto extends HTMLElement {
         },
         pan: true,
         tilt: true,
-        zoom: true
+        zoom: true,
+        torch: this.torch
       },
       audio: false
     };
@@ -640,9 +694,9 @@ class CapturePhoto extends HTMLElement {
         this.#videoElement.srcObject = this.#stream;
       }
 
-      this.#applyPTZ('pan', this.pan);
-      this.#applyPTZ('tilt', this.tilt);
-      this.#applyPTZ('zoom', this.zoom);
+      this.#applyConstraint('pan', this.pan);
+      this.#applyConstraint('tilt', this.tilt);
+      this.#applyConstraint('zoom', this.zoom);
 
       const trackSettings = this.getTrackSettings();
 
@@ -650,11 +704,13 @@ class CapturePhoto extends HTMLElement {
         this.#facingModeButtonSlot.hidden = false;
       }
     } catch (error) {
-      this.dispatchEvent(new CustomEvent(`${COMPONENT_NAME}:error`, {
-        bubbles: true,
-        composed: true,
-        detail: { error }
-      }));
+      this.dispatchEvent(
+        new CustomEvent(`${COMPONENT_NAME}:error`, {
+          bubbles: true,
+          composed: true,
+          detail: { error }
+        })
+      );
     } finally {
       this.removeAttribute('loading');
     }
@@ -700,6 +756,7 @@ class CapturePhoto extends HTMLElement {
           image.src = dataURI;
           image.width = width;
           image.height = height;
+          image.alt = 'Captured photo';
           image.setAttribute('part', 'output-image');
           this.#emptyOutputElement();
           this.#outputElement?.appendChild(image);
@@ -717,23 +774,27 @@ class CapturePhoto extends HTMLElement {
             if (size) {
               eventDetail.size = size;
             }
-          } catch (err) {
+          } catch {
             // Fail silently...
           }
         }
 
-        this.dispatchEvent(new CustomEvent(`${COMPONENT_NAME}:success`, {
-          bubbles: true,
-          composed: true,
-          detail: eventDetail
-        }));
+        this.dispatchEvent(
+          new CustomEvent(`${COMPONENT_NAME}:success`, {
+            bubbles: true,
+            composed: true,
+            detail: eventDetail
+          })
+        );
       }
     } catch (error) {
-      this.dispatchEvent(new CustomEvent(`${COMPONENT_NAME}:error`, {
-        bubbles: true,
-        composed: true,
-        detail: { error }
-      }));
+      this.dispatchEvent(
+        new CustomEvent(`${COMPONENT_NAME}:error`, {
+          bubbles: true,
+          composed: true,
+          detail: { error }
+        })
+      );
     }
   }
 

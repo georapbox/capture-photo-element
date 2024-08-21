@@ -5,7 +5,7 @@
 [getUserMedia]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 [MediaDevices]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices
 [constraints]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#parameters
-[license]: https://georapbox.mit-license.org/@2022
+[license]: https://github.com/georapbox/capture-photo-element/blob/main/LICENSE
 [changelog]: https://github.com/georapbox/capture-photo-element/blob/main/CHANGELOG.md
 
 # &lt;capture-photo&gt;
@@ -85,6 +85,7 @@ capture-photo::part(output-image) {
 | `pan`<sup>1</sup> | ✓ | Number | - | `0` | Defines the camera's pan level if supported by the camera hardware. You can access the min & max supported values for pan level, using `getTrackCapabilities().pan`. |
 | `tilt`<sup>1</sup> | ✓ | Number | - | `0` | Defines the camera's tilt level if supported by the camera hardware. You can access the min & max supported values for tilt level, using `getTrackCapabilities().tilt`. |
 | `zoom`<sup>1</sup> | ✓ | Number | - | `1` | Defines the camera's zoom level if supported by the camera hardware. You can access the min & max supported values for zoom level, using `getTrackCapabilities().zoom`. |
+| `torch`<sup>1</sup> | ✓ | Boolean | - | `false` | Determines if the camera's fill light should be turned on if supported by the camera hardware. This works only when `facingMode` is set to `environment`. You can access the supported values for torch, using `getTrackCapabilities().torch`. **NOTE:** The support for this feature is known to be limited and heavily dependent on the device, browser, and operating system. |
 | `loading` | ✓ | Boolean | - | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
 | `calculateFileSize`<br>*`calculate-file-size`* | ✓ | Boolean | - | `false` | Indicates if the component should calculate the file size of the generated image. If set to `true` the file size (in bytes) will be included in the event detail object when the `capture-photo:success` event is fired. The reason for not calculating the file size by default is that it might be an "expensive" operation, especially for large images, therefore it is recommended to set this property to `true` only if you need the file size. |
 
@@ -163,6 +164,53 @@ capture-photo::part(output-image) {
 ## Changelog
 
 For API updates and breaking changes, check the [CHANGELOG][changelog].
+
+## Development setup
+
+### Prerequisites
+
+The project requires `Node.js` and `npm` to be installed on your environment. Preferrably, use [nvm](https://github.com/nvm-sh/nvm) Node Version Manager and use the version of Node.js specified in the `.nvmrc` file by running `nvm use`.
+
+### Install dependencies
+
+Install the project dependencies by running the following command.
+
+```sh
+npm install
+```
+
+### Build for development
+
+Watch for changes and start a development server by running the following command.
+
+```sh
+npm start
+```
+
+### Linting
+
+Lint the code by running the following command.
+
+```sh
+npm run lint
+```
+
+### Testing
+
+Run the tests by running any of the following commands.
+
+```sh
+npm test
+npm run test:watch # watch mode
+```
+
+### Build for production
+
+Create a production build by running the following command.
+
+```sh
+npm run build
+```
 
 ## License
 

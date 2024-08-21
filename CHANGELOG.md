@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v4.1.0 (2024-08-21)
+
+- Add support for `torch` property to turn on/off the fill light if supported by the camera hardware.
+- Replace parcel with esbuild for bundling.
+- Update ESLint to use flat configuration.
+- Use Prettier for code formatting.
+- Update dev dependencies.
+
 ## v4.0.1 (2023-12-27)
 
 - Fix bug that set the camera resolution to the lowest value when `camera-resolution` attribute was not provided. This was a regression introduced in `v4.0.0`.

@@ -1,185 +1,123 @@
-const isLocalhost = window.location.href.includes('127.0.0.1') || window.location.href.includes('localhost');
+import { escapeHTML } from './utils.js';
+
+const url = window.location.href;
+const isLocalhost = url.includes('127.0.0.1') || url.includes('localhost');
 const componentUrl = isLocalhost ? '../../dist/capture-photo.js' : '../lib/capture-photo.js';
 const capturePhotoEl = document.querySelector('capture-photo');
 const form = document.getElementById('form');
 const codePreviewEl = document.getElementById('codePreview');
 
-const escapeHTML = subjectString => {
-  if (typeof subjectString !== 'string') {
-    throw new TypeError('Expected a string for first argument');
-  }
+import(componentUrl)
+  .then(res => {
+    const { CapturePhoto } = res;
 
-  const htmlEscapes = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;' // eslint-disable-line quotes
-  };
+    function handleCapturePhotoError(evt) {
+      console.log('capture-photo:error ->', evt.detail);
 
-  const regexUnescapedHtml = /[&<>"'`]/g;
-  const regexHasUnescapedHtml = RegExp(regexUnescapedHtml.source);
+      const errorEl = document.createElement('p');
+      errorEl.className = 'alert alert-danger';
+      errorEl.innerHTML = evt.detail.error?.message || 'Unknown error';
+      document.getElementById('errorPlaceholder').appendChild(errorEl);
+    }
 
-  return regexHasUnescapedHtml.test(subjectString)
-    ? subjectString.replace(regexUnescapedHtml, tag => htmlEscapes[tag] || tag)
-    : subjectString;
-};
+    function handleCapturePhotoSuccess(evt) {
+      console.log('capture-photo:success ->', evt.detail);
+    }
 
-import(componentUrl).then(res => {
-  const { CapturePhoto } = res;
+    function capturePhotoVideoPlay() {
+      const settings = capturePhotoEl.getTrackSettings();
+      const capabilities = capturePhotoEl.getTrackCapabilities();
+      const facingModeInput = form.querySelector('select[name="facing-mode"]');
+      const zoomInput = form.querySelector('input[name="zoom"]');
+      const panInput = form.querySelector('input[name="pan"]');
+      const tiltInput = form.querySelector('input[name="tilt"]');
 
-  document.addEventListener('capture-photo:error', evt => {
-    console.log('capture-photo:error ->', evt.detail);
+      if ('facingMode' in settings) {
+        facingModeInput.value = settings.facingMode;
+      }
+
+      if ('zoom' in settings) {
+        if (capabilities?.zoom) {
+          zoomInput.min = capabilities.zoom?.min || 0;
+          zoomInput.max = capabilities.zoom?.max;
+          zoomInput.step = capabilities.zoom?.step || 0.1;
+        }
+        zoomInput.value = settings.zoom;
+      } else {
+        zoomInput.value = 0;
+      }
+
+      if ('pan' in settings) {
+        if (capabilities?.pan) {
+          panInput.min = capabilities.pan?.min || 0;
+          panInput.max = capabilities.pan?.max;
+          panInput.step = capabilities.pan?.step || 0.1;
+        }
+        panInput.value = settings.pan;
+      } else {
+        panInput.value = 0;
+      }
+
+      if ('tilt' in settings) {
+        if (capabilities?.tilt) {
+          tiltInput.min = capabilities.tilt?.min || 0;
+          tiltInput.max = capabilities.tilt?.max;
+          tiltInput.step = capabilities.tilt?.step || 0.1;
+        }
+        tiltInput.value = settings.tilt;
+      } else {
+        tiltInput.value = 0;
+      }
+
+      form.querySelector('fieldset').disabled = false;
+    }
+
+    function createCodePreview() {
+      let attrs = '';
+
+      for (const { name, value } of capturePhotoEl.attributes) {
+        if (name === 'loading') {
+          continue;
+        }
+
+        attrs += value ? ` ${name}="${value}"` : ` ${name}`;
+      }
+
+      const codePreview = `<capture-photo${attrs}></capture-photo>`;
+      codePreviewEl.innerHTML = escapeHTML(codePreview);
+
+      window.hljs.highlightElement(codePreviewEl);
+    }
+
+    document.addEventListener('capture-photo:error', handleCapturePhotoError);
+    document.addEventListener('capture-photo:success', handleCapturePhotoSuccess);
+    document.addEventListener('capture-photo:video-play', capturePhotoVideoPlay, { once: true });
+
+    CapturePhoto.defineCustomElement();
+
+    Array.from(form.elements)
+      .filter(el => el.nodeName !== 'FIELDSET')
+      .forEach(el => {
+        el.addEventListener('change', evt => {
+          evt.preventDefault();
+
+          switch (el.type) {
+            case 'checkbox':
+              capturePhotoEl.toggleAttribute(el.name, el.checked);
+              break;
+            default:
+              if (el.value) {
+                capturePhotoEl.setAttribute(el.name, el.value);
+              } else {
+                capturePhotoEl.removeAttribute(el.name);
+              }
+              break;
+          }
+
+          createCodePreview();
+        });
+      });
+  })
+  .catch(err => {
+    console.error(err);
   });
-
-  document.addEventListener('capture-photo:success', evt => {
-    console.log('capture-photo:success ->', evt.detail);
-  });
-
-  form.addEventListener('submit', evt => {
-    evt.preventDefault();
-
-    const facingMode = form['facing-mode'];
-    const zoom = form['zoom'];
-    const pan = form['pan'];
-    const tilt = form['tilt'];
-    const width = form['width'];
-    const height = form['height'];
-    const calculateFileSize = form['calculate-file-size'];
-    const noImage = form['no-image'];
-
-    if (facingMode.value && !facingMode.disabled) {
-      capturePhotoEl.setAttribute('facing-mode', facingMode.value);
-    } else {
-      capturePhotoEl.removeAttribute('facing-mode');
-    }
-
-    if (zoom.value && !zoom.disabled) {
-      capturePhotoEl.setAttribute('zoom', zoom.value);
-    } else {
-      capturePhotoEl.removeAttribute('zoom');
-    }
-
-    if (pan.value && !pan.disabled) {
-      capturePhotoEl.setAttribute('pan', pan.value);
-    } else {
-      capturePhotoEl.removeAttribute('pan');
-    }
-
-    if (tilt.value && !tilt.disabled) {
-      capturePhotoEl.setAttribute('tilt', tilt.value);
-    } else {
-      capturePhotoEl.removeAttribute('tilt');
-    }
-
-    if (width.value && !width.disabled && height.value && !height.disabled) {
-      capturePhotoEl.setAttribute('camera-resolution', `${width.value}x${height.value}`);
-    } else {
-      capturePhotoEl.removeAttribute('camera-resolution');
-    }
-
-    capturePhotoEl.toggleAttribute('calculate-file-size', calculateFileSize.checked);
-    capturePhotoEl.toggleAttribute('no-image', noImage.checked);
-
-    let attrs = '';
-
-    for (const { name, value } of capturePhotoEl.attributes) {
-      if (name === 'loading') {
-        continue;
-      }
-
-      attrs += value ? ` ${name}="${value}"` : ` ${name}`;
-    }
-
-    const codePreview = `<capture-photo${attrs}></capture-photo>`;
-    codePreviewEl.innerHTML = escapeHTML(codePreview);
-
-    window.hljs.highlightElement(codePreviewEl);
-  });
-
-  capturePhotoEl.addEventListener('capture-photo:video-play', () => {
-    const settings = capturePhotoEl.getTrackSettings();
-    const capabilities = capturePhotoEl.getTrackCapabilities();
-    const facingModeInput = form.querySelector('select[name="facing-mode"]');
-    const zoomInput = form.querySelector('input[name="zoom"]');
-    const panInput = form.querySelector('input[name="pan"]');
-    const tiltInput = form.querySelector('input[name="tilt"]');
-    const widthInput = form.querySelector('input[name="width"]');
-    const heightInput = form.querySelector('input[name="height"]');
-
-    if ('facingMode' in settings) {
-      facingModeInput.value = settings.facingMode;
-    } else {
-      facingModeInput.disabled = true;
-    }
-
-    if ('zoom' in settings) {
-      if (capabilities?.zoom) {
-        zoomInput.min = capabilities.zoom?.min || 1;
-        zoomInput.max = capabilities.zoom?.max;
-        zoomInput.step = capabilities.zoom?.step || 1;
-      }
-      zoomInput.value = settings.zoom;
-    } else {
-      zoomInput.disabled = true;
-      zoomInput.value = 0;
-    }
-
-    if ('pan' in settings) {
-      if (capabilities?.pan) {
-        panInput.min = capabilities.pan?.min || 0;
-        panInput.max = capabilities.pan?.max;
-        panInput.step = capabilities.pan?.step || 1;
-      }
-      panInput.value = settings.pan;
-    } else {
-      panInput.disabled = true;
-      panInput.value = 0;
-    }
-
-    if ('tilt' in settings) {
-      if (capabilities?.tilt) {
-        tiltInput.min = capabilities.tilt?.min || 0;
-        tiltInput.max = capabilities.tilt?.max;
-        tiltInput.step = capabilities.tilt?.step || 1;
-      }
-      tiltInput.value = settings.tilt;
-    } else {
-      tiltInput.disabled = true;
-      tiltInput.value = 0;
-    }
-
-    if ('width' in settings) {
-      if (capabilities?.width) {
-        widthInput.min = capabilities.width?.min || 1;
-        widthInput.max = capabilities.width?.max;
-      }
-    } else {
-      widthInput.disabled = true;
-    }
-
-    if ('height' in settings) {
-      if (capabilities?.height) {
-        heightInput.min = capabilities.height?.min || 1;
-        heightInput.max = capabilities.height?.max;
-      }
-    } else {
-      heightInput.disabled = true;
-    }
-
-    form.querySelector('fieldset').disabled = false;
-  }, {
-    once: true
-  });
-
-  capturePhotoEl.addEventListener('capture-photo:error', evt => {
-    const errorEl = document.createElement('p');
-    errorEl.className = 'alert alert-danger';
-    errorEl.innerHTML = evt.detail.error?.message || 'Unknown error';
-    document.getElementById('errorPlaceholder').appendChild(errorEl);
-  });
-
-  CapturePhoto.defineCustomElement();
-}).catch(err => {
-  console.error(err);
-});
