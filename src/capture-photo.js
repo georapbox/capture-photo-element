@@ -19,7 +19,7 @@
 
 /**
  * @typedef {Object} ExtendedMediaTrackConstraints
- * @property {MediaTrackConstraints & {pan: boolean, tilt: boolean, zoom: boolean}} video - The video constraints.
+ * @property {MediaTrackConstraints & {pan: boolean, tilt: boolean, zoom: boolean, torch: boolean}} video - The video constraints.
  * @property {MediaTrackConstraints | boolean} audio - The audio constraints.
  */
 
@@ -98,6 +98,7 @@ template.innerHTML = /* html */`
  * @property {number} pan - The pan value of the camera.
  * @property {number} tilt - The tilt value of the camera.
  * @property {number} zoom - The zoom value of the camera.
+ * @property {boolean} torch - Whether or not the fill light is connected.
  * @property {boolean} loading - Whether or not the video stream is loading.
  * @property {boolean} calculateFileSize - Whether or not to calculate the file size of the captured image.
  *
@@ -108,6 +109,7 @@ template.innerHTML = /* html */`
  * @atttribute {number} pan - Reflects the pan property.
  * @atttribute {number} tilt - Reflects the tilt property.
  * @atttribute {number} zoom - Reflects the zoom property.
+ * @atttribute {boolean} torch - Reflects the torch property.
  * @atttribute {boolean} loading - Reflects the loading property.
  * @atttribute {boolean} calculate-file-size - Reflects the calculateFileSize property.
  *
@@ -178,7 +180,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom'];
+    return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom', 'torch'];
   }
 
   /**
@@ -205,8 +207,7 @@ class CapturePhoto extends HTMLElement {
       const isValidFacingMode = ['user', 'environment'].includes(this.facingMode || '');
 
       if ('facingMode' in trackSettings && isValidFacingMode) {
-        this.stopVideoStream();
-        this.startVideoStream();
+        this.#restartVideoStream();
       }
     }
 
@@ -224,8 +225,7 @@ class CapturePhoto extends HTMLElement {
             : false;
 
           if ('width' in trackSettings && 'height' in trackSettings && widthInAllowedRange && heightInAllowedRange) {
-            this.stopVideoStream();
-            this.startVideoStream();
+            this.#restartVideoStream();
           }
         }
       }
@@ -237,7 +237,7 @@ class CapturePhoto extends HTMLElement {
         : false;
 
       if ('pan' in trackSettings && typeof this.pan === 'number' && panInAllowedRange) {
-        this.#applyPTZ('pan', this.pan);
+        this.#applyConstraint('pan', this.pan);
       }
     }
 
@@ -247,7 +247,7 @@ class CapturePhoto extends HTMLElement {
         : false;
 
       if ('tilt' in trackSettings && typeof this.tilt === 'number' && tiltInAllowedRange) {
-        this.#applyPTZ('tilt', this.tilt);
+        this.#applyConstraint('tilt', this.tilt);
       }
     }
 
@@ -257,8 +257,12 @@ class CapturePhoto extends HTMLElement {
         : false;
 
       if ('zoom' in trackSettings && typeof this.zoom === 'number' && zoomInAllowedRange) {
-        this.#applyPTZ('zoom', this.zoom);
+        this.#applyConstraint('zoom', this.zoom);
       }
+    }
+
+    if (name === 'torch' && oldValue !== newValue && 'torch' in this.#supportedConstraints && 'torch' in trackSettings) {
+      this.#applyConstraint('torch', this.torch);
     }
   }
 
@@ -273,6 +277,7 @@ class CapturePhoto extends HTMLElement {
     this.#upgradeProperty('pan');
     this.#upgradeProperty('tilt');
     this.#upgradeProperty('zoom');
+    this.#upgradeProperty('torch');
     this.#upgradeProperty('calculateFileSize');
 
     this.#canvasElement = this.shadowRoot?.querySelector('canvas') || null;
@@ -404,6 +409,18 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
+   * @type {boolean} torch - Whether or not the fill light is connected.
+   * @attribute torch - Reflects the torch attribute.
+   */
+  get torch() {
+    return this.hasAttribute('torch');
+  }
+
+  set torch(value) {
+    this.toggleAttribute('torch', !!value);
+  }
+
+  /**
    * @type {boolean} loading - Whether or not the video stream is loading.
    * @attribute loading - Reflects the loading attribute.
    */
@@ -485,13 +502,13 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
-   * Applies the pan, tilt or zoom constraint.
+   * Applies a constraint to the video track.
    *
-   * @param {'pan' | 'tilt' | 'zoom'} constraintName - The name of the constraint.
-   * @param {number} constraintValue - The value of the constraint.
+   * @param {string} constraint - The name of the constraint.
+   * @param {any} value - The value of the constraint.
    */
-  #applyPTZ(constraintName, constraintValue) {
-    if (!this.#stream || !constraintName || !constraintValue) {
+  #applyConstraint(constraint, value) {
+    if (!this.#stream) {
       return;
     }
 
@@ -500,10 +517,14 @@ class CapturePhoto extends HTMLElement {
     const trackCapabilities = this.getTrackCapabilities();
     const trackSettings = this.getTrackSettings();
 
-    if (constraintName in trackSettings) {
+    const constraintValue = constraint === 'pan' || constraint === 'tilt' || constraint === 'zoom'
+      ? clamp(Number(value), trackCapabilities[constraint]?.min || 1, trackCapabilities[constraint]?.max || 1)
+      : value;
+
+    if (constraint in trackSettings) {
       track.applyConstraints({
         advanced: [{
-          [constraintName]: clamp(Number(constraintValue), trackCapabilities[constraintName]?.min || 1, trackCapabilities[constraintName]?.max || 1)
+          [constraint]: constraintValue
         }]
       });
     }
@@ -580,13 +601,21 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
+   * Restarts the video stream.
+   */
+  #restartVideoStream() {
+    this.stopVideoStream();
+    this.startVideoStream();
+  }
+
+  /**
    * This is to safe guard against cases where, for instance, a framework may have added the element to the page and
    * set a value on one of its properties, but lazy loaded its definition. Without this guard, the upgraded element would
    * miss that property and the instance property would prevent the class property setter from ever being called.
    *
    * https://developers.google.com/web/fundamentals/web-components/best-practices#lazy-properties
    *
-   * @param {'autpoPlay' | 'noImage' | 'facingMode' | 'cameraResolution' | 'pan' | 'tilt' | 'zoom' | 'calculateFileSize'} prop
+   * @param {'autpoPlay' | 'noImage' | 'facingMode' | 'cameraResolution' | 'pan' | 'tilt' | 'zoom' | 'calculateFileSize' | 'torch'} prop
    */
   #upgradeProperty(prop) {
     /** @type {any} */
@@ -619,7 +648,8 @@ class CapturePhoto extends HTMLElement {
         },
         pan: true,
         tilt: true,
-        zoom: true
+        zoom: true,
+        torch: this.torch
       },
       audio: false
     };
@@ -640,9 +670,9 @@ class CapturePhoto extends HTMLElement {
         this.#videoElement.srcObject = this.#stream;
       }
 
-      this.#applyPTZ('pan', this.pan);
-      this.#applyPTZ('tilt', this.tilt);
-      this.#applyPTZ('zoom', this.zoom);
+      this.#applyConstraint('pan', this.pan);
+      this.#applyConstraint('tilt', this.tilt);
+      this.#applyConstraint('zoom', this.zoom);
 
       const trackSettings = this.getTrackSettings();
 
