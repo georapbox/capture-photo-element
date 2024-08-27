@@ -5,10 +5,11 @@
 
 .noscript-banner {
   width: 100%;
-  padding: 8px 12px;
+  padding: 0.5rem 0.75rem;
   border-radius: var(--border-radius);
-  background-color: var(--focus);
+  background-color: #f8d7da;
   text-align: center;
+  color: #000000;
 }
 
 code {
