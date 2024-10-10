@@ -70,12 +70,6 @@ template.innerHTML = /* html */ `
       </button>
     </slot>
 
-    <slot name="facing-mode-button" hidden>
-      <button part="facing-mode-button" type="button">
-        <slot name="facing-mode-button-content">Toggle facing mode</slot>
-      </button>
-    </slot>
-
     <slot name="actions"></slot>
   </div>
 
@@ -117,15 +111,12 @@ template.innerHTML = /* html */ `
  *
  * @slot capture-button - The capture button.
  * @slot capture-button-content - The capture button content.
- * @slot facing-mode-button - The facing mode button.
- * @slot facing-mode-button-content - The facing mode button content.
  * @slot actions - The actions container.
  * @slot - A default un-named slot to add content inside the component.
  *
  * @csspart video - The video element.
  * @csspart actions-container - The actions container.
  * @csspart capture-button - The capture button.
- * @csspart facing-mode-button - The facing mode button.
  * @csspart output-container - The output container.
  * @csspart output-image - The output image.
  *
@@ -165,12 +156,6 @@ class CapturePhoto extends HTMLElement {
   /** @type {Nullable<HTMLButtonElement | Element>} */
   #captureButton = null;
 
-  /** @type {Nullable<HTMLSlotElement>} */
-  #facingModeButtonSlot = null;
-
-  /** @type {Nullable<HTMLButtonElement | Element>} */
-  #facingModeButton = null;
-
   constructor() {
     super();
 
@@ -183,7 +168,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom', 'torch', 'camera-id'];
+    return ['no-image', 'facing-mode', 'camera-id', 'camera-resolution', 'pan', 'tilt', 'zoom', 'torch'];
   }
 
   /**
@@ -212,6 +197,10 @@ class CapturePhoto extends HTMLElement {
       if ('facingMode' in trackSettings && isValidFacingMode) {
         this.#restartVideoStream();
       }
+    }
+
+    if (name === 'camera-id' && oldValue !== newValue) {
+      this.#restartVideoStream();
     }
 
     if (name === 'camera-resolution' && oldValue !== newValue) {
@@ -272,10 +261,6 @@ class CapturePhoto extends HTMLElement {
     if (name === 'torch' && oldValue !== newValue && 'torch' in this.#supportedConstraints) {
       this.#applyConstraint('torch', this.torch);
     }
-
-    if (name === 'camera-id' && oldValue !== newValue) {
-      this.#restartVideoStream();
-    }
   }
 
   /**
@@ -298,14 +283,10 @@ class CapturePhoto extends HTMLElement {
     this.#videoElement = this.shadowRoot?.querySelector('video') || null;
     this.#captureButtonSlot = this.shadowRoot?.querySelector('slot[name="capture-button"]') || null;
     this.#captureButton = this.#getCaptureButton();
-    this.#facingModeButtonSlot = this.shadowRoot?.querySelector('slot[name="facing-mode-button"]') || null;
-    this.#facingModeButton = this.#getFacingModeButton();
 
     this.#videoElement?.addEventListener('loadedmetadata', this.#onVideoLoadedMetaData);
     this.#captureButtonSlot?.addEventListener('slotchange', this.#onCaptureButtonSlotChange);
     this.#captureButton?.addEventListener('click', this.#onCapturePhotoButtonClick);
-    this.#facingModeButtonSlot?.addEventListener('slotchange', this.#onFacingModeButtonSlotChange);
-    this.#facingModeButton?.addEventListener('click', this.#onFacingModeButtonClick);
 
     if (!CapturePhoto.isSupported()) {
       return this.dispatchEvent(
@@ -332,11 +313,9 @@ class CapturePhoto extends HTMLElement {
    */
   disconnectedCallback() {
     this.stopVideoStream();
-    this.#facingModeButton?.removeEventListener('click', this.#onFacingModeButtonClick);
     this.#captureButton?.removeEventListener('click', this.#onCapturePhotoButtonClick);
     this.#videoElement?.removeEventListener('canplay', this.#onVideoLoadedMetaData);
     this.#captureButtonSlot?.removeEventListener('slotchange', this.#onCaptureButtonSlotChange);
-    this.#facingModeButtonSlot?.removeEventListener('slotchange', this.#onFacingModeButtonSlotChange);
   }
 
   /**
@@ -468,21 +447,6 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
-   * Handles the click event of the facing mode button.
-   *
-   * @param {*} evt - The click event.
-   */
-  #onFacingModeButtonClick = evt => {
-    evt.preventDefault();
-
-    if (this.loading) {
-      return;
-    }
-
-    this.facingMode = this.facingMode === 'user' || !this.facingMode ? 'environment' : 'user';
-  };
-
-  /**
    * Handles the click event of the capture button.
    *
    * @param {*} evt - The click event.
@@ -591,43 +555,6 @@ class CapturePhoto extends HTMLElement {
   };
 
   /**
-   * Handles the slotchange event of the facing mode button slot.
-   *
-   * @param {*} evt - The slotchange event.
-   */
-  #onFacingModeButtonSlotChange = evt => {
-    if (evt.target?.name === 'facing-mode-button') {
-      this.#facingModeButton?.removeEventListener('click', this.#onFacingModeButtonClick);
-      this.#facingModeButton = this.#getFacingModeButton();
-
-      if (this.#facingModeButton) {
-        this.#facingModeButton.addEventListener('click', this.#onFacingModeButtonClick);
-
-        if (this.#facingModeButton.nodeName !== 'BUTTON' && !this.#facingModeButton.hasAttribute('role')) {
-          this.#facingModeButton.setAttribute('role', 'button');
-        }
-      }
-    }
-  };
-
-  /**
-   * Returns the facing mode button.
-   *
-   * @returns {Nullable<HTMLButtonElement | Element>}
-   */
-  #getFacingModeButton() {
-    if (!this.#facingModeButtonSlot) {
-      return null;
-    }
-
-    return (
-      this.#facingModeButtonSlot.assignedElements({ flatten: true }).find(el => {
-        return el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'facing-mode-button';
-      }) || null
-    );
-  }
-
-  /**
    * Returns the capture button.
    *
    * @returns {Nullable<HTMLButtonElement | Element>}
@@ -725,12 +652,6 @@ class CapturePhoto extends HTMLElement {
       this.#applyConstraint('pan', this.pan);
       this.#applyConstraint('tilt', this.tilt);
       this.#applyConstraint('zoom', this.zoom);
-
-      const trackSettings = this.getTrackSettings();
-
-      if ('facingMode' in trackSettings && this.#facingModeButtonSlot) {
-        this.#facingModeButtonSlot.hidden = false;
-      }
     } catch (error) {
       this.dispatchEvent(
         new CustomEvent(`${COMPONENT_NAME}:error`, {
@@ -894,9 +815,7 @@ class CapturePhoto extends HTMLElement {
     }
 
     const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
-    const videoDevices = devices.filter(device => device.kind === 'videoinput');
-
-    return videoDevices;
+    return devices.filter(device => device.kind === 'videoinput');
   }
 
   /**

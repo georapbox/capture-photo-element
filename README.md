@@ -60,10 +60,6 @@ capture-photo::part(capture-button) {
   /* The button responsible to take picture */
 }
 
-capture-photo::part(facing-mode-button) {
-  /* The button responsible to change camera's facing mode */
-}
-
 capture-photo::part(output-container) {
   /* Output container - where the final output photo is placed */  
 }
@@ -81,12 +77,12 @@ capture-photo::part(output-image) {
 | `autoPlay`<br>*`auto-play`* | ✓ | Boolean | - | `false` | Determines if the video stream should start playing automatically when the component is connected to the DOM. If set to `false`, you can start the video stream manually using `startVideoStream()` method. |
 | `noImage`<br>*`no-image`* | ✓ | Boolean | - | `false` | Determines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
 | `facingMode`<br>*`facing-mode`*<sup>1</sup> | ✓ | String | - | `"user"` | The preferred camera to be used if the camera hardware supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera respectively. Note, that this property might not have any effect if a specific camera is set using `cameraId` property. |
-| `cameraId`<br>*`camera-id`*<sup>1</sup> | ✓ | String | - | `""` | The ID of the video input device to use. If not set, the browser will use the default camera. This is useful if a device supports multiple video input devices and one needs to select a specific one other than the default. You can access the available video input devices using `getVideoDevices()` static method. |
+| `cameraId`<br>*`camera-id`*<sup>1</sup> | ✓ | String | - | `""` | The ID of the video input device to use. If not set, the browser will use the default camera. This is useful if a device supports multiple video input devices and one needs to select a specific one other than the default. You can access the available video input devices using `getVideoDevices()` method. |
 | `cameraResolution`<br>*`camera-resolution`*<sup>1</sup> | ✓ | String | - | `""` | Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. You can access the min & max supported values for width and height, using `getTrackCapabilities().width` and `getTrackCapabilities().height` respectively. |
 | `pan`<sup>1</sup> | ✓ | Number | - | `0` | Defines the camera's pan level if supported by the camera hardware. You can access the min & max supported values for pan level, using `getTrackCapabilities().pan`. |
 | `tilt`<sup>1</sup> | ✓ | Number | - | `0` | Defines the camera's tilt level if supported by the camera hardware. You can access the min & max supported values for tilt level, using `getTrackCapabilities().tilt`. |
 | `zoom`<sup>1</sup> | ✓ | Number | - | `1` | Defines the camera's zoom level if supported by the camera hardware. You can access the min & max supported values for zoom level, using `getTrackCapabilities().zoom`. |
-| `torch`<sup>1</sup> | ✓ | Boolean | - | `false` | Determines if the camera's fill light should be turned on if supported by the camera hardware. This works only when `facingMode` is set to `environment`. You can access the supported values for torch, using `getTrackCapabilities().torch`. **NOTE:** The support for this feature is known to be limited and heavily dependent on the device, browser, and operating system. |
+| `torch`<sup>1</sup> | ✓ | Boolean | - | `false` | Determines if the camera's fill light should be turned on if supported by the camera hardware. This works only when `facingMode` is set to `environment` or the selected video input device supports it. You can access the supported values for torch, using `getTrackCapabilities().torch`. **NOTE:** The support for this feature is known to be limited and heavily dependent on the device, browser, and operating system. |
 | `calculateFileSize`<br>*`calculate-file-size`* | ✓ | Boolean | - | `false` | Indicates if the component should calculate the file size of the generated image. If set to `true` the file size (in bytes) will be included in the event detail object when the `capture-photo:success` event is fired. The reason for not calculating the file size by default is that it might be an "expensive" operation, especially for large images, therefore it is recommended to set this property to `true` only if you need the file size. |
 | `loading` | ✓ | Boolean | - | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
 
@@ -98,35 +94,8 @@ capture-photo::part(output-image) {
 | ---- | ----------- |
 | `capture-button` | Override the default capture photo button with your own. |
 | `capture-button-content` | Override the default content of the capture photo button with your own content. |
-| `facing-mode-button` | Override the default facing mode button with your own. If `facingMode` is not supported in constrainable properties for the current `MediaStreamTrack`, the slot is hidden. |
-| `facing-mode-button-content` | Override the default content of the facing mode button with your own content. |
 | `actions` | Slot to add content inside the actions container element. |
 | (default) | Un-named slot to add content inside the component. |
-
-#### Slots usage examples
-
-##### Override the default buttons with your own elements
-
-```html
-<capture-photo>
-  <button slot="capture-button" type="button">
-    Take picture
-  </button>
-  
-  <a slot="facing-mode-button" href="#" role="button">
-    Change camera
-  </a>
-</capture-photo>
-```
-
-##### Override just the content of the default buttons
-
-```html
-<capture-photo>
-  <span slot="capture-button-content">Take picture</span>
-  <span slot="facing-mode-button-content">Change camera</span>
-</capture-photo>
-```
 
 ### CSS Parts
 
@@ -135,7 +104,6 @@ capture-photo::part(output-image) {
 | `video` | The video element. |
 | `actions-container` | The action buttons container element. |
 | `capture-button` | The capture photo button. |
-| `facing-mode-button` | The facing mode button. |
 | `output-container` | The output container element. |
 | `output-image` | The output image element. |
 
@@ -144,8 +112,8 @@ capture-photo::part(output-image) {
 | Name | Type | Description | Arguments |
 | ---- | ---- | ----------- | --------- |
 | `defineCustomElement` | Static | Defines/registers the custom element with the name provided. If no name is provided, the default name is used. The method checks if the element is already defined, hence will skip trying to redefine it. | `elementName='capture-photo'` |
+| `getVideoDevices` | Static | Returns a promise that resolves with an array of `MediaDeviceInfo` objects representing the available video input devices. Make sure to call this method after permission is granted to access the camera. | - |
 | `isSupported` | Static | Returns `true` if `MediaDevices.getUserMedia()` is supported by the platform, otherwise returns `false`. | - |
-| `getVideoDevices` | Static | Returns a promise that resolves with an array of `MediaDeviceInfo` objects representing the available video input devices. | - |
 | `capture`<sup>1</sup> | Instance | Captures a photo using the element's properties. | - |
 | `getSupportedConstraints`<sup>1</sup> | Instance | Returns an object based on the `MediaTrackSupportedConstraints` dictionary, whose member fields each specify one of the constrainable properties the user agent understands. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaDevices/getSupportedConstraints) | - |
 | `getTrackCapabilities`<sup>1</sup> | Instance | Returns a `MediaTrackCapabilities` object which specifies the values or range of values which each constrainable property, based upon the platform and user agent. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getCapabilities) | - |
