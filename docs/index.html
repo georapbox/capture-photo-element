@@ -43,12 +43,14 @@
           <small><em>Open the browser's console to watch emitted events.</em></small>
         </div>
 
+        <select id="cameraSelect" disabled>
+          <option value="">Select camera...</option>
+        </select>
+
         <capture-photo auto-play>
           <button slot="capture-button">Capture photo</button>
           <button slot="facing-mode-button">Change facing mode</button>
         </capture-photo>
-
-
 
         <div id="errorPlaceholder"></div>
       </div>

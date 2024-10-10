@@ -94,24 +94,26 @@ template.innerHTML = /* html */ `
  * @property {boolean} autoPlay - Whether or not to start the video stream automatically.
  * @property {boolean} noImage - Whether or not to show the captured image.
  * @property {string} facingMode - The facing mode of the camera.
+ * @property {string} cameraId - The ID of the camera to use.
  * @property {string} cameraResolution - The resolution of the camera.
  * @property {number} pan - The pan value of the camera.
  * @property {number} tilt - The tilt value of the camera.
  * @property {number} zoom - The zoom value of the camera.
  * @property {boolean} torch - Whether or not the fill light is connected.
- * @property {boolean} loading - Whether or not the video stream is loading.
  * @property {boolean} calculateFileSize - Whether or not to calculate the file size of the captured image.
+ * @property {boolean} loading - Whether or not the video stream is loading.
  *
  * @atttribute {boolean} auto-play - Reflects the autoPlay property.
  * @atttribute {boolean} no-image - Reflects the noImage property.
  * @atttribute {string} facing-mode - Reflects the facingMode property.
+ * @atttribute {string} camera-id - Reflects the cameraId property.
  * @atttribute {string} camera-resolution - Reflects the cameraResolution property.
  * @atttribute {number} pan - Reflects the pan property.
  * @atttribute {number} tilt - Reflects the tilt property.
  * @atttribute {number} zoom - Reflects the zoom property.
  * @atttribute {boolean} torch - Reflects the torch property.
- * @atttribute {boolean} loading - Reflects the loading property.
  * @atttribute {boolean} calculate-file-size - Reflects the calculateFileSize property.
+ * @atttribute {boolean} loading - Reflects the loading property.
  *
  * @slot capture-button - The capture button.
  * @slot capture-button-content - The capture button content.
@@ -133,6 +135,7 @@ template.innerHTML = /* html */ `
  *
  * @method defineCustomElement - Static method. Defines the custom element with the given name.
  * @method isSupported - Static method. Checks if the MediaDevices.getUserMedia() method is supported.
+ * @method getVideoDevices - Static method. Gets the available video devices.
  * @method startVideoStream - Instance method. Starts the video stream.
  * @method stopVideoStream - Instance method. Stops the video stream.
  * @method capture - Instance method. Captures a photo.
@@ -180,7 +183,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom', 'torch'];
+    return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom', 'torch', 'camera-id'];
   }
 
   /**
@@ -269,15 +272,20 @@ class CapturePhoto extends HTMLElement {
     if (name === 'torch' && oldValue !== newValue && 'torch' in this.#supportedConstraints) {
       this.#applyConstraint('torch', this.torch);
     }
+
+    if (name === 'camera-id' && oldValue !== newValue) {
+      this.#restartVideoStream();
+    }
   }
 
   /**
    * Lifecycle method that is called when the element is added to the DOM.
    */
-  connectedCallback() {
+  async connectedCallback() {
     this.#upgradeProperty('autpoPlay');
     this.#upgradeProperty('noImage');
     this.#upgradeProperty('facingMode');
+    this.#upgradeProperty('cameraId');
     this.#upgradeProperty('cameraResolution');
     this.#upgradeProperty('pan');
     this.#upgradeProperty('tilt');
@@ -368,6 +376,18 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
+   * @type {string} cameraId - The ID of the camera to use.
+   * @attribute camera-id - Reflects the cameraId attribute.
+   */
+  get cameraId() {
+    return this.getAttribute('camera-id') || '';
+  }
+
+  set cameraId(value) {
+    this.setAttribute('camera-id', value);
+  }
+
+  /**
    * @type {string} cameraResolution - The resolution of the camera.
    * @attribute camera-resolution - Reflects the cameraResolution attribute.
    */
@@ -428,14 +448,6 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
-   * @type {boolean} loading - Whether or not the video stream is loading.
-   * @attribute loading - Reflects the loading attribute.
-   */
-  get loading() {
-    return this.hasAttribute('loading');
-  }
-
-  /**
    * @type {boolean} calculateFileSize - Whether or not to calculate the file size of the captured image.
    * @attribute calculate-file-size - Reflects the calculateFileSize attribute.
    */
@@ -445,6 +457,14 @@ class CapturePhoto extends HTMLElement {
 
   set calculateFileSize(value) {
     this.toggleAttribute('calculate-file-size', !!value);
+  }
+
+  /**
+   * @type {boolean} loading - Whether or not the video stream is loading.
+   * @attribute loading - Reflects the loading attribute.
+   */
+  get loading() {
+    return this.hasAttribute('loading');
   }
 
   /**
@@ -625,9 +645,13 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
-   * Restarts the video stream.
+   * Restarts the video stream if it is already running.
    */
   #restartVideoStream() {
+    if (!this.#stream) {
+      return;
+    }
+
     this.stopVideoStream();
     this.startVideoStream();
   }
@@ -639,7 +663,7 @@ class CapturePhoto extends HTMLElement {
    *
    * https://developers.google.com/web/fundamentals/web-components/best-practices#lazy-properties
    *
-   * @param {'autpoPlay' | 'noImage' | 'facingMode' | 'cameraResolution' | 'pan' | 'tilt' | 'zoom' | 'calculateFileSize' | 'torch'} prop
+   * @param {'autpoPlay' | 'noImage' | 'facingMode' | 'cameraId' | 'cameraResolution' | 'pan' | 'tilt' | 'zoom' | 'calculateFileSize' | 'torch'} prop
    */
   #upgradeProperty(prop) {
     /** @type {any} */
@@ -677,6 +701,10 @@ class CapturePhoto extends HTMLElement {
       },
       audio: false
     };
+
+    if (this.cameraId) {
+      constraints.video.deviceId = { exact: this.cameraId };
+    }
 
     if (typeof this.cameraResolution === 'string' && this.cameraResolution.trim().length > 0) {
       const [width = 0, height = 0] = this.cameraResolution.split('x').map(x => Number(x));
@@ -853,6 +881,22 @@ class CapturePhoto extends HTMLElement {
     }
 
     return {};
+  }
+
+  /**
+   * Returns the available video devices.
+   *
+   * @returns {Promise<MediaDeviceInfo[]>}
+   */
+  static async getVideoDevices() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      return [];
+    }
+
+    const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
+    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+    return videoDevices;
   }
 
   /**

@@ -6,6 +6,7 @@ const componentUrl = isLocalhost ? '../../dist/capture-photo.js' : '../lib/captu
 const capturePhotoEl = document.querySelector('capture-photo');
 const form = document.getElementById('form');
 const codePreviewEl = document.getElementById('codePreview');
+const cameraSelect = document.getElementById('cameraSelect');
 
 import(componentUrl)
   .then(res => {
@@ -17,7 +18,10 @@ import(componentUrl)
       const errorEl = document.createElement('p');
       errorEl.className = 'alert alert-danger';
       errorEl.innerHTML = evt.detail.error?.message || 'Unknown error';
-      document.getElementById('errorPlaceholder').appendChild(errorEl);
+
+      const errorPlaceholder = document.getElementById('errorPlaceholder');
+      errorPlaceholder.replaceChildren();
+      errorPlaceholder.appendChild(errorEl);
     }
 
     function handleCapturePhotoSuccess(evt) {
@@ -94,6 +98,28 @@ import(componentUrl)
     document.addEventListener('capture-photo:video-play', capturePhotoVideoPlay, { once: true });
 
     CapturePhoto.defineCustomElement();
+
+    CapturePhoto.getVideoDevices().then(devices => {
+      console.log('devices ->', devices);
+
+      devices.forEach((device, index) => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label || `Camera ${index + 1}`;
+        cameraSelect.appendChild(option);
+      });
+
+      if (devices.length > 1) {
+        cameraSelect.disabled = false;
+      }
+    });
+
+    cameraSelect.addEventListener('change', evt => {
+      evt.preventDefault();
+
+      const deviceId = cameraSelect.value;
+      capturePhotoEl.setAttribute('camera-id', deviceId);
+    });
 
     Array.from(form.elements)
       .filter(el => el.nodeName !== 'FIELDSET')
