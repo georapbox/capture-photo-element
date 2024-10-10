@@ -51,6 +51,7 @@ code {
 .form-col input[type="number"],
 .form-col select {
   margin-right: 0;
+  width: 100%;
 }
 
 .form-col input[type="range"] {
@@ -113,6 +114,11 @@ code {
 
 form label {
   white-space: nowrap;
+}
+
+#cameraSelect {
+  width: 100%;
+  margin: 0 0 16px 0;
 }
 
 capture-photo:not(:defined) {

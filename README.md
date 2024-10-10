@@ -76,8 +76,7 @@ capture-photo::part(output-image) {
 | ---- | -------- | ---- | -------- | ------- | ----------- |
 | `autoPlay`<br>*`auto-play`* | ✓ | Boolean | - | `false` | Determines if the video stream should start playing automatically when the component is connected to the DOM. If set to `false`, you can start the video stream manually using `startVideoStream()` method. |
 | `noImage`<br>*`no-image`* | ✓ | Boolean | - | `false` | Determines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
-| `facingMode`<br>*`facing-mode`*<sup>1</sup> | ✓ | String | - | `"user"` | The preferred camera to be used if the camera hardware supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera respectively. Note, that this property might not have any effect if a specific camera is set using `cameraId` property. |
-| `cameraId`<br>*`camera-id`*<sup>1</sup> | ✓ | String | - | `""` | The ID of the video input device to use. If not set, the browser will use the default camera. This is useful if a device supports multiple video input devices and one needs to select a specific one other than the default. You can access the available video input devices using `getVideoDevices()` method. |
+| `facingMode`<br>*`facing-mode`*<sup>1</sup> | ✓ | String | - | `"user"` | The preferred camera to be used if the camera hardware supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera respectively. Note that this property might not have any effect if you have called `startVideoStream()` method with a specific video input device as argument because the camera hardware might not support changing the facing mode. |
 | `cameraResolution`<br>*`camera-resolution`*<sup>1</sup> | ✓ | String | - | `""` | Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. You can access the min & max supported values for width and height, using `getTrackCapabilities().width` and `getTrackCapabilities().height` respectively. |
 | `pan`<sup>1</sup> | ✓ | Number | - | `0` | Defines the camera's pan level if supported by the camera hardware. You can access the min & max supported values for pan level, using `getTrackCapabilities().pan`. |
 | `tilt`<sup>1</sup> | ✓ | Number | - | `0` | Defines the camera's tilt level if supported by the camera hardware. You can access the min & max supported values for tilt level, using `getTrackCapabilities().tilt`. |
@@ -87,6 +86,9 @@ capture-photo::part(output-image) {
 | `loading` | ✓ | Boolean | - | `false` | **Readonly**. Indicates if the component is ready for interaction. It is used internally but is also exposed as a readonly property for purposes such as styling, etc. |
 
 <sup>1</sup> Changing any of these properties/attributes may not always guarantee the desired result, because they all depend on the camera hardware support. For example, `zoom=3` might not result to the camera to zoom if the camera hardware does not support zooming. Using `getTrackCapabilities()` and `getTrackSettings()` can prove helpful to check the campera hardware support.
+
+> [!IMPORTANT]
+> Changing the `facingMode` and `cameraResolution`, properties/attributes after the video stream has started will not have any effect. You need to stop the video stream and start it again with the new properties. This is to avoid unnecessary camera hardware operations.
 
 ### Slots
 
@@ -111,17 +113,19 @@ capture-photo::part(output-image) {
 
 | Name | Type | Description | Arguments |
 | ---- | ---- | ----------- | --------- |
-| `defineCustomElement` | Static | Defines/registers the custom element with the name provided. If no name is provided, the default name is used. The method checks if the element is already defined, hence will skip trying to redefine it. | `elementName='capture-photo'` |
-| `getVideoDevices` | Static | Returns a promise that resolves with an array of `MediaDeviceInfo` objects representing the available video input devices. Make sure to call this method after permission is granted to access the camera. | - |
+| `defineCustomElement` | Static | Defines/registers the custom element with the name provided. If no name is provided, the default name is used. The method checks if the element is already defined, hence will skip trying to redefine it. | `[elementName='capture-photo']` |
+| `getVideoInputDevices` | Static | Returns a promise that resolves with an array of `MediaDeviceInfo` objects representing the available video input devices. Make sure to call this method after permission is granted to access the camera. | - |
 | `isSupported` | Static | Returns `true` if `MediaDevices.getUserMedia()` is supported by the platform, otherwise returns `false`. | - |
-| `capture`<sup>1</sup> | Instance | Captures a photo using the element's properties. | - |
-| `getSupportedConstraints`<sup>1</sup> | Instance | Returns an object based on the `MediaTrackSupportedConstraints` dictionary, whose member fields each specify one of the constrainable properties the user agent understands. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaDevices/getSupportedConstraints) | - |
-| `getTrackCapabilities`<sup>1</sup> | Instance | Returns a `MediaTrackCapabilities` object which specifies the values or range of values which each constrainable property, based upon the platform and user agent. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getCapabilities) | - |
-| `getTrackSettings`<sup>1</sup> | Instance | Returns a `MediaTrackSettings` object containing the current values of each of the constrainable properties for the current MediaStreamTrack. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getSettings) | - |
-| `startVideoStream`<sup>1</sup> | Instance | Starts the video stream. Use this method to start the video stream manually, if `autoPlay` is set to `false` or if you want to restart the video stream after it has been previously stopped by calling `stopVideoStream()` method. | - |
-| `stopVideoStream`<sup>1</sup> | Instance | Stops the video stream and releases the camera. Use this method if you want to stop the video stream manually. | - |
+| `capture` | Instance | Captures a photo using the element's properties. | - |
+| `getSupportedConstraints` | Instance | Returns an object based on the `MediaTrackSupportedConstraints` dictionary, whose member fields each specify one of the constrainable properties the user agent understands. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaDevices/getSupportedConstraints) | - |
+| `getTrackCapabilities` | Instance | Returns a `MediaTrackCapabilities` object which specifies the values or range of values which each constrainable property, based upon the platform and user agent. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getCapabilities) | - |
+| `getTrackSettings` | Instance | Returns a `MediaTrackSettings` object containing the current values of each of the constrainable properties for the current MediaStreamTrack. [Read more...](https://developer.mozilla.org/docs/Web/API/MediaStreamTrack/getSettings) | - |
+| `startVideoStream` | Instance | Starts the video stream. Use this method to start the video stream manually, if `autoPlay` is set to `false` or if you want to restart the video stream after it has been previously stopped by calling `stopVideoStream()` method. If `videoInputId` is provided and the camera hardware supports it, the video stream will start using the specified video input device. You can get the available video input devices using `getVideoInputDevices()` static method. | `[videoInputId]` |
+| `restartVideoStream` | Instance | Same as `startVideoStream()` method but first stops the video stream if it is already playing. | `[videoInputId]` |
+| `stopVideoStream` | Instance | Stops the video stream and releases the camera. Use this method if you want to stop the video stream manually. | - |
 
-<sup>1</sup> Instance methods are only available after the component has been defined. To ensure the component is defined, you can use `whenDefined` method of the `CustomElementRegistry` interface, eg `customElements.whenDefined('capture-photo').then(() => { /* call methods here */ });`
+> [!IMPORTANT]
+> Instance methods are only available after the component has been defined. To ensure the component is defined, you can use `whenDefined` method of the `CustomElementRegistry` interface, eg `customElements.whenDefined('capture-photo').then(() => { /* call methods here */ });`
 
 ### Events
 

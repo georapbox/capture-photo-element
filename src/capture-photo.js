@@ -88,7 +88,6 @@ template.innerHTML = /* html */ `
  * @property {boolean} autoPlay - Whether or not to start the video stream automatically.
  * @property {boolean} noImage - Whether or not to show the captured image.
  * @property {string} facingMode - The facing mode of the camera.
- * @property {string} cameraId - The ID of the camera to use.
  * @property {string} cameraResolution - The resolution of the camera.
  * @property {number} pan - The pan value of the camera.
  * @property {number} tilt - The tilt value of the camera.
@@ -100,7 +99,6 @@ template.innerHTML = /* html */ `
  * @atttribute {boolean} auto-play - Reflects the autoPlay property.
  * @atttribute {boolean} no-image - Reflects the noImage property.
  * @atttribute {string} facing-mode - Reflects the facingMode property.
- * @atttribute {string} camera-id - Reflects the cameraId property.
  * @atttribute {string} camera-resolution - Reflects the cameraResolution property.
  * @atttribute {number} pan - Reflects the pan property.
  * @atttribute {number} tilt - Reflects the tilt property.
@@ -126,8 +124,9 @@ template.innerHTML = /* html */ `
  *
  * @method defineCustomElement - Static method. Defines the custom element with the given name.
  * @method isSupported - Static method. Checks if the MediaDevices.getUserMedia() method is supported.
- * @method getVideoDevices - Static method. Gets the available video devices.
+ * @method getVideoInputDevices - Static method. Gets the available video devices.
  * @method startVideoStream - Instance method. Starts the video stream.
+ * @method restartVideoStream - Instance method. Restarts the video stream.
  * @method stopVideoStream - Instance method. Stops the video stream.
  * @method capture - Instance method. Captures a photo.
  * @method getSupportedConstraints - Instance method. Gets the supported constraints.
@@ -168,7 +167,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['no-image', 'facing-mode', 'camera-id', 'camera-resolution', 'pan', 'tilt', 'zoom', 'torch'];
+    return ['no-image', 'pan', 'tilt', 'zoom', 'torch'];
   }
 
   /**
@@ -185,44 +184,9 @@ class CapturePhoto extends HTMLElement {
 
     /** @type {ExtendedMediaTrackCapabilities} */
     const trackCapabilities = this.getTrackCapabilities();
-    const trackSettings = this.getTrackSettings();
 
     if (name === 'no-image' && oldValue !== newValue) {
       this.#emptyOutputElement();
-    }
-
-    if (name === 'facing-mode' && oldValue !== newValue && 'facingMode' in this.#supportedConstraints) {
-      const isValidFacingMode = ['user', 'environment'].includes(this.facingMode || '');
-
-      if ('facingMode' in trackSettings && isValidFacingMode) {
-        this.#restartVideoStream();
-      }
-    }
-
-    if (name === 'camera-id' && oldValue !== newValue) {
-      this.#restartVideoStream();
-    }
-
-    if (name === 'camera-resolution' && oldValue !== newValue) {
-      if (typeof this.cameraResolution === 'string' && this.cameraResolution.trim().length > 0) {
-        const [width = 0, height = 0] = this.cameraResolution.split('x').map(x => Number(x));
-
-        if (width > 0 && height > 0 && 'width' in trackCapabilities && 'height' in trackCapabilities) {
-          const widthInAllowedRange =
-            trackCapabilities.width?.min && trackCapabilities.width?.max
-              ? width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max
-              : false;
-
-          const heightInAllowedRange =
-            trackCapabilities.height?.min && trackCapabilities.height?.max
-              ? height >= trackCapabilities?.height?.min && height <= trackCapabilities?.height?.max
-              : false;
-
-          if ('width' in trackSettings && 'height' in trackSettings && widthInAllowedRange && heightInAllowedRange) {
-            this.#restartVideoStream();
-          }
-        }
-      }
     }
 
     if (name === 'pan' && oldValue !== newValue && 'pan' in this.#supportedConstraints) {
@@ -267,10 +231,9 @@ class CapturePhoto extends HTMLElement {
    * Lifecycle method that is called when the element is added to the DOM.
    */
   async connectedCallback() {
-    this.#upgradeProperty('autpoPlay');
+    this.#upgradeProperty('autoPlay');
     this.#upgradeProperty('noImage');
     this.#upgradeProperty('facingMode');
-    this.#upgradeProperty('cameraId');
     this.#upgradeProperty('cameraResolution');
     this.#upgradeProperty('pan');
     this.#upgradeProperty('tilt');
@@ -352,18 +315,6 @@ class CapturePhoto extends HTMLElement {
 
   set facingMode(value) {
     this.setAttribute('facing-mode', value);
-  }
-
-  /**
-   * @type {string} cameraId - The ID of the camera to use.
-   * @attribute camera-id - Reflects the cameraId attribute.
-   */
-  get cameraId() {
-    return this.getAttribute('camera-id') || '';
-  }
-
-  set cameraId(value) {
-    this.setAttribute('camera-id', value);
   }
 
   /**
@@ -572,25 +523,13 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
-   * Restarts the video stream if it is already running.
-   */
-  #restartVideoStream() {
-    if (!this.#stream) {
-      return;
-    }
-
-    this.stopVideoStream();
-    this.startVideoStream();
-  }
-
-  /**
    * This is to safe guard against cases where, for instance, a framework may have added the element to the page and
    * set a value on one of its properties, but lazy loaded its definition. Without this guard, the upgraded element would
    * miss that property and the instance property would prevent the class property setter from ever being called.
    *
    * https://developers.google.com/web/fundamentals/web-components/best-practices#lazy-properties
    *
-   * @param {'autpoPlay' | 'noImage' | 'facingMode' | 'cameraId' | 'cameraResolution' | 'pan' | 'tilt' | 'zoom' | 'calculateFileSize' | 'torch'} prop
+   * @param {'autoPlay' | 'noImage' | 'facingMode' | 'cameraResolution' | 'pan' | 'tilt' | 'zoom' | 'calculateFileSize' | 'torch'} prop
    */
   #upgradeProperty(prop) {
     /** @type {any} */
@@ -606,9 +545,10 @@ class CapturePhoto extends HTMLElement {
   /**
    * Starts the video stream.
    *
+   * @param {string} [videoInputId] - The video input device ID.
    * @returns Promise<void>
    */
-  async startVideoStream() {
+  async startVideoStream(videoInputId) {
     if (!CapturePhoto.isSupported() || this.#stream) {
       return;
     }
@@ -629,8 +569,8 @@ class CapturePhoto extends HTMLElement {
       audio: false
     };
 
-    if (this.cameraId) {
-      constraints.video.deviceId = { exact: this.cameraId };
+    if (typeof videoInputId === 'string' && videoInputId.trim().length > 0) {
+      constraints.video.deviceId = { exact: videoInputId };
     }
 
     if (typeof this.cameraResolution === 'string' && this.cameraResolution.trim().length > 0) {
@@ -663,6 +603,19 @@ class CapturePhoto extends HTMLElement {
     } finally {
       this.removeAttribute('loading');
     }
+  }
+
+  /**
+   * Restarts the video stream.
+   *
+   * @param {string} videoInputId - The video input device ID.
+   */
+  restartVideoStream(videoInputId) {
+    if (this.#stream && this.#videoElement) {
+      this.stopVideoStream();
+    }
+
+    this.startVideoStream(videoInputId);
   }
 
   /**
@@ -805,17 +758,17 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
-   * Returns the available video devices.
+   * Returns the available video input devices.
    *
    * @returns {Promise<MediaDeviceInfo[]>}
    */
-  static async getVideoDevices() {
+  static async getVideoInputDevices() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
       return [];
     }
 
     const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
-    return devices.filter(device => device.kind === 'videoinput');
+    return devices.filter(device => device.kind === 'videoinput' && !!device.deviceId);
   }
 
   /**

@@ -6,6 +6,7 @@ const componentUrl = isLocalhost ? '../../dist/capture-photo.js' : '../lib/captu
 const capturePhotoEl = document.querySelector('capture-photo');
 const form = document.getElementById('form');
 const codePreviewEl = document.getElementById('codePreview');
+const cameraSelect = document.getElementById('cameraSelect');
 
 import(componentUrl)
   .then(res => {
@@ -72,6 +73,21 @@ import(componentUrl)
         tiltInput.value = 0;
       }
 
+      CapturePhoto.getVideoInputDevices().then(devices => {
+        console.log('devices ->', devices);
+
+        devices.forEach((device, index) => {
+          const option = document.createElement('option');
+          option.value = device.deviceId;
+          option.text = device.label || `Camera ${index + 1}`;
+          cameraSelect.appendChild(option);
+        });
+
+        if (devices.length >= 1) {
+          cameraSelect.disabled = false;
+        }
+      });
+
       form.querySelector('fieldset').disabled = false;
     }
 
@@ -98,45 +114,38 @@ import(componentUrl)
 
     CapturePhoto.defineCustomElement();
 
-    capturePhotoEl.getVideoDevices().then(devices => {
-      console.log('devices ->', devices);
-
-      const cameraIdSelect = document.getElementById('camera-id');
-
-      devices.forEach((device, index) => {
-        const option = document.createElement('option');
-        option.value = device.deviceId;
-        option.text = device.label || `Camera ${index + 1}`;
-        cameraIdSelect.appendChild(option);
-      });
-
-      if (devices.length === 0) {
-        cameraIdSelect.disabled = true;
-      }
-    });
-
     Array.from(form.elements)
       .filter(el => el.nodeName !== 'FIELDSET')
       .forEach(el => {
-        el.addEventListener('change', evt => {
-          evt.preventDefault();
-
-          switch (el.type) {
-            case 'checkbox':
+        el.addEventListener('change', () => {
+          if (el.name === 'facing-mode' || el.name === 'camera-resolution') {
+            capturePhotoEl.setAttribute(el.name, el.value);
+            capturePhotoEl.restartVideoStream(cameraSelect.value || undefined);
+          } else {
+            if (el.type === 'checkbox') {
               capturePhotoEl.toggleAttribute(el.name, el.checked);
-              break;
-            default:
+            } else if (el.type === 'range') {
+              if (el.value !== el.min) {
+                capturePhotoEl.setAttribute(el.name, el.value);
+              } else {
+                capturePhotoEl.removeAttribute(el.name);
+              }
+            } else {
               if (el.value) {
                 capturePhotoEl.setAttribute(el.name, el.value);
               } else {
                 capturePhotoEl.removeAttribute(el.name);
               }
-              break;
+            }
           }
 
           createCodePreview();
         });
       });
+
+    cameraSelect.addEventListener('change', evt => {
+      capturePhotoEl.restartVideoStream(evt.target.value);
+    });
   })
   .catch(err => {
     console.error(err);
