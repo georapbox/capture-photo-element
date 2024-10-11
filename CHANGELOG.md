@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## v5.0.0 (2024-10-14)
+
+### Breaking Changes
+
+- Remove the `facing-mode-button` slot and button to toggle the camera facing mode in favor of consistence with other camera properties thad don't have a dedicated button, such as `camera-resolution`, `torch`, `pan`, `tilt` and `zoom`.
+- Changing the `facingMode` and `cameraResolution`, properties or equivalent attributes after the video stream has started will not have any effect. You need to stop the video stream and start it again with the new properties. This is to avoid unnecessary camera hardware operations.
+
+### Other Changes
+
+- Add static method `getVideoInputDevices()` to get the list of available video input devices.
+- Support passing a `deviceInputId` as argument to the `startVideoStream()` method to start the video stream with a specific video input device.
+- Add instance method `restartVideoStream()` to restart the video stream with the current properties.
+
 ## v4.1.0 (2024-08-21)
 
 - Add support for `torch` property to turn on/off the fill light if supported by the camera hardware.
@@ -14,7 +27,7 @@
 
 ## v4.0.0 (2023-12-27)
 
-## Breaking Changes
+### Breaking Changes
 
 - As of `v4.0.0`, the video stream will not start automatically when the component is connected to the DOM. If you want to start the video stream automatically, you can use the `auto-play` attribute.
 - Change the default value of property `facingMode` from `null` to `"user"`.
@@ -23,7 +36,7 @@
 - Change the default value of property `tilt` from `null` to `0`.
 - Change the default value of property `zoom` from `null` to `1`.
 
-## Other Changes
+### Other Changes
 
 - Add types declarations.
 - Update dev dependencies.

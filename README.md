@@ -88,7 +88,7 @@ capture-photo::part(output-image) {
 <sup>1</sup> Changing any of these properties/attributes may not always guarantee the desired result, because they all depend on the camera hardware support. For example, `zoom=3` might not result to the camera to zoom if the camera hardware does not support zooming. Using `getTrackCapabilities()` and `getTrackSettings()` can prove helpful to check the campera hardware support.
 
 > [!IMPORTANT]
-> Changing the `facingMode` and `cameraResolution`, properties/attributes after the video stream has started will not have any effect. You need to stop the video stream and start it again with the new properties. This is to avoid unnecessary camera hardware operations.
+> Changing the `facingMode` and `cameraResolution`, properties or equivalent after the video stream has started will not have any effect. You need to stop the video stream and start it again with the new properties. This is to avoid unnecessary camera hardware operations.
 
 ### Slots
 

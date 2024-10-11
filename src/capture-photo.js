@@ -28,53 +28,28 @@ import { clamp } from './utils/clamp.js';
 const COMPONENT_NAME = 'capture-photo';
 
 const styles = /* css */ `
-  :host {
-    display: block;
-    box-sizing: border-box;
-  }
-
-  :host *,
-  :host *::before,
-  :host *::after {
-    box-sizing: inherit;
-  }
-
-  :host([hidden]),
-  [hidden],
-  ::slotted([hidden]) {
-    display: none;
-  }
-
-  video {
-    display: block;
-  }
-
-  #output:empty {
-    display: none;
-  }
+  :host { display: block; box-sizing: border-box; }
+  :host *, :host *::before, :host *::after { box-sizing: inherit;}
+  :host([hidden]), [hidden], ::slotted([hidden]) { display: none; }
+  video { display: block; }
+  #output:empty { display: none; }
 `;
 
 const template = document.createElement('template');
 
 template.innerHTML = /* html */ `
   <style>${styles}</style>
-
   <video part="video" playsinline></video>
-
   <canvas hidden></canvas>
-
   <div part="actions-container">
     <slot name="capture-button">
       <button part="capture-button" type="button">
         <slot name="capture-button-content">Capture photo</slot>
       </button>
     </slot>
-
     <slot name="actions"></slot>
   </div>
-
   <slot></slot>
-
   <div part="output-container" id="output"></div>
 `;
 
@@ -450,7 +425,7 @@ class CapturePhoto extends HTMLElement {
       return;
     }
 
-    Array.from(this.#outputElement.childNodes).forEach(node => node.remove());
+    this.#outputElement.replaceChildren();
   }
 
   /**
@@ -608,7 +583,7 @@ class CapturePhoto extends HTMLElement {
   /**
    * Restarts the video stream.
    *
-   * @param {string} videoInputId - The video input device ID.
+   * @param {string} [videoInputId] - The video input device ID.
    */
   restartVideoStream(videoInputId) {
     if (this.#stream && this.#videoElement) {
