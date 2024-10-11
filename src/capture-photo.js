@@ -252,7 +252,7 @@ class CapturePhoto extends HTMLElement {
   disconnectedCallback() {
     this.stopVideoStream();
     this.#captureButton?.removeEventListener('click', this.#onCapturePhotoButtonClick);
-    this.#videoElement?.removeEventListener('canplay', this.#onVideoLoadedMetaData);
+    this.#videoElement?.removeEventListener('loadedmetadata', this.#onVideoLoadedMetaData);
     this.#captureButtonSlot?.removeEventListener('slotchange', this.#onCaptureButtonSlotChange);
   }
 
