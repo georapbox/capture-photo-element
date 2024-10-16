@@ -28,59 +28,28 @@ import { clamp } from './utils/clamp.js';
 const COMPONENT_NAME = 'capture-photo';
 
 const styles = /* css */ `
-  :host {
-    display: block;
-    box-sizing: border-box;
-  }
-
-  :host *,
-  :host *::before,
-  :host *::after {
-    box-sizing: inherit;
-  }
-
-  :host([hidden]),
-  [hidden],
-  ::slotted([hidden]) {
-    display: none;
-  }
-
-  video {
-    display: block;
-  }
-
-  #output:empty {
-    display: none;
-  }
+  :host { display: block; box-sizing: border-box; }
+  :host *, :host *::before, :host *::after { box-sizing: inherit;}
+  :host([hidden]), [hidden], ::slotted([hidden]) { display: none; }
+  video { display: block; }
+  #output:empty { display: none; }
 `;
 
 const template = document.createElement('template');
 
 template.innerHTML = /* html */ `
   <style>${styles}</style>
-
   <video part="video" playsinline></video>
-
   <canvas hidden></canvas>
-
   <div part="actions-container">
     <slot name="capture-button">
       <button part="capture-button" type="button">
         <slot name="capture-button-content">Capture photo</slot>
       </button>
     </slot>
-
-    <slot name="facing-mode-button" hidden>
-      <button part="facing-mode-button" type="button">
-        <slot name="facing-mode-button-content">Toggle facing mode</slot>
-      </button>
-    </slot>
-
     <slot name="actions"></slot>
   </div>
-
   <slot></slot>
-
   <div part="output-container" id="output"></div>
 `;
 
@@ -99,8 +68,8 @@ template.innerHTML = /* html */ `
  * @property {number} tilt - The tilt value of the camera.
  * @property {number} zoom - The zoom value of the camera.
  * @property {boolean} torch - Whether or not the fill light is connected.
- * @property {boolean} loading - Whether or not the video stream is loading.
  * @property {boolean} calculateFileSize - Whether or not to calculate the file size of the captured image.
+ * @property {boolean} loading - Whether or not the video stream is loading.
  *
  * @atttribute {boolean} auto-play - Reflects the autoPlay property.
  * @atttribute {boolean} no-image - Reflects the noImage property.
@@ -110,20 +79,17 @@ template.innerHTML = /* html */ `
  * @atttribute {number} tilt - Reflects the tilt property.
  * @atttribute {number} zoom - Reflects the zoom property.
  * @atttribute {boolean} torch - Reflects the torch property.
- * @atttribute {boolean} loading - Reflects the loading property.
  * @atttribute {boolean} calculate-file-size - Reflects the calculateFileSize property.
+ * @atttribute {boolean} loading - Reflects the loading property.
  *
  * @slot capture-button - The capture button.
  * @slot capture-button-content - The capture button content.
- * @slot facing-mode-button - The facing mode button.
- * @slot facing-mode-button-content - The facing mode button content.
  * @slot actions - The actions container.
  * @slot - A default un-named slot to add content inside the component.
  *
  * @csspart video - The video element.
  * @csspart actions-container - The actions container.
  * @csspart capture-button - The capture button.
- * @csspart facing-mode-button - The facing mode button.
  * @csspart output-container - The output container.
  * @csspart output-image - The output image.
  *
@@ -133,7 +99,9 @@ template.innerHTML = /* html */ `
  *
  * @method defineCustomElement - Static method. Defines the custom element with the given name.
  * @method isSupported - Static method. Checks if the MediaDevices.getUserMedia() method is supported.
+ * @method getVideoInputDevices - Static method. Gets the available video devices.
  * @method startVideoStream - Instance method. Starts the video stream.
+ * @method restartVideoStream - Instance method. Restarts the video stream.
  * @method stopVideoStream - Instance method. Stops the video stream.
  * @method capture - Instance method. Captures a photo.
  * @method getSupportedConstraints - Instance method. Gets the supported constraints.
@@ -162,12 +130,6 @@ class CapturePhoto extends HTMLElement {
   /** @type {Nullable<HTMLButtonElement | Element>} */
   #captureButton = null;
 
-  /** @type {Nullable<HTMLSlotElement>} */
-  #facingModeButtonSlot = null;
-
-  /** @type {Nullable<HTMLButtonElement | Element>} */
-  #facingModeButton = null;
-
   constructor() {
     super();
 
@@ -180,7 +142,7 @@ class CapturePhoto extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['no-image', 'facing-mode', 'camera-resolution', 'pan', 'tilt', 'zoom', 'torch'];
+    return ['no-image', 'pan', 'tilt', 'zoom', 'torch'];
   }
 
   /**
@@ -197,40 +159,9 @@ class CapturePhoto extends HTMLElement {
 
     /** @type {ExtendedMediaTrackCapabilities} */
     const trackCapabilities = this.getTrackCapabilities();
-    const trackSettings = this.getTrackSettings();
 
     if (name === 'no-image' && oldValue !== newValue) {
       this.#emptyOutputElement();
-    }
-
-    if (name === 'facing-mode' && oldValue !== newValue && 'facingMode' in this.#supportedConstraints) {
-      const isValidFacingMode = ['user', 'environment'].includes(this.facingMode || '');
-
-      if ('facingMode' in trackSettings && isValidFacingMode) {
-        this.#restartVideoStream();
-      }
-    }
-
-    if (name === 'camera-resolution' && oldValue !== newValue) {
-      if (typeof this.cameraResolution === 'string' && this.cameraResolution.trim().length > 0) {
-        const [width = 0, height = 0] = this.cameraResolution.split('x').map(x => Number(x));
-
-        if (width > 0 && height > 0 && 'width' in trackCapabilities && 'height' in trackCapabilities) {
-          const widthInAllowedRange =
-            trackCapabilities.width?.min && trackCapabilities.width?.max
-              ? width >= trackCapabilities?.width?.min && width <= trackCapabilities?.width?.max
-              : false;
-
-          const heightInAllowedRange =
-            trackCapabilities.height?.min && trackCapabilities.height?.max
-              ? height >= trackCapabilities?.height?.min && height <= trackCapabilities?.height?.max
-              : false;
-
-          if ('width' in trackSettings && 'height' in trackSettings && widthInAllowedRange && heightInAllowedRange) {
-            this.#restartVideoStream();
-          }
-        }
-      }
     }
 
     if (name === 'pan' && oldValue !== newValue && 'pan' in this.#supportedConstraints) {
@@ -274,8 +205,8 @@ class CapturePhoto extends HTMLElement {
   /**
    * Lifecycle method that is called when the element is added to the DOM.
    */
-  connectedCallback() {
-    this.#upgradeProperty('autpoPlay');
+  async connectedCallback() {
+    this.#upgradeProperty('autoPlay');
     this.#upgradeProperty('noImage');
     this.#upgradeProperty('facingMode');
     this.#upgradeProperty('cameraResolution');
@@ -290,14 +221,10 @@ class CapturePhoto extends HTMLElement {
     this.#videoElement = this.shadowRoot?.querySelector('video') || null;
     this.#captureButtonSlot = this.shadowRoot?.querySelector('slot[name="capture-button"]') || null;
     this.#captureButton = this.#getCaptureButton();
-    this.#facingModeButtonSlot = this.shadowRoot?.querySelector('slot[name="facing-mode-button"]') || null;
-    this.#facingModeButton = this.#getFacingModeButton();
 
     this.#videoElement?.addEventListener('loadedmetadata', this.#onVideoLoadedMetaData);
     this.#captureButtonSlot?.addEventListener('slotchange', this.#onCaptureButtonSlotChange);
     this.#captureButton?.addEventListener('click', this.#onCapturePhotoButtonClick);
-    this.#facingModeButtonSlot?.addEventListener('slotchange', this.#onFacingModeButtonSlotChange);
-    this.#facingModeButton?.addEventListener('click', this.#onFacingModeButtonClick);
 
     if (!CapturePhoto.isSupported()) {
       return this.dispatchEvent(
@@ -324,16 +251,14 @@ class CapturePhoto extends HTMLElement {
    */
   disconnectedCallback() {
     this.stopVideoStream();
-    this.#facingModeButton?.removeEventListener('click', this.#onFacingModeButtonClick);
     this.#captureButton?.removeEventListener('click', this.#onCapturePhotoButtonClick);
-    this.#videoElement?.removeEventListener('canplay', this.#onVideoLoadedMetaData);
+    this.#videoElement?.removeEventListener('loadedmetadata', this.#onVideoLoadedMetaData);
     this.#captureButtonSlot?.removeEventListener('slotchange', this.#onCaptureButtonSlotChange);
-    this.#facingModeButtonSlot?.removeEventListener('slotchange', this.#onFacingModeButtonSlotChange);
   }
 
   /**
    * @type {boolean} autoPlay - Whether or not to start the video stream automatically.
-   * @attribute auto-play - Reflects the autoPlay attribute.
+   * @attribute auto-play - Reflects the autoPlay property.
    */
   get autoPlay() {
     return this.hasAttribute('auto-play');
@@ -345,7 +270,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} noImage - Whether or not to show the captured image.
-   * @attribute no-image - Reflects the noImage attribute.
+   * @attribute no-image - Reflects the noImage property.
    */
   get noImage() {
     return this.hasAttribute('no-image');
@@ -357,10 +282,16 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {string} facingMode - The facing mode of the camera.
-   * @attribute facing-mode - Reflects the facingMode attribute.
+   * @attribute facing-mode - Reflects the facingMode property.
    */
   get facingMode() {
-    return this.getAttribute('facing-mode') || 'user';
+    const value = this.getAttribute('facing-mode');
+
+    if (value !== 'user') {
+      return 'environment';
+    }
+
+    return value;
   }
 
   set facingMode(value) {
@@ -369,7 +300,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {string} cameraResolution - The resolution of the camera.
-   * @attribute camera-resolution - Reflects the cameraResolution attribute.
+   * @attribute camera-resolution - Reflects the cameraResolution property.
    */
   get cameraResolution() {
     return this.getAttribute('camera-resolution') || '';
@@ -381,7 +312,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {number} pan - The pan value of the camera.
-   * @attribute pan - Reflects the pan attribute.
+   * @attribute pan - Reflects the pan property.
    */
   get pan() {
     return Number(this.getAttribute('pan')) || 0;
@@ -393,7 +324,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {number} tilt - The tilt value of the camera.
-   * @attribute tilt - Reflects the tilt attribute.
+   * @attribute tilt - Reflects the tilt property.
    */
   get tilt() {
     return Number(this.getAttribute('tilt')) || 0;
@@ -405,7 +336,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {number} zoom - The zoom value of the camera.
-   * @attribute zoom - Reflects the zoom attribute.
+   * @attribute zoom - Reflects the zoom property.
    */
   get zoom() {
     return Number(this.getAttribute('zoom')) || 1;
@@ -417,7 +348,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} torch - Whether or not the fill light is connected.
-   * @attribute torch - Reflects the torch attribute.
+   * @attribute torch - Reflects the torch property.
    */
   get torch() {
     return this.hasAttribute('torch');
@@ -428,16 +359,8 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
-   * @type {boolean} loading - Whether or not the video stream is loading.
-   * @attribute loading - Reflects the loading attribute.
-   */
-  get loading() {
-    return this.hasAttribute('loading');
-  }
-
-  /**
    * @type {boolean} calculateFileSize - Whether or not to calculate the file size of the captured image.
-   * @attribute calculate-file-size - Reflects the calculateFileSize attribute.
+   * @attribute calculate-file-size - Reflects the calculateFileSize property.
    */
   get calculateFileSize() {
     return this.hasAttribute('calculate-file-size');
@@ -448,19 +371,12 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
-   * Handles the click event of the facing mode button.
-   *
-   * @param {*} evt - The click event.
+   * @type {boolean} loading - Whether or not the video stream is loading.
+   * @attribute loading - Reflects the loading property.
    */
-  #onFacingModeButtonClick = evt => {
-    evt.preventDefault();
-
-    if (this.loading) {
-      return;
-    }
-
-    this.facingMode = this.facingMode === 'user' || !this.facingMode ? 'environment' : 'user';
-  };
+  get loading() {
+    return this.hasAttribute('loading');
+  }
 
   /**
    * Handles the click event of the capture button.
@@ -515,7 +431,7 @@ class CapturePhoto extends HTMLElement {
       return;
     }
 
-    Array.from(this.#outputElement.childNodes).forEach(node => node.remove());
+    this.#outputElement.replaceChildren();
   }
 
   /**
@@ -571,43 +487,6 @@ class CapturePhoto extends HTMLElement {
   };
 
   /**
-   * Handles the slotchange event of the facing mode button slot.
-   *
-   * @param {*} evt - The slotchange event.
-   */
-  #onFacingModeButtonSlotChange = evt => {
-    if (evt.target?.name === 'facing-mode-button') {
-      this.#facingModeButton?.removeEventListener('click', this.#onFacingModeButtonClick);
-      this.#facingModeButton = this.#getFacingModeButton();
-
-      if (this.#facingModeButton) {
-        this.#facingModeButton.addEventListener('click', this.#onFacingModeButtonClick);
-
-        if (this.#facingModeButton.nodeName !== 'BUTTON' && !this.#facingModeButton.hasAttribute('role')) {
-          this.#facingModeButton.setAttribute('role', 'button');
-        }
-      }
-    }
-  };
-
-  /**
-   * Returns the facing mode button.
-   *
-   * @returns {Nullable<HTMLButtonElement | Element>}
-   */
-  #getFacingModeButton() {
-    if (!this.#facingModeButtonSlot) {
-      return null;
-    }
-
-    return (
-      this.#facingModeButtonSlot.assignedElements({ flatten: true }).find(el => {
-        return el.nodeName === 'BUTTON' || el.getAttribute('slot') === 'facing-mode-button';
-      }) || null
-    );
-  }
-
-  /**
    * Returns the capture button.
    *
    * @returns {Nullable<HTMLButtonElement | Element>}
@@ -625,21 +504,13 @@ class CapturePhoto extends HTMLElement {
   }
 
   /**
-   * Restarts the video stream.
-   */
-  #restartVideoStream() {
-    this.stopVideoStream();
-    this.startVideoStream();
-  }
-
-  /**
    * This is to safe guard against cases where, for instance, a framework may have added the element to the page and
    * set a value on one of its properties, but lazy loaded its definition. Without this guard, the upgraded element would
    * miss that property and the instance property would prevent the class property setter from ever being called.
    *
    * https://developers.google.com/web/fundamentals/web-components/best-practices#lazy-properties
    *
-   * @param {'autpoPlay' | 'noImage' | 'facingMode' | 'cameraResolution' | 'pan' | 'tilt' | 'zoom' | 'calculateFileSize' | 'torch'} prop
+   * @param {'autoPlay' | 'noImage' | 'facingMode' | 'cameraResolution' | 'pan' | 'tilt' | 'zoom' | 'calculateFileSize' | 'torch'} prop
    */
   #upgradeProperty(prop) {
     /** @type {any} */
@@ -655,9 +526,10 @@ class CapturePhoto extends HTMLElement {
   /**
    * Starts the video stream.
    *
+   * @param {string} [videoInputId] - The video input device ID.
    * @returns Promise<void>
    */
-  async startVideoStream() {
+  async startVideoStream(videoInputId) {
     if (!CapturePhoto.isSupported() || this.#stream) {
       return;
     }
@@ -668,7 +540,7 @@ class CapturePhoto extends HTMLElement {
     const constraints = {
       video: {
         facingMode: {
-          ideal: this.facingMode || 'user'
+          ideal: this.facingMode
         },
         pan: true,
         tilt: true,
@@ -677,6 +549,10 @@ class CapturePhoto extends HTMLElement {
       },
       audio: false
     };
+
+    if (typeof videoInputId === 'string' && videoInputId.trim().length > 0) {
+      constraints.video.deviceId = { exact: videoInputId };
+    }
 
     if (typeof this.cameraResolution === 'string' && this.cameraResolution.trim().length > 0) {
       const [width = 0, height = 0] = this.cameraResolution.split('x').map(x => Number(x));
@@ -697,12 +573,6 @@ class CapturePhoto extends HTMLElement {
       this.#applyConstraint('pan', this.pan);
       this.#applyConstraint('tilt', this.tilt);
       this.#applyConstraint('zoom', this.zoom);
-
-      const trackSettings = this.getTrackSettings();
-
-      if ('facingMode' in trackSettings && this.#facingModeButtonSlot) {
-        this.#facingModeButtonSlot.hidden = false;
-      }
     } catch (error) {
       this.dispatchEvent(
         new CustomEvent(`${COMPONENT_NAME}:error`, {
@@ -714,6 +584,19 @@ class CapturePhoto extends HTMLElement {
     } finally {
       this.removeAttribute('loading');
     }
+  }
+
+  /**
+   * Restarts the video stream.
+   *
+   * @param {string} [videoInputId] - The video input device ID.
+   */
+  restartVideoStream(videoInputId) {
+    if (this.#stream && this.#videoElement) {
+      this.stopVideoStream();
+    }
+
+    this.startVideoStream(videoInputId);
   }
 
   /**
@@ -853,6 +736,20 @@ class CapturePhoto extends HTMLElement {
     }
 
     return {};
+  }
+
+  /**
+   * Returns the available video input devices.
+   *
+   * @returns {Promise<MediaDeviceInfo[]>}
+   */
+  static async getVideoInputDevices() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      return [];
+    }
+
+    const devices = (await navigator.mediaDevices.enumerateDevices()) || [];
+    return devices.filter(device => device.kind === 'videoinput' && !!device.deviceId);
   }
 
   /**

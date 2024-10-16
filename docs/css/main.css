@@ -9,6 +9,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .noscript-banner {
   width: 100%;
   padding: 0.5rem 0.75rem;
@@ -47,6 +51,7 @@ code {
 .form-col input[type="number"],
 .form-col select {
   margin-right: 0;
+  width: 100%;
 }
 
 .form-col input[type="range"] {
@@ -98,7 +103,7 @@ code {
   align-items: center;
   gap: 8px;
   margin: 0 0 16px 0;
-  padding: 8px 16px;
+  padding: 8px;
   border-radius: calc(var(--border-radius) / 2);
   background-color: var(--background-body);
 }
@@ -109,6 +114,14 @@ code {
 
 form label {
   white-space: nowrap;
+}
+
+#cameraSelect {
+  width: 100%;
+  margin: 0 0 16px 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: capitalize;
 }
 
 capture-photo:not(:defined) {
@@ -131,8 +144,7 @@ capture-photo[loading]::part(video) {
   background-repeat: no-repeat;
 }
 
-capture-photo[loading]::part(capture-button),
-capture-photo[loading]::part(facing-mode-button) {
+capture-photo[loading]::part(capture-button) {
   opacity: 0.7;
   cursor: not-allowed;
 }

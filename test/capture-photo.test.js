@@ -207,13 +207,11 @@ describe('<capture-photo>', () => {
       const el = await fixture(html`
         <capture-photo>
           <button type="button" slot="capture-button">Take picture</button>
-          <button type="button" slot="facing-mode-button">Change camera</button>
         </capture-photo>
       `);
 
       expect(el).lightDom.to.equal(`
         <button type="button" slot="capture-button">Take picture</button>
-        <button type="button" slot="facing-mode-button">Change camera</button>
       `);
     });
 
@@ -221,13 +219,11 @@ describe('<capture-photo>', () => {
       const el = await fixture(html`
         <capture-photo>
           <span slot="capture-button-content">Take picture</span>
-          <span slot="facing-mode-button-content">Change camera</span>
         </capture-photo>
       `);
 
       expect(el).lightDom.to.equal(`
         <span slot="capture-button-content">Take picture</span>
-        <span slot="facing-mode-button-content">Change camera</span>
       `);
     });
 
@@ -235,13 +231,11 @@ describe('<capture-photo>', () => {
       const el = await fixture(html`
         <capture-photo>
           <a href="#" slot="capture-button">Take picture</a>
-          <a href="#" slot="facing-mode-button">Change camera</a>
         </capture-photo>
       `);
 
       expect(el).lightDom.to.equal(`
         <a href="#" slot="capture-button" role="button">Take picture</a>
-        <a href="#" slot="facing-mode-button" role="button">Change camera</a>
       `);
     });
 
@@ -287,12 +281,6 @@ describe('<capture-photo>', () => {
       const el = await fixture(html`<capture-photo></capture-photo>`);
       const captureButton = el.shadowRoot.querySelector('[part="capture-button"]');
       expect(captureButton).to.exist;
-    });
-
-    it('should have "facing-mode-button" CSS part', async () => {
-      const el = await fixture(html`<capture-photo></capture-photo>`);
-      const facingModeButton = el.shadowRoot.querySelector('[part="facing-mode-button"]');
-      expect(facingModeButton).to.exist;
     });
 
     it('should have "output-container" CSS part', async () => {
