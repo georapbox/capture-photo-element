@@ -136,9 +136,22 @@ try {
     createCodePreview();
   }
 
+  function handleDocumentVisibilityChange() {
+    if (
+      capturePhotoEl === null ||
+      typeof capturePhotoEl.stopVideoStream !== 'function' ||
+      typeof capturePhotoEl.startVideoStream !== 'function'
+    ) {
+      return;
+    }
+
+    document.visibilityState === 'hidden' ? capturePhotoEl.stopVideoStream() : capturePhotoEl.startVideoStream();
+  }
+
   document.addEventListener('capture-photo:error', handleCapturePhotoError);
   document.addEventListener('capture-photo:success', handleCapturePhotoSuccess);
   document.addEventListener('capture-photo:video-play', capturePhotoVideoPlay, { once: true });
+  document.addEventListener('visibilitychange', handleDocumentVisibilityChange);
   cameraSelect.addEventListener('change', handleCameraSelectChange);
   form.addEventListener('change', handleFormChange);
 

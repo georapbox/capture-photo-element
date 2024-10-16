@@ -54,7 +54,7 @@
         <h3 class="mt-0">Customize component</h3>
 
         <select id="cameraSelect" disabled>
-          <option value="">Select camera...</option>
+          <option value="" selected disabled>--Select Camera--</option>
         </select>
 
         <form id="form" class="form" autocomplete="off">
@@ -65,15 +65,15 @@
               <div class="form-col">
                 <label for="facing-mode">facing-mode</label>
                 <select name="facing-mode" id="facing-mode">
-                  <option value="user">user</option>
                   <option value="environment">environment</option>
+                  <option value="user">user</option>
                 </select>
               </div>
 
               <div class="form-col">
                 <label for="camera-resolution">camera-resolution</label>
                 <select name="camera-resolution" id="camera-resolution">
-                  <option value="">Select...</option>
+                  <option value="">Default</option>
                   <option value="320x240">320x240</option>
                   <option value="640x480">640x480</option>
                   <option value="1280x720">1280x720</option>
