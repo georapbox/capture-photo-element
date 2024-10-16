@@ -69,9 +69,9 @@ describe('<capture-photo>', () => {
     });
 
     // facingMode property
-    it('property facingMode is user when attribute facing-mode is not set', async () => {
+    it('property facingMode is environment when attribute facing-mode is not set', async () => {
       const el = await fixture(html`<capture-photo></capture-photo>`);
-      expect(el.facingMode).to.equal('user');
+      expect(el.facingMode).to.equal('environment');
     });
 
     it('property facingMode is environment when attribute facing-mode is set to environment', async () => {
@@ -91,6 +91,11 @@ describe('<capture-photo>', () => {
       el.facingMode = 'environment';
       await elementUpdated(el);
       expect(el.getAttribute('facing-mode')).to.equal('environment');
+    });
+
+    it('facingMode property is environment if facing-mode attribute is set to invalid value', async () => {
+      const el = await fixture(html`<capture-photo facing-mode="invalid"></capture-photo>`);
+      expect(el.facingMode).to.equal('environment');
     });
 
     // cameraResolution property
