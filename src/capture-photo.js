@@ -258,7 +258,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} autoPlay - Whether or not to start the video stream automatically.
-   * @attribute auto-play - Reflects the autoPlay attribute.
+   * @attribute auto-play - Reflects the autoPlay property.
    */
   get autoPlay() {
     return this.hasAttribute('auto-play');
@@ -270,7 +270,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} noImage - Whether or not to show the captured image.
-   * @attribute no-image - Reflects the noImage attribute.
+   * @attribute no-image - Reflects the noImage property.
    */
   get noImage() {
     return this.hasAttribute('no-image');
@@ -282,10 +282,16 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {string} facingMode - The facing mode of the camera.
-   * @attribute facing-mode - Reflects the facingMode attribute.
+   * @attribute facing-mode - Reflects the facingMode property.
    */
   get facingMode() {
-    return this.getAttribute('facing-mode') || 'user';
+    const value = this.getAttribute('facing-mode');
+
+    if (value !== 'user') {
+      return 'environment';
+    }
+
+    return value;
   }
 
   set facingMode(value) {
@@ -294,7 +300,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {string} cameraResolution - The resolution of the camera.
-   * @attribute camera-resolution - Reflects the cameraResolution attribute.
+   * @attribute camera-resolution - Reflects the cameraResolution property.
    */
   get cameraResolution() {
     return this.getAttribute('camera-resolution') || '';
@@ -306,7 +312,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {number} pan - The pan value of the camera.
-   * @attribute pan - Reflects the pan attribute.
+   * @attribute pan - Reflects the pan property.
    */
   get pan() {
     return Number(this.getAttribute('pan')) || 0;
@@ -318,7 +324,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {number} tilt - The tilt value of the camera.
-   * @attribute tilt - Reflects the tilt attribute.
+   * @attribute tilt - Reflects the tilt property.
    */
   get tilt() {
     return Number(this.getAttribute('tilt')) || 0;
@@ -330,7 +336,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {number} zoom - The zoom value of the camera.
-   * @attribute zoom - Reflects the zoom attribute.
+   * @attribute zoom - Reflects the zoom property.
    */
   get zoom() {
     return Number(this.getAttribute('zoom')) || 1;
@@ -342,7 +348,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} torch - Whether or not the fill light is connected.
-   * @attribute torch - Reflects the torch attribute.
+   * @attribute torch - Reflects the torch property.
    */
   get torch() {
     return this.hasAttribute('torch');
@@ -354,7 +360,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} calculateFileSize - Whether or not to calculate the file size of the captured image.
-   * @attribute calculate-file-size - Reflects the calculateFileSize attribute.
+   * @attribute calculate-file-size - Reflects the calculateFileSize property.
    */
   get calculateFileSize() {
     return this.hasAttribute('calculate-file-size');
@@ -366,7 +372,7 @@ class CapturePhoto extends HTMLElement {
 
   /**
    * @type {boolean} loading - Whether or not the video stream is loading.
-   * @attribute loading - Reflects the loading attribute.
+   * @attribute loading - Reflects the loading property.
    */
   get loading() {
     return this.hasAttribute('loading');
@@ -534,7 +540,7 @@ class CapturePhoto extends HTMLElement {
     const constraints = {
       video: {
         facingMode: {
-          ideal: this.facingMode || 'user'
+          ideal: this.facingMode
         },
         pan: true,
         tilt: true,

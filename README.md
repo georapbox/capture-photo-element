@@ -76,7 +76,7 @@ capture-photo::part(output-image) {
 | ---- | -------- | ---- | -------- | ------- | ----------- |
 | `autoPlay`<br>*`auto-play`* | ✓ | Boolean | - | `false` | Determines if the video stream should start playing automatically when the component is connected to the DOM. If set to `false`, you can start the video stream manually using `startVideoStream()` method. |
 | `noImage`<br>*`no-image`* | ✓ | Boolean | - | `false` | Determines if the generated image is added in DOM. Use it if you don't need to display the generated image or if you need to display it somewhere else in DOM. |
-| `facingMode`<br>*`facing-mode`*<sup>1</sup> | ✓ | String | - | `"user"` | The preferred camera to be used if the camera hardware supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera respectively. Note that this property might not have any effect if you have called `startVideoStream()` method with a specific video input device as argument because the camera hardware might not support changing the facing mode. |
+| `facingMode`<br>*`facing-mode`*<sup>1</sup> | ✓ | String | - | `"environment"` | The preferred camera to be used if the camera hardware supports more than one (mostly for mobile devices). Available values: "user" and "environment" for the front and the rear camera respectively. Note that this property might not have any effect if you have called `startVideoStream()` method with a specific video input device as argument because the camera hardware might not support changing the facing mode. |
 | `cameraResolution`<br>*`camera-resolution`*<sup>1</sup> | ✓ | String | - | `""` | Defines the ideal camera resolution constraint. It must be of the format `[width]x[height]`, eg `640x480`. The browser will try to honour this, but may return other resolutions if an exact match is not available. You can access the min & max supported values for width and height, using `getTrackCapabilities().width` and `getTrackCapabilities().height` respectively. |
 | `pan`<sup>1</sup> | ✓ | Number | - | `0` | Defines the camera's pan level if supported by the camera hardware. You can access the min & max supported values for pan level, using `getTrackCapabilities().pan`. |
 | `tilt`<sup>1</sup> | ✓ | Number | - | `0` | Defines the camera's tilt level if supported by the camera hardware. You can access the min & max supported values for tilt level, using `getTrackCapabilities().tilt`. |
@@ -96,7 +96,7 @@ capture-photo::part(output-image) {
 | ---- | ----------- |
 | `capture-button` | Override the default capture photo button with your own. |
 | `capture-button-content` | Override the default content of the capture photo button with your own content. |
-| `actions` | Slot to add content inside the actions container element. |
+| `actions` | Slot to add content inside the actions container element. Useful for adding custom actions, such as a button to switch camera facing mode, or zoom in/out buttons. |
 | (default) | Un-named slot to add content inside the component. |
 
 ### CSS Parts
@@ -104,7 +104,7 @@ capture-photo::part(output-image) {
 | Name | Description |
 | ---- | ----------- |
 | `video` | The video element. |
-| `actions-container` | The action buttons container element. |
+| `actions-container` | The container element for custom actions. |
 | `capture-button` | The capture photo button. |
 | `output-container` | The output container element. |
 | `output-image` | The output image element. |

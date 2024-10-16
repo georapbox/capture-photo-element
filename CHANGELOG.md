@@ -1,11 +1,12 @@
 # CHANGELOG
 
-## v5.0.0 (2024-10-14)
+## v5.0.0 (2024-10-16)
 
 ### Breaking Changes
 
+- Change default value of `facingMode` property from `"user"` to `"environment"`, to be as much consistent as possible with the default camera facing mode of most mobile devices.
 - Remove the `facing-mode-button` slot and button to toggle the camera facing mode in favor of consistence with other camera properties thad don't have a dedicated button, such as `camera-resolution`, `torch`, `pan`, `tilt` and `zoom`.
-- Changing the `facingMode` and `cameraResolution`, properties or equivalent attributes after the video stream has started will not have any effect. You need to stop the video stream and start it again with the new properties. This is to avoid unnecessary camera hardware operations.
+- Changing the `facingMode` and `cameraResolution`, properties or equivalent attributes after the video stream has started will not have any effect. You need to restart the video stream with the new properties. This is to avoid unnecessary camera hardware operations.
 
 ### Other Changes
 
