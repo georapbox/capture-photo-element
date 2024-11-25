@@ -601,9 +601,6 @@ tbody tr:nth-child(even) button:hover {
 }
 
 details {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
   background-color: var(--background-alt);
   padding: 10px 10px 0;
   margin: 16px 0;
@@ -615,7 +612,7 @@ details[open] {
   padding: 10px;
 }
 
-details> :last-child {
+details > :last-child {
   margin-bottom: 0;
 }
 
