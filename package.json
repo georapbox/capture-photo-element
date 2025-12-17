@@ -25,7 +25,7 @@
     "build:esbuild": "node ./scripts/build.mjs",
     "build": "npm-run-all clean build:esbuild",
     "clean": "rimraf dist",
-    "prepare": "npm-run-all clean lint test build types"
+    "prepublishOnly": "npm-run-all clean lint test build types"
   },
   "keywords": [
     "custom element",
