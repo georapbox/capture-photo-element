@@ -7,6 +7,7 @@ CapturePhoto.defineCustomElement();
 describe('<capture-photo>', () => {
   afterEach(() => {
     fixtureCleanup();
+    sinon.restore();
   });
 
   describe('accessibility', () => {
@@ -301,45 +302,43 @@ describe('<capture-photo>', () => {
       const captureSlot = el.shadowRoot.querySelector('slot[name="capture-button"]');
       const captureButton = captureSlot.assignedNodes({ flatten: true }).find(el => el.nodeName === 'BUTTON');
       const fn = sinon.spy(el, 'capture');
-
       captureButton.click();
-
-      expect(fn).to.have.been.calledOnce;
+      sinon.assert.calledOnce(fn);
     });
 
     it('startVideoStream method is called', async () => {
       const el = await fixture(html`<capture-photo></capture-photo>`);
       const fn = sinon.spy(el, 'startVideoStream');
       el.startVideoStream();
-      expect(fn).to.have.been.calledOnce;
+      sinon.assert.calledOnce(fn);
     });
 
     it('stopVideoStream method is called', async () => {
       const el = await fixture(html`<capture-photo></capture-photo>`);
       const fn = sinon.spy(el, 'stopVideoStream');
       el.stopVideoStream();
-      expect(fn).to.have.been.calledOnce;
+      sinon.assert.calledOnce(fn);
     });
 
     it('getTrackCapabilities method is called', async () => {
       const el = await fixture(html`<capture-photo></capture-photo>`);
       const fn = sinon.spy(el, 'getTrackCapabilities');
       el.getTrackCapabilities();
-      expect(fn).to.have.been.calledOnce;
+      sinon.assert.calledOnce(fn);
     });
 
     it('getTrackSettings method is called', async () => {
       const el = await fixture(html`<capture-photo></capture-photo>`);
       const fn = sinon.spy(el, 'getTrackSettings');
       el.getTrackSettings();
-      expect(fn).to.have.been.calledOnce;
+      sinon.assert.calledOnce(fn);
     });
 
     it('getSupportedConstraints method is called', async () => {
       const el = await fixture(html`<capture-photo></capture-photo>`);
       const fn = sinon.spy(el, 'getSupportedConstraints');
       el.getSupportedConstraints();
-      expect(fn).to.have.been.calledOnce;
+      sinon.assert.calledOnce(fn);
     });
   });
 });
